@@ -1,0 +1,47 @@
+{
+  "name": "generous-corp-marketplace",
+  "owner": {
+    "name": "Generous Corp",
+    "email": "dev@generouscorp.com"
+  },
+  "metadata": {
+    "description": "Git worktree management and workflow orchestration tools for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "worktree-manager",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/danielraffel/worktree-manager.git"
+      },
+      "description": "Effortless git worktrees for parallel development with automatic environment setup",
+      "version": "2.0.0",
+      "author": {
+        "name": "Daniel Raffel",
+        "url": "https://danielraffel.me"
+      },
+      "homepage": "https://www.generouscorp.com/worktree-manager/",
+      "repository": "https://github.com/danielraffel/worktree-manager",
+      "license": "MIT",
+      "keywords": ["git", "worktree", "version-control", "productivity", "parallel-development"]
+    },
+    {
+      "name": "chainer",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/danielraffel/chainer.git"
+      },
+      "description": "Universal plugin orchestration for Claude Code",
+      "version": "2.0.0",
+      "author": {
+        "name": "Daniel Raffel",
+        "url": "https://danielraffel.me"
+      },
+      "homepage": "https://www.generouscorp.com/Chainer/",
+      "repository": "https://github.com/danielraffel/chainer",
+      "license": "MIT",
+      "keywords": ["orchestration", "workflow", "automation", "plugin-orchestration"]
+    }
+  ]
+}
