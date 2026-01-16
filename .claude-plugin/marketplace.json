@@ -11,10 +11,7 @@
   "plugins": [
     {
       "name": "worktree-manager",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/danielraffel/worktree-manager.git"
-      },
+      "source": "./plugins/worktree-manager",
       "description": "Effortless git worktrees for parallel development with automatic environment setup",
       "version": "2.0.0",
       "author": {
@@ -27,10 +24,7 @@
     },
     {
       "name": "chainer",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/danielraffel/chainer.git"
-      },
+      "source": "./plugins/chainer",
       "description": "Universal plugin orchestration for Claude Code",
       "version": "2.0.0",
       "author": {

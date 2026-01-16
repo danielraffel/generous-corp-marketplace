@@ -1,0 +1,14 @@
+{
+  "name": "chainer",
+  "version": "2.0.0",
+  "description": "Universal plugin orchestration for Claude Code",
+  "author": {
+    "name": "Daniel Raffel",
+    "url": "https://danielraffel.me"
+  },
+  "homepage": "https://www.generouscorp.com/Chainer/",
+  "repository": "https://github.com/danielraffel/chainer",
+  "license": "MIT",
+  "keywords": ["orchestration", "workflow", "automation", "plugin-orchestration"],
+  "commands": "./commands/"
+}

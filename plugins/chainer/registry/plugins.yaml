@@ -1,0 +1,188 @@
+# Claude Code Plugin Registry
+# Defines known plugins and their dependencies for built-in chains
+
+plugins:
+  # Core development plugins
+  worktree-manager:
+    marketplace: inline
+    description: "Git worktree creation and management"
+    keywords:
+      - worktree
+      - isolation
+      - parallel
+      - branch
+      - separate
+      - workspace
+      - isolated
+      - independent
+
+  feature-dev:
+    marketplace: claude-plugins-official
+    description: "Feature planning with architecture focus"
+    docs: "https://docs.anthropic.com"
+    keywords:
+      - plan
+      - planning
+      - architecture
+      - spec
+      - specification
+      - design
+      - requirements
+      - document
+      - blueprint
+
+  ralph-loop:
+    marketplace: claude-plugins-official
+    description: "Autonomous implementation loops"
+    docs: "https://awesomeclaude.ai/ralph-loop"
+    keywords:
+      - implement
+      - implementation
+      - code
+      - build
+      - create
+      - develop
+      - feature
+      - autonomous
+      - iterate
+      - loop
+
+  # Design
+  frontend-design:
+    marketplace: claude-plugins-official
+    description: "Production-grade frontend design"
+    keywords:
+      - design
+      - UI
+      - frontend
+      - component
+      - styling
+      - interface
+      - visual
+      - CSS
+      - UX
+      - layout
+
+  # Official Anthropic plugins (for future chain use)
+  agent-sdk-dev:
+    marketplace: claude-plugins-official
+    description: "Claude Agent SDK development tools"
+    keywords:
+      - agent
+      - SDK
+      - framework
+      - development
+      - tools
+      - API
+
+  code-review:
+    marketplace: claude-plugins-official
+    description: "Code review and quality analysis"
+    keywords:
+      - review
+      - quality
+      - analysis
+      - lint
+      - check
+      - audit
+      - inspect
+
+  commit-commands:
+    marketplace: claude-plugins-official
+    description: "Git commit workflow automation"
+    keywords:
+      - commit
+      - git
+      - message
+      - changelog
+      - version
+      - release
+
+  plugin-dev:
+    marketplace: claude-plugins-official
+    description: "Plugin development tools"
+    keywords:
+      - plugin
+      - extension
+      - development
+      - create
+      - build
+      - scaffold
+
+  pr-review-toolkit:
+    marketplace: claude-plugins-official
+    description: "Pull request review toolkit"
+    keywords:
+      - PR
+      - pull request
+      - review
+      - merge
+      - GitHub
+      - code review
+
+  security-guidance:
+    marketplace: claude-plugins-official
+    description: "Security best practices and guidance"
+    keywords:
+      - security
+      - vulnerability
+      - best practices
+      - OWASP
+      - CVE
+      - audit
+      - secure
+
+  # LSP servers (for reference)
+  clangd-lsp:
+    marketplace: claude-plugins-official
+    description: "C/C++ language server"
+
+  csharp-lsp:
+    marketplace: claude-plugins-official
+    description: "C# language server"
+
+  gopls-lsp:
+    marketplace: claude-plugins-official
+    description: "Go language server"
+
+  hookify:
+    marketplace: claude-plugins-official
+    description: "Git hook management"
+
+  jdtls-lsp:
+    marketplace: claude-plugins-official
+    description: "Java language server"
+
+  lua-lsp:
+    marketplace: claude-plugins-official
+    description: "Lua language server"
+
+  php-lsp:
+    marketplace: claude-plugins-official
+    description: "PHP language server"
+
+  pyright-lsp:
+    marketplace: claude-plugins-official
+    description: "Python language server"
+
+  rust-analyzer-lsp:
+    marketplace: claude-plugins-official
+    description: "Rust language server"
+
+  swift-lsp:
+    marketplace: claude-plugins-official
+    description: "Swift language server"
+
+# Chain dependency mapping
+chains:
+  plan-only:
+    requires: [feature-dev]
+
+  implement-only:
+    requires: [ralph-loop]
+
+  plan-and-implement:
+    requires: [feature-dev, ralph-loop]
+
+  worktree-plan-implement:
+    requires: [worktree-manager, feature-dev, ralph-loop]

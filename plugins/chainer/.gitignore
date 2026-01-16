@@ -1,0 +1,26 @@
+# AI Context (project files for Claude)
+ai/
+
+# Node.js
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+*.tgz
+coverage/
+
+# Environment
+.env
+.env.local

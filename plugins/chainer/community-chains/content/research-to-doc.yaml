@@ -1,0 +1,64 @@
+---
+name: research-to-doc
+enabled: true
+description: "Research a topic and create comprehensive documentation"
+inputs:
+  topic: { required: true, description: "Topic to research" }
+  output_file: { required: true, description: "Path to output markdown file" }
+  depth: { required: false, description: "Research depth: quick, standard, deep" }
+steps:
+  - name: research
+    type: script
+    script: |
+      echo "🔍 Researching: {{topic}}"
+      echo "Depth: {{depth}}"
+      # This would use web search and compilation
+  - name: create-doc
+    type: script
+    script: |
+      echo "📄 Creating documentation at {{output_file}}"
+      # This would compile research into structured markdown
+  - name: review
+    type: script
+    script: |
+      echo "✅ Reviewing documentation for accuracy and completeness"
+      # This would validate and enhance the documentation
+---
+
+# Research to Documentation Chain
+
+This chain automates research and documentation creation:
+
+1. **Research Phase**: Gather information from multiple sources
+2. **Create Documentation**: Compile into well-structured markdown
+3. **Review Phase**: Validate accuracy and completeness
+
+## Usage
+
+```bash
+/chainer:run research-to-doc \
+  --topic="OAuth 2.0 best practices" \
+  --output_file="docs/oauth-guide.md" \
+  --depth="deep"
+```
+
+## Requirements
+
+- Web search capability
+- Document compilation skills
+
+## Research Depths
+
+- **quick**: Surface-level overview (5-10 sources)
+- **standard**: Balanced depth (15-20 sources)
+- **deep**: Comprehensive research (30+ sources)
+
+## Example
+
+```bash
+# Create API documentation
+/chainer:run research-to-doc \
+  --topic="REST API design patterns 2025" \
+  --output_file="docs/api-design.md" \
+  --depth="standard"
+```

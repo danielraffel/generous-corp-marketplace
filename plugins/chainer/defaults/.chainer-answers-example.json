@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "Chainer Smart Question Handler - Answer History",
+  "note": "This file is created at .claude/chainer-answers.json when question_handling.save_answers is enabled",
+
+  "history": [
+    {
+      "timestamp": "2025-01-05T20:30:00Z",
+      "chain": "plan-and-implement",
+      "step": "plan",
+      "plugin": "feature-dev",
+      "question": "How should invaders behave?",
+      "answer": "Formation with swooping attacks",
+      "project_type": "game",
+      "tags": ["gameplay", "mechanics"]
+    },
+    {
+      "timestamp": "2025-01-05T20:31:15Z",
+      "chain": "plan-and-implement",
+      "step": "plan",
+      "plugin": "feature-dev",
+      "question": "Controls?",
+      "answer": "Arrow keys and spacebar",
+      "project_type": "game",
+      "tags": ["input", "controls"]
+    }
+  ],
+
+  "templates": {
+    "game-project": {
+      "controls": "Arrow keys and spacebar",
+      "lives": "3",
+      "audio": "Include sound effects"
+    },
+    "web-api": {
+      "auth": "JWT tokens",
+      "database": "PostgreSQL",
+      "testing": "Jest"
+    }
+  },
+
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2025-01-05T20:31:15Z",
+    "total_questions": 2
+  }
+}

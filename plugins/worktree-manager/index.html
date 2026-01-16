@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worktree Manager | Plugin for Claude Code</title>
+    <meta name="description" content="A Claude Code plugin designed for AI coding workflows that go beyond a single assistant and into multi-agent collaboration using Git Worktrees.">
+    
+    <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
+    <meta property="og:title" content="Worktree Manager">
+    <meta property="og:description" content="A Claude Code plugin designed for AI coding workflows that go beyond a single assistant and into multi-agent collaboration using Git Worktrees.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://danielraffel.github.io/worktree-manager/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/worktree-manager/refs/heads/main/wtree.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Worktree Manager">
+    <meta name="twitter:description" content="A Claude Code plugin designed for AI coding workflows that go beyond a single assistant and into multi-agent collaboration using Git Worktrees.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/worktree-manager/refs/heads/main/wtree.png">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #2e8b57; /* Seagreen - subtle, organic code feel */
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: #333;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        /* Components */
+        .plugin-name {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .code-comment { color: #6a6a6a; }
+        .code-command { color: #fff; font-weight: bold; }
+        .code-prompt { color: var(--accent); user-select: none; }
+
+        .btn {
+            display: inline-block;
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-top: var(--spacing-unit);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        /* Copy button */
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #444; color: #fff; }
+        .copy-btn.copied { background: var(--accent); color: #fff; }
+
+        /* Workflow cards */
+        .workflow-card {
+            margin-bottom: 1.5rem;
+        }
+        .workflow-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .workflow-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+        .learn-more {
+            color: var(--accent);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .learn-more:hover { color: var(--text); }
+        .details {
+            display: none;
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .details.open { display: block; }
+
+        /* Alt install */
+        .alt-install {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+        }
+        .alt-install-label {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--gray);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after {
+            content: '−';
+        }
+        .faq-answer {
+            display: none;
+            padding-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #444;
+        }
+        .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+        .faq-item.open .faq-answer { display: block; }
+
+        /* Command Reference Table */
+        .cmd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .cmd-table th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--light-gray);
+            font-weight: 600;
+            border-bottom: 2px solid var(--text);
+        }
+        .cmd-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+            vertical-align: top;
+        }
+        .cmd-table tr:hover {
+            background: #fafafa;
+        }
+        .cmd-table code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            word-break: break-all;
+            white-space: normal;
+        }
+        .cmd-table .uses {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        .cmd-table .uses a {
+            color: var(--accent);
+        }
+
+        /* Mobile: Convert table to cards */
+        @media (max-width: 768px) {
+            .cmd-table thead {
+                display: none;
+            }
+            .cmd-table, .cmd-table tbody, .cmd-table tr, .cmd-table td {
+                display: block;
+                width: 100%;
+            }
+            .cmd-table tr {
+                margin-bottom: 1.5rem;
+                border: 1px solid var(--light-gray);
+                border-radius: 8px;
+                padding: 1rem;
+                background: #fff;
+            }
+            .cmd-table tr:hover {
+                background: #fff;
+            }
+            .cmd-table td {
+                padding: 0.5rem 0;
+                border-bottom: none;
+            }
+            .cmd-table td:first-child {
+                font-weight: 600;
+                font-size: 1.1rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid var(--light-gray);
+                margin-bottom: 0.5rem;
+            }
+            .cmd-table td:nth-child(2) {
+                padding-top: 0.75rem;
+            }
+            .cmd-table td:nth-child(2)::before {
+                content: "Command: ";
+                font-weight: 600;
+                color: var(--gray);
+                font-size: 0.8rem;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+            .cmd-table td:nth-child(3)::before {
+                content: "You provide: ";
+                font-weight: 600;
+                color: var(--gray);
+                font-size: 0.8rem;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+            .cmd-table td:nth-child(4)::before {
+                content: "What happens: ";
+                font-weight: 600;
+                color: var(--gray);
+                font-size: 0.8rem;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+            .cmd-table code {
+                display: inline-block;
+                word-break: break-all;
+                white-space: normal;
+                font-size: 0.8rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        
+        <!-- Hero Section -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <span class="plugin-name">Worktree Manager</span>
+            <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
+            <nav class="nav-links">
+                <a href="#concept">Concept</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#installation">Installation</a>
+                <a href="#commands">Commands</a>
+                <a href="#config">Config</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <h1>Parallel workspaces<br>for your code.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p><b>Worktree Manager</b> creates isolated git worktrees for parallel feature development. Handles the tedious setup so you can focus on building. Pairs with <a href="https://www.generouscorp.com/Chainer">Chainer</a> for workflow automation.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-prompt">/</span>worktree-manager:create payments</div>
+                    </div>
+                    <div class="workflow-desc" style="margin-top: 1rem;">
+                        Creates isolated worktree with automatic setup.
+                        <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                    </div>
+                    <div class="details">
+                        <strong>Behind that command:</strong><br>
+                        1. Creates <code>~/worktrees/payments/</code> directory<br>
+                        2. Creates <code>feature/payments</code> branch<br>
+                        3. Auto-detects project type (Node, Swift, & <a href="https://github.com/danielraffel/worktree-manager/blob/21add3106a70de956e8307126fdceab68820f7c5/mcp-server/src/utils/project-detector.ts#L50" target="_blank">20 more</a>)<br>
+                        4. Offers to run setup (npm install, swift build, etc.)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Concept -->
+        <section id="concept">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>The Concept</h3>
+                    <h2>Work on multiple features<br>in parallel.</h2>
+                </div>
+                <div class="col-right">
+                    <p>When you ask an AI to build a feature, it usually monopolizes your environment. You wait. You watch text stream.</p>
+                    <p><strong>Worktree Manager sets you up to collaborate in parallel with agents.</strong> It spins up a clean, separate copy of your project (a git <a href="https://git-scm.com/docs/git-worktree">worktree</a>) and installs dependencies, so you can assign an AI worker to that directory.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="capabilities">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>Capabilities</h3>
+                    <p>Designed for workflows that go beyond a single assistant and into multi-agent collaboration.</p>
+                </div>
+                <div class="col-right">
+                    <ul class="feature-list">
+                        <li>Creates isolated Git Worktrees automatically</li>
+                        <li>Auto-detects project type & installs dependencies</li>
+                        <li>Auto-copies development environment files (.env, .vscode)</li>
+                        <li>Move, lock, repair, and prune worktrees for lifecycle management</li>
+                        <li>Rename and delete branches with safety checks</li>
+                        <li>Create worktrees from existing branches</li>
+                        <li>Automatically initializes git submodules</li>
+                        <li>Pairs with <a href="https://www.generouscorp.com/Chainer">Chainer</a> for workflow automation</li>
+                        <li>Safe experimentation without contaminating main</li>
+                        <li>Zero bookkeeping required</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works / Install -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Simple setup.</h2>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a>. For automated workflows, also install <a href="https://www.generouscorp.com/Chainer">Chainer</a> plugin.</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                        <div class="code-block" id="install-code">
+<span class="code-comment"># 1. Add the marketplace (in Claude Code)</span>
+/plugin marketplace add danielraffel/generous-corp-marketplace
+
+<span class="code-comment"># 2. Install the plugin</span>
+/plugin install worktree-manager@generous-corp-marketplace
+
+<span class="code-comment"># 3. Restart Claude Code</span>
+<span class="code-comment"># Quit and reopen Claude Code to load the plugin</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <a href="https://github.com/danielraffel/worktree-manager" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <div style="color: var(--gray); font-size: 0.9rem;">
+                            After installation, verify with <code style="background: var(--light-gray); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">/worktree-manager:list</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Command Reference -->
+        <section id="commands">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Command Reference</h3>
+                    <h2>Quick lookup.</h2>
+                    <p style="max-width: 60ch; margin-bottom: 2rem;">Worktree Manager creates isolated worktrees. For automated workflows (planning + implementation), use <a href="https://www.generouscorp.com/Chainer">Chainer</a>.</p>
+                    <table class="cmd-table">
+                        <thead>
+                            <tr>
+                                <th>What you want</th>
+                                <th>Command</th>
+                                <th>You provide</th>
+                                <th>What happens</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Create a worktree</td>
+                                <td><code>/worktree-manager:create bug-fix</code></td>
+                                <td>feature name (<code>bug-fix</code>)</td>
+                                <td>Creates worktree at <code>~/worktrees/bug-fix</code> on branch <code>feature/bug-fix</code> with auto-setup (npm install, etc.)</td>
+                            </tr>
+                            <tr>
+                                <td>List all worktrees</td>
+                                <td><code>/worktree-manager:list</code></td>
+                                <td>nothing</td>
+                                <td>Shows all active worktrees with their paths, branches, and lock status</td>
+                            </tr>
+                            <tr>
+                                <td>Check worktree status</td>
+                                <td><code>/worktree-manager:status &lt;path&gt;</code></td>
+                                <td>worktree path</td>
+                                <td>Shows git status, uncommitted changes, and branch info</td>
+                            </tr>
+                            <tr>
+                                <td>Cleanup worktree</td>
+                                <td><code>/worktree-manager:cleanup &lt;path&gt; [--merge]</code></td>
+                                <td>worktree path, optional --merge flag</td>
+                                <td>Removes worktree. With --merge, merges branch to main first</td>
+                            </tr>
+                            <tr>
+                                <td>Move worktree</td>
+                                <td><code>/worktree-manager:move &lt;current&gt; &lt;new&gt;</code></td>
+                                <td>current path, new path</td>
+                                <td>Moves worktree to new location. Git updates all references automatically</td>
+                            </tr>
+                            <tr>
+                                <td>Lock worktree</td>
+                                <td><code>/worktree-manager:lock &lt;path&gt; [--reason="text"]</code></td>
+                                <td>worktree path, optional reason</td>
+                                <td>Prevents accidental removal. Useful for protecting important worktrees</td>
+                            </tr>
+                            <tr>
+                                <td>Unlock worktree</td>
+                                <td><code>/worktree-manager:unlock &lt;path&gt;</code></td>
+                                <td>worktree path</td>
+                                <td>Allows removal again after locking</td>
+                            </tr>
+                            <tr>
+                                <td>Repair worktree</td>
+                                <td><code>/worktree-manager:repair &lt;path&gt;</code></td>
+                                <td>worktree path</td>
+                                <td>Fixes broken administrative files. Use when worktree was manually moved</td>
+                            </tr>
+                            <tr>
+                                <td>Prune orphaned worktrees</td>
+                                <td><code>/worktree-manager:prune</code></td>
+                                <td>nothing</td>
+                                <td>Removes references to worktrees that were manually deleted</td>
+                            </tr>
+                            <tr>
+                                <td>Rename branch</td>
+                                <td><code>/worktree-manager:rename-branch &lt;path&gt; &lt;old&gt; &lt;new&gt;</code></td>
+                                <td>worktree path, old name, new name</td>
+                                <td>Renames branch in worktree. Updates all git references automatically</td>
+                            </tr>
+                            <tr>
+                                <td>Delete branch</td>
+                                <td><code>/worktree-manager:delete-branch &lt;name&gt; [--force] [--delete-remote]</code></td>
+                                <td>branch name, optional flags</td>
+                                <td>Deletes branch with safety checks. Use --force for unmerged branches, --delete-remote to also delete from origin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration -->
+        <section id="config">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Configuration</h3>
+                    <h2>Override defaults.</h2>
+                    <p style="max-width: 60ch;">Create a config file to customize behavior. Project config overrides user config, which overrides defaults.</p>
+                </div>
+                <div class="col-left">
+                    <h4 style="margin-bottom: 1rem; font-size: 1rem;">Config file locations</h4>
+                    <ul class="feature-list" style="font-size: 1rem;">
+                        <li><strong>Project:</strong> <code>.claude/worktree-manager.local.md</code></li>
+                        <li><strong>Global:</strong> <code>~/.claude/worktree-manager.local.md</code></li>
+                    </ul>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># .claude/worktree-manager.local.md</span>
+---
+<span class="code-comment"># Where to create worktrees</span>
+worktree_base_path: ~/worktrees
+
+<span class="code-comment"># Branch prefix (default: feature/)</span>
+branch_prefix: feature/
+
+<span class="code-comment"># Create LEARNINGS.md in worktree</span>
+create_learnings_file: false
+
+<span class="code-comment"># Auto-initialize git submodules</span>
+auto_init_submodules: true
+
+<span class="code-comment"># Setup behavior: prompt | auto | false</span>
+auto_run_setup: prompt
+
+<span class="code-comment"># Auto-copy environment files</span>
+copy_files_enabled: true
+copy_file_patterns: [".env", ".vscode/**"]
+
+<span class="code-comment"># Auto-commit changes</span>
+auto_commit: false
+
+<span class="code-comment"># Auto-push to remote</span>
+auto_push: false
+---</div>
+                    </div>
+                </div>
+                <div class="col-full" style="margin-top: 2rem;">
+                    <table class="cmd-table">
+                        <thead>
+                            <tr>
+                                <th>Option</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>worktree_base_path</code></td>
+                                <td><code>~/worktrees</code></td>
+                                <td>Base directory where all worktrees are created</td>
+                            </tr>
+                            <tr>
+                                <td><code>branch_prefix</code></td>
+                                <td><code>feature/</code></td>
+                                <td>Prefix for new branches (e.g., <code>feature/my-task</code>)</td>
+                            </tr>
+                            <tr>
+                                <td><code>create_learnings_file</code></td>
+                                <td><code>false</code></td>
+                                <td>Create <code>LEARNINGS.md</code> in worktree to capture insights</td>
+                            </tr>
+                            <tr>
+                                <td><code>auto_init_submodules</code></td>
+                                <td><code>true</code></td>
+                                <td>Auto-initialize git submodules recursively in new worktrees</td>
+                            </tr>
+                            <tr>
+                                <td><code>auto_run_setup</code></td>
+                                <td><code>'prompt'</code></td>
+                                <td>Setup behavior: <code>'prompt'</code> (ask which ecosystems), <code>'auto'</code> (run first detected), <code>false</code> (skip all)</td>
+                            </tr>
+                            <tr>
+                                <td><code>copy_files_enabled</code></td>
+                                <td><code>true</code></td>
+                                <td>Auto-copy development environment files to new worktrees</td>
+                            </tr>
+                            <tr>
+                                <td><code>copy_file_patterns</code></td>
+                                <td><code>['.env', '.vscode/**']</code></td>
+                                <td>Glob patterns for files to copy from main repo</td>
+                            </tr>
+                            <tr>
+                                <td><code>exclude_file_patterns</code></td>
+                                <td><code>['node_modules', 'dist']</code></td>
+                                <td>Glob patterns to exclude from copying</td>
+                            </tr>
+                            <tr>
+                                <td><code>auto_commit</code></td>
+                                <td><code>false</code></td>
+                                <td>Auto-commit changes during AI agent execution</td>
+                            </tr>
+                            <tr>
+                                <td><code>auto_push</code></td>
+                                <td><code>false</code></td>
+                                <td>Auto-push to remote after commits</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>FAQ</h3>
+                    <h2>Common questions.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-simple-explanation">Can you explain this without all the jargon?</div>
+                        <div class="faq-answer">
+                            <p>Worktree Manager lets you safely ask AI to try ideas and make changes to a project without messing up what you're currently working on.</p>
+                            <p><strong>The simple mental model:</strong> it creates a separate "workspace" for each task—like making a duplicate of your project dedicated to "try Feature A" or "fix Bug B." You keep working in your normal workspace while the AI works in the separate one.</p>
+                            <p><strong>How it works:</strong></p>
+                            <p>1. You tell Worktree Manager to create a workspace for a task.<br>
+                            2. It spins up a fresh, isolated directory with your project code.<br>
+                            3. You open Claude Code in that directory and work on the feature.<br>
+                            4. Your main project stays clean and stable while experiments happen elsewhere.<br>
+                            5. When done, you review the results and decide what to merge back.</p>
+                            <p><strong>For automation:</strong> Pair it with <a href="https://www.generouscorp.com/Chainer">Chainer</a> to automatically chain planning (feature-dev) and implementation (ralph-loop) inside isolated worktrees.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-status">What's the status of this project?</div>
+                        <div class="faq-answer">
+                            <p><strong>Very early beta.</strong> This project was cobbled together on December 31, 2025 and should be considered experimental. Only a handful of people have tried it so far.</p>
+                            <p>Expect rough edges, breaking changes, and incomplete features. Use at your own risk. This notice will be updated if/when the project matures.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-install-plugins">How do I install plugins in Claude Code?</div>
+                        <div class="faq-answer">
+                            <p><strong>For official marketplace plugins</strong> (like feature-dev and ralph-loop): Launch Claude Code and type <code>/plugins</code>. Search for the plugin you want, select it, and install. After installing marketplace plugins, you must quit and restart Claude Code for them to take effect. See the <a href="https://code.claude.com/docs/en/discover-plugins">official plugin documentation</a> for more details.</p>
+                            <p><strong>For Worktree Manager:</strong> Add the marketplace, then install:</p>
+                            <p><code>/plugin marketplace add danielraffel/generous-corp-marketplace</code><br>
+                            <code>/plugin install worktree-manager@generous-corp-marketplace</code></p>
+                            <p>Then restart Claude Code to load the plugin.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-why-needed">Why would I need a plugin like this? What's the alternative?</div>
+                        <div class="faq-answer">
+                            <p>Without worktrees, the typical process is: stash your current changes, create a new branch, work on the feature, commit, switch back to your original branch, pop your stash. If you want AI help, it monopolizes your terminal while it works.</p>
+                            <p>With Worktree Manager, you skip all that context-switching. The AI works in a completely separate directory on a separate branch. You can spin up multiple worktrees and have several Claude agents working in parallel—each isolated, each on its own feature.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-workflow">What's a typical workflow?</div>
+                        <div class="faq-answer">
+                            <p><strong>Create a worktree for your feature:</strong></p>
+                            <p><code>/worktree-manager:create payment-flow</code><br>
+                            Creates isolated workspace at <code>~/worktrees/payment-flow</code> on branch <code>feature/payment-flow</code>. Detects your project type, asks what to install.</p>
+                            <p><strong>Work on your feature:</strong></p>
+                            <p>Open Claude Code in the worktree directory and build. Your main branch stays clean while you experiment.</p>
+                            <p><strong>Check status when needed:</strong></p>
+                            <p><code>/worktree-manager:list</code> - See all active worktrees<br>
+                            <code>/worktree-manager:status ~/worktrees/payment-flow</code> - Check uncommitted changes</p>
+                            <p><strong>Manage as you go:</strong></p>
+                            <p><code>/worktree-manager:lock ~/worktrees/payment-flow --reason="In progress"</code> - Prevent accidental deletion<br>
+                            <code>/worktree-manager:rename-branch ~/worktrees/payment-flow feature/payment-flow feature/new-payments</code> - Rename if needed</p>
+                            <p><strong>Clean up when done:</strong></p>
+                            <p><code>/worktree-manager:cleanup ~/worktrees/payment-flow --merge</code><br>
+                            Merges changes to main, removes worktree, deletes feature branch. Push to git or let Claude handle it.</p>
+                            <p><strong>Parallel development:</strong> Create multiple worktrees, open separate Claude Code sessions in each, work on different features simultaneously.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-no-repo">Why does it say "no git repo detected" when I have one?</div>
+                        <div class="faq-answer">
+                            <p>Git worktrees require an existing repository with at least one commit. If you just ran <code>git init</code> but haven't committed anything yet, worktrees won't work.</p>
+                            <p>Fix: make an initial commit first (<code>git add . && git commit -m "Initial commit"</code>), then try again.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-environment-setup">Can this automatically set up my development environment?</div>
+                        <div class="faq-answer">
+                            <p><strong>Yes, but you control what gets installed.</strong> We detect your project type and ask you which dependencies to install—we don't run anything without your permission.</p>
+                            <p><strong>How it works:</strong></p>
+                            <p>1. <strong>You create a worktree</strong> - Run <code>/worktree-manager:create my-feature</code><br>
+                            2. <strong>We scan for ecosystems</strong> - Detects all <a href="https://github.com/danielraffel/worktree-manager/blob/21add3106a70de956e8307126fdceab68820f7c5/mcp-server/src/utils/project-detector.ts#L50" target="_blank">22+ project types</a> in ~100ms<br>
+                            3. <strong>You pick what to install</strong> - Interactive menu shows options, you select what you need<br>
+                            4. <strong>We run only your selections</strong> - Executes only what you chose</p>
+                            <p><strong>Example:</strong> Project with Node.js, Rust, and Swift shows:</p>
+                            <p><code>Which project types should I set up?<br>
+                            [x] Node.js (npm) - npm install<br>
+                            [ ] Rust - cargo fetch<br>
+                            [ ] Swift - swift package resolve<br>
+                            [Other...]</code></p>
+                            <p>Select Node.js, press Enter, and you're coding in 30 seconds. Need Rust later? The command is shown—just run it manually. Want to skip all setup? Deselect everything.</p>
+                            <p><strong>What we detect and can install:</strong></p>
+                            <p>• <strong>Node.js</strong> - npm, yarn, pnpm, or bun (auto-detects from lockfiles)<br>
+                            • <strong>Python</strong> - uv, Conda, Poetry, pipenv, or pip<br>
+                            • <strong>Native/Mobile</strong> - Swift Package Manager, Flutter, iOS (Xcode)<br>
+                            • <strong>Backend</strong> - Go, Rust, Java (Maven/Gradle), PHP, Elixir, .NET, Scala, Ruby<br>
+                            • <strong>Other</strong> - Deno, C++ (CMake), Dart</p>
+                            <p><strong>Control how this works:</strong> Set <code>auto_run_setup</code> in your config (<code>.claude/worktree-manager.local.md</code>):</p>
+                            <p>• <code>'prompt'</code> (default) - Interactive menu, you choose what to install (recommended)<br>
+                            • <code>'auto'</code> - Runs first detected ecosystem only (faster for single-language projects)<br>
+                            • <code>'all'</code> - Installs all detected ecosystems (slower, could take 5+ minutes for polyglot repos)<br>
+                            • <code>'false'</code> - Skip all detection and setup</p>
+                            <p><strong>Is this safe?</strong> We think so—but you’re the best judge. We only run standard package manager commands (<code>npm install</code>, <code>pip install</code>, etc.)—the same commands you'd run manually. In default mode, you explicitly select what runs. If you're not interested in scanning for ecosystems, set <code>auto_run_setup: false</code> to disable and skip this entirely.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026</a>
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/worktree-manager" style="text-decoration: none;">GitHub Repository ↗</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyInstall(btn) {
+            const code = document.getElementById('install-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleDetails(el) {
+            const details = el.parentElement.nextElementSibling;
+            details.classList.toggle('open');
+            el.textContent = details.classList.contains('open') ? 'Show less' : 'Learn more';
+        }
+
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
+        // Open FAQ if hash matches
+        if (window.location.hash) {
+            const target = document.getElementById(window.location.hash.substring(1));
+            if (target && target.classList.contains('faq-question')) {
+                target.parentElement.classList.add('open');
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chainer Settings - Visual Chain Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 180px);
+            max-width: 1400px;
+            margin: 2rem auto;
+            gap: 2rem;
+            padding: 0 2rem;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .chain-list {
+            list-style: none;
+        }
+
+        .chain-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chain-item:hover {
+            background: #f8f9ff;
+            border-color: #667eea;
+        }
+
+        .chain-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .chain-item input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .add-chain-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .add-chain-btn:hover {
+            background: #5568d3;
+        }
+
+        .editor {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .editor h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .inputs-section,
+        .steps-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .input-item,
+        .step-item {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .input-header,
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .input-header h4,
+        .step-header h4 {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+        }
+
+        .code-editor {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 4px;
+            min-height: 150px;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            z-index: 1;
+            right: 0;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f8f9ff;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #999;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⛓️ Chainer Settings</h1>
+        <p>Visual chain editor for Claude Code plugin orchestration</p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>My Chains</h2>
+            <ul class="chain-list" id="chainList">
+                <!-- Populated by JavaScript -->
+            </ul>
+            <button class="add-chain-btn" onclick="addNewChain()">+ New Chain</button>
+
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+                <h2>Community Chains</h2>
+                <p style="color: #999; font-size: 0.875rem; margin-top: 0.5rem;">Coming soon in Phase 5</p>
+            </div>
+        </div>
+
+        <div class="editor" id="editor">
+            <div class="empty-state">
+                <h3>Select a chain to edit</h3>
+                <p>Choose a chain from the sidebar or create a new one</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <span id="lastSaved">Not saved</span>
+        </div>
+        <div class="toolbar-right">
+            <div class="dropdown">
+                <button class="btn btn-secondary">Import ▼</button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="importFromFile(); return false;">From File</a>
+                    <a href="#" onclick="importFromURL(); return false;">From URL</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-secondary">Export ▼</button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="exportConfig(); return false;">All Chains</a>
+                    <a href="#" onclick="exportCurrentChain(); return false;">Current Chain</a>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveConfig()">Save Config ↓</button>
+        </div>
+    </div>
+
+    <script>
+        let config = {
+            chains: {},
+            defaults: {
+                spec_directory: 'audit',
+                max_iterations: 50
+            }
+        };
+
+        let currentChain = null;
+
+        // Load config from localStorage or defaults
+        function loadConfig() {
+            const saved = localStorage.getItem('chainer-config');
+            if (saved) {
+                config = JSON.parse(saved);
+            } else {
+                // Load default chains
+                config.chains = {
+                    'plan-and-implement': {
+                        enabled: true,
+                        description: 'Plan with feature-dev, implement with ralph-loop',
+                        inputs: {
+                            prompt: { required: true, description: 'What to build' },
+                            feature_name: { required: true, description: 'Feature name for spec file' }
+                        },
+                        steps: [
+                            { name: 'plan', type: 'skill', skill: 'feature-dev:feature-dev', args: '{{prompt}}' },
+                            { name: 'implement', type: 'script', script: 'SCRIPT_PATH="$(find ~/.claude/plugins -name \'setup-ralph-loop.sh\' -path \'*ralph-loop*\' 2>/dev/null | head -1)"\nbash "$SCRIPT_PATH" "Implement features from audit/{{feature_name}}.md" --max-iterations 50 --completion-promise DONE' }
+                        ]
+                    },
+                    'plan-only': {
+                        enabled: true,
+                        description: 'Just plan with feature-dev',
+                        inputs: {
+                            prompt: { required: true, description: 'What to build' },
+                            feature_name: { required: true, description: 'Feature name for spec file' }
+                        },
+                        steps: [
+                            { name: 'plan', type: 'skill', skill: 'feature-dev:feature-dev', args: '{{prompt}}' }
+                        ]
+                    },
+                    'implement-only': {
+                        enabled: true,
+                        description: 'Implement from existing spec',
+                        inputs: {
+                            spec_file: { required: true, description: 'Path to spec file' }
+                        },
+                        steps: [
+                            { name: 'implement', type: 'script', script: 'SCRIPT_PATH="$(find ~/.claude/plugins -name \'setup-ralph-loop.sh\' -path \'*ralph-loop*\' 2>/dev/null | head -1)"\nbash "$SCRIPT_PATH" "Implement features from {{spec_file}}" --max-iterations 50 --completion-promise DONE' }
+                        ]
+                    }
+                };
+            }
+            renderChainList();
+        }
+
+        function renderChainList() {
+            const listEl = document.getElementById('chainList');
+            listEl.innerHTML = '';
+
+            Object.keys(config.chains).forEach(chainName => {
+                const chain = config.chains[chainName];
+                const li = document.createElement('li');
+                li.className = 'chain-item' + (currentChain === chainName ? ' active' : '');
+                li.innerHTML = `
+                    <input type="checkbox" ${chain.enabled ? 'checked' : ''}
+                           onclick="toggleChain('${chainName}', event)" />
+                    <span onclick="selectChain('${chainName}')">${chainName}</span>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        function toggleChain(chainName, event) {
+            event.stopPropagation();
+            config.chains[chainName].enabled = event.target.checked;
+            autoSave();
+        }
+
+        function selectChain(chainName) {
+            currentChain = chainName;
+            renderChainList();
+            renderEditor();
+        }
+
+        function renderEditor() {
+            const editor = document.getElementById('editor');
+            if (!currentChain) {
+                editor.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Select a chain to edit</h3>
+                        <p>Choose a chain from the sidebar or create a new one</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const chain = config.chains[currentChain];
+
+            let inputsHTML = '';
+            Object.keys(chain.inputs || {}).forEach(inputName => {
+                const input = chain.inputs[inputName];
+                inputsHTML += `
+                    <div class="input-item">
+                        <div class="input-header">
+                            <h4>${inputName}</h4>
+                            <button class="delete-btn" onclick="deleteInput('${inputName}')">Delete</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" value="${input.description || ''}"
+                                   onchange="updateInputDescription('${inputName}', this.value)" />
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" ${input.required ? 'checked' : ''}
+                                   onchange="updateInputRequired('${inputName}', this.checked)" />
+                            <label>Required</label>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let stepsHTML = '';
+            (chain.steps || []).forEach((step, index) => {
+                const stepTypeOptions = ['skill', 'script', 'mcp', 'prompt', 'wait'];
+                const typeSelect = stepTypeOptions.map(t =>
+                    `<option value="${t}" ${step.type === t ? 'selected' : ''}>${t}</option>`
+                ).join('');
+
+                let stepDetails = '';
+                if (step.type === 'skill') {
+                    stepDetails = `
+                        <div class="form-group">
+                            <label>Skill</label>
+                            <input type="text" value="${step.skill || ''}"
+                                   onchange="updateStepSkill(${index}, this.value)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Args</label>
+                            <input type="text" value="${step.args || ''}"
+                                   onchange="updateStepArgs(${index}, this.value)" />
+                        </div>
+                    `;
+                } else if (step.type === 'script') {
+                    stepDetails = `
+                        <div class="form-group">
+                            <label>Script</label>
+                            <textarea onchange="updateStepScript(${index}, this.value)">${step.script || ''}</textarea>
+                        </div>
+                    `;
+                }
+
+                stepsHTML += `
+                    <div class="step-item">
+                        <div class="step-header">
+                            <h4>
+                                <span class="drag-handle">☰</span>
+                                ${index + 1}. ${step.name}
+                            </h4>
+                            <button class="delete-btn" onclick="deleteStep(${index})">Delete</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Step Name</label>
+                            <input type="text" value="${step.name || ''}"
+                                   onchange="updateStepName(${index}, this.value)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select onchange="updateStepType(${index}, this.value)">
+                                ${typeSelect}
+                            </select>
+                        </div>
+                        ${stepDetails}
+                    </div>
+                `;
+            });
+
+            editor.innerHTML = `
+                <h2>Edit: ${currentChain}</h2>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" value="${chain.description || ''}"
+                           onchange="updateChainDescription(this.value)" />
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" ${chain.enabled ? 'checked' : ''}
+                           onchange="updateChainEnabled(this.checked)" />
+                    <label>Enabled</label>
+                </div>
+
+                <div class="inputs-section">
+                    <div class="section-header">
+                        <h3>Inputs</h3>
+                        <button class="add-btn" onclick="addInput()">+ Add Input</button>
+                    </div>
+                    ${inputsHTML || '<p style="color: #999;">No inputs defined</p>'}
+                </div>
+
+                <div class="steps-section">
+                    <div class="section-header">
+                        <h3>Steps</h3>
+                        <button class="add-btn" onclick="addStep()">+ Add Step</button>
+                    </div>
+                    ${stepsHTML || '<p style="color: #999;">No steps defined</p>'}
+                </div>
+            `;
+        }
+
+        function addNewChain() {
+            const name = prompt('Enter chain name:');
+            if (!name) return;
+
+            config.chains[name] = {
+                enabled: true,
+                description: '',
+                inputs: {},
+                steps: []
+            };
+            currentChain = name;
+            renderChainList();
+            renderEditor();
+            autoSave();
+        }
+
+        function addInput() {
+            const name = prompt('Enter input name:');
+            if (!name) return;
+
+            config.chains[currentChain].inputs[name] = {
+                required: false,
+                description: ''
+            };
+            renderEditor();
+            autoSave();
+        }
+
+        function deleteInput(inputName) {
+            if (!confirm(`Delete input "${inputName}"?`)) return;
+            delete config.chains[currentChain].inputs[inputName];
+            renderEditor();
+            autoSave();
+        }
+
+        function addStep() {
+            config.chains[currentChain].steps.push({
+                name: 'new-step',
+                type: 'skill'
+            });
+            renderEditor();
+            autoSave();
+        }
+
+        function deleteStep(index) {
+            if (!confirm('Delete this step?')) return;
+            config.chains[currentChain].steps.splice(index, 1);
+            renderEditor();
+            autoSave();
+        }
+
+        function updateChainDescription(value) {
+            config.chains[currentChain].description = value;
+            autoSave();
+        }
+
+        function updateChainEnabled(value) {
+            config.chains[currentChain].enabled = value;
+            renderChainList();
+            autoSave();
+        }
+
+        function updateInputDescription(inputName, value) {
+            config.chains[currentChain].inputs[inputName].description = value;
+            autoSave();
+        }
+
+        function updateInputRequired(inputName, value) {
+            config.chains[currentChain].inputs[inputName].required = value;
+            autoSave();
+        }
+
+        function updateStepName(index, value) {
+            config.chains[currentChain].steps[index].name = value;
+            renderEditor();
+            autoSave();
+        }
+
+        function updateStepType(index, value) {
+            config.chains[currentChain].steps[index].type = value;
+            renderEditor();
+            autoSave();
+        }
+
+        function updateStepSkill(index, value) {
+            config.chains[currentChain].steps[index].skill = value;
+            autoSave();
+        }
+
+        function updateStepArgs(index, value) {
+            config.chains[currentChain].steps[index].args = value;
+            autoSave();
+        }
+
+        function updateStepScript(index, value) {
+            config.chains[currentChain].steps[index].script = value;
+            autoSave();
+        }
+
+        function autoSave() {
+            localStorage.setItem('chainer-config', JSON.stringify(config));
+            document.getElementById('lastSaved').textContent = 'Saved to browser storage';
+        }
+
+        function saveConfig() {
+            const yaml = generateYAML();
+            const blob = new Blob([yaml], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chainer.local.md';
+            a.click();
+            document.getElementById('lastSaved').textContent = 'Downloaded: chainer.local.md';
+        }
+
+        function generateYAML() {
+            let yaml = '---\nchains:\n';
+
+            Object.keys(config.chains).forEach(chainName => {
+                const chain = config.chains[chainName];
+                yaml += `  ${chainName}:\n`;
+                yaml += `    enabled: ${chain.enabled}\n`;
+                yaml += `    description: "${chain.description}"\n`;
+
+                if (Object.keys(chain.inputs).length > 0) {
+                    yaml += `    inputs:\n`;
+                    Object.keys(chain.inputs).forEach(inputName => {
+                        const input = chain.inputs[inputName];
+                        yaml += `      ${inputName}: { required: ${input.required}, description: "${input.description}" }\n`;
+                    });
+                }
+
+                if (chain.steps.length > 0) {
+                    yaml += `    steps:\n`;
+                    chain.steps.forEach(step => {
+                        yaml += `      - name: ${step.name}\n`;
+                        yaml += `        type: ${step.type}\n`;
+                        if (step.skill) yaml += `        skill: ${step.skill}\n`;
+                        if (step.args) yaml += `        args: "${step.args}"\n`;
+                        if (step.script) {
+                            yaml += `        script: |\n`;
+                            step.script.split('\n').forEach(line => {
+                                yaml += `          ${line}\n`;
+                            });
+                        }
+                    });
+                }
+                yaml += '\n';
+            });
+
+            yaml += `defaults:\n`;
+            yaml += `  spec_directory: ${config.defaults.spec_directory}\n`;
+            yaml += `  max_iterations: ${config.defaults.max_iterations}\n`;
+            yaml += '---\n\n';
+            yaml += '# Chainer Configuration\n\n';
+            yaml += 'This file contains your custom chain definitions.\n';
+
+            return yaml;
+        }
+
+        function exportCurrentChain() {
+            if (!currentChain) {
+                alert('Please select a chain first');
+                return;
+            }
+
+            const yaml = `---\n${currentChain}:\n${generateYAML().split(currentChain + ':')[1].split('\n\n')[0]}\n---`;
+            const blob = new Blob([yaml], { type: 'text/yaml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentChain}.yaml`;
+            a.click();
+        }
+
+        function importFromFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.md,.yaml,.yml';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        parseAndImport(event.target.result);
+                        alert('Import successful!');
+                    } catch (err) {
+                        alert('Import failed: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function importFromURL() {
+            const url = prompt('Enter URL to chain configuration:');
+            if (!url) return;
+
+            fetch(url)
+                .then(r => r.text())
+                .then(parseAndImport)
+                .then(() => alert('Import successful!'))
+                .catch(err => alert('Import failed: ' + err.message));
+        }
+
+        function parseAndImport(content) {
+            // Simple YAML parser (would need a real YAML library for production)
+            // For now, just show a message
+            alert('YAML parsing not implemented yet. Please manually copy the configuration.');
+        }
+
+        function exportConfig() {
+            saveConfig();
+        }
+
+        // Initialize
+        loadConfig();
+    </script>
+</body>
+</html>

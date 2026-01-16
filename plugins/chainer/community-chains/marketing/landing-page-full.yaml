@@ -1,0 +1,73 @@
+---
+name: landing-page-full
+enabled: true
+description: "Complete landing page: design, build, copy, and deploy"
+inputs:
+  product: { required: true, description: "Product name and description" }
+  target_audience: { required: true, description: "Target audience description" }
+  brand_colors: { required: false, description: "Brand color scheme" }
+steps:
+  - name: design
+    type: skill
+    skill: frontend-design:frontend-design
+    args: "Design a modern landing page for {{product}} targeting {{target_audience}}"
+    output:
+      design_spec: "audit/landing-design.md"
+  - name: copywriting
+    type: script
+    script: |
+      echo "✍️  Writing compelling copy for {{product}}"
+      # This would generate marketing copy
+  - name: implement
+    type: script
+    script: |
+      SCRIPT_PATH="$(find ~/.claude/plugins -name 'setup-ralph-loop.sh' -path '*ralph-loop*' 2>/dev/null | head -1)"
+      bash "$SCRIPT_PATH" "Build landing page from {{design_spec}} with marketing copy" --max-iterations 30 --completion-promise DONE
+  - name: optimize
+    type: script
+    script: |
+      echo "⚡ Optimizing for performance and SEO"
+      npm run build
+      npm run analyze
+---
+
+# Full Landing Page Chain
+
+This chain creates a complete, production-ready landing page:
+
+1. **Design Phase**: Create high-converting UI/UX design
+2. **Copywriting**: Generate compelling marketing copy
+3. **Implementation**: Build responsive landing page
+4. **Optimization**: Performance and SEO optimization
+
+## Usage
+
+```bash
+/chainer:run landing-page-full \
+  --product="TaskMaster - AI-powered task management" \
+  --target_audience="Busy professionals aged 25-45" \
+  --brand_colors="blue, white, gray"
+```
+
+## Requirements
+
+- `frontend-design` plugin installed
+- `ralph-loop` plugin installed
+- Node.js and build tools configured
+
+## Output
+
+- Fully designed landing page
+- Marketing copy
+- Responsive implementation
+- Performance optimized
+- SEO ready
+
+## Example
+
+```bash
+# Create SaaS landing page
+/chainer:run landing-page-full \
+  --product="DataViz Pro - Business analytics platform" \
+  --target_audience="Data analysts and business intelligence teams"
+```

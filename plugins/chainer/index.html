@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chainer | Plugin for Claude Code</title>
+    <meta name="description" content="A Claude Code plugin designed for orchestrating AI coding workflows by chaining together plugins.">
+    
+    <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
+    <meta property="og:title" content="Chainer">
+    <meta property="og:description" content="A Claude Code plugin designed for orchestrating AI coding workflows by chaining together plugins.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://danielraffel.github.io/Chainer/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/Chainer/refs/heads/main/chain.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Chainer">
+    <meta name="twitter:description" content="A Claude Code plugin designed for orchestrating AI coding workflows by chaining together plugins.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/Chainer/refs/heads/main/chain.png">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #667eea;
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: #333;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        /* Components */
+        .plugin-name {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .code-comment { color: #6a6a6a; }
+        .code-command { color: #fff; font-weight: bold; }
+        .code-prompt { color: var(--accent); user-select: none; }
+
+        .btn {
+            display: inline-block;
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-top: var(--spacing-unit);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        /* Copy button */
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #444; color: #fff; }
+        .copy-btn.copied { background: var(--accent); color: #fff; }
+
+        /* Chain examples */
+        .chain-card {
+            margin-bottom: 1.5rem;
+        }
+        .chain-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .chain-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+        .learn-more {
+            color: var(--accent);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .learn-more:hover { color: var(--text); }
+        .details {
+            display: none;
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .details.open { display: block; }
+        .details code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+        .step-list {
+            margin: 0.75rem 0;
+            padding-left: 1.25rem;
+        }
+        .step-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--gray);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after {
+            content: '−';
+        }
+        .faq-answer {
+            display: none;
+            padding-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #444;
+        }
+        .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+        .faq-item.open .faq-answer { display: block; }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+
+        <!-- Hero Section -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <span class="plugin-name">Chainer</span>
+            <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
+            <nav class="nav-links">
+                <a href="#concept">Concept</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#installation">Installation</a>
+                <a href="#chains">Examples</a>
+                <a href="#questions">Smart Questions</a>
+                <a href="#custom">Custom Patterns</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <h1>Just describe<br>your goal.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p><b>Chainer</b> lets you tell Claude Code what you want to build, then it suggests and runs the right plugins—end to end.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-prompt">/</span>chainer:run Add OAuth login to my app</div>
+                    </div>
+                    <div class="chain-desc" style="margin-top: 1rem;">
+                        Chainer interprets what you want and confirms before running.
+                        <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                    </div>
+                    <div class="details">
+                        <strong>Chainer will respond with a confirmation:</strong>
+                        <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; font-family: var(--font-main);">
+                            <div style="margin-bottom: 0.75rem;">Here's what I'll do:</div>
+                            <div style="margin-bottom: 0.5rem;">1. <code>/feature-dev</code> will analyze your codebase and create a plan for adding OAuth</div>
+                            <div style="margin-bottom: 0.75rem;">2. <code>/ralph-loop</code> will implement the plan automatically (up to 50 passes)</div>
+                        </div>
+                        <strong>Result:</strong> You describe what you want in plain English, confirm the plan, come back to working code.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Concept -->
+        <section id="concept">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>The Concept</h3>
+                    <h2>Simple requests,<br>complex orchestrations.</h2>
+                </div>
+                <div class="col-right">
+                    <p>Instead of knowing which plugins to run and in what order, let Chainer figure that out for you. Just describe what you're trying to do—Chainer finds the right plugins and runs them.</p>
+                    <p><strong>You're in control.</strong> Extend it to do new things your way, or use the defaults to create worktrees, plan features, implement code, run tests, and deploy.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="capabilities">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>Capabilities</h3>
+                    <p>Designed for multi-step workflows that benefit from automation.</p>
+                </div>
+                <div class="col-right">
+                    <ul class="feature-list">
+                        <li>Chain any Claude Code plugins in sequence</li>
+                        <li>Smart question handler makes responses interactive</li>
+                        <li>Config-driven workflows with YAML</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Simple setup.</h2>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a>. Works with plugins like <a href="https://www.generouscorp.com/worktree-manager/">Worktree Manager</a>, <a href="https://github.com/anthropics/claude-plugins-official/tree/main/feature-dev">feature-dev</a>, <a href="https://github.com/anthropics/claude-plugins-official/tree/main/ralph-loop">ralph-loop</a>, and more.</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                        <div class="code-block" id="install-code">
+<span class="code-comment"># 1. Add the marketplace (in Claude Code)</span>
+/plugin marketplace add danielraffel/worktree-manager
+
+<span class="code-comment"># 2. Install Chainer</span>
+/plugin install chainer@generous-corp-marketplace
+
+<span class="code-comment"># 3. Restart Claude Code</span>
+<span class="code-comment"># Quit and reopen Claude Code to load the plugin</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <a href="https://github.com/danielraffel/Chainer" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <div style="color: var(--gray); font-size: 0.9rem;">
+                            Zero build steps required. Installs directly from marketplace.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Example Scenarios -->
+        <section id="chains">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Example Scenarios</h3>
+                    <h2>Just say what you want.</h2>
+                    <p style="max-width: 60ch;">Chainer interprets natural language and shows you what it'll do before running. Here are common patterns.</p>
+                </div>
+
+                <div class="col-left">
+                    <div class="chain-card">
+                        <div class="chain-title">Plan + Implement</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>chainer:run Add user authentication</div>
+                        </div>
+                        <div class="chain-desc">
+                            The default: plan it, then build it.
+                            <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                        </div>
+                        <div class="details">
+                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                                <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
+                                <div style="margin-bottom: 0.5rem;">1. <code>/feature-dev</code> will analyze your codebase and create a plan for user authentication</div>
+                                <div>2. <code>/ralph-loop</code> will implement the plan (up to 50 passes)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="chain-card">
+                        <div class="chain-title">Just Planning</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>chainer:run design a REST API for orders</div>
+                        </div>
+                        <div class="chain-desc">
+                            Specify what you want - planning only or full implementation.
+                            <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                        </div>
+                        <div class="details">
+                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                                <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
+                                <div style="margin-bottom: 0.5rem;">1. <code>/feature-dev</code> will analyze your codebase and create an API design</div>
+                                <div style="margin-bottom: 0.5rem; padding-left: 1rem; color: var(--gray);">→ Saves plan to <code>specs/</code> in your project</div>
+                                <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--gray);">No automatic implementation. Review the plan, then say <code>/chainer:run implement</code> when ready.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="chain-card">
+                        <div class="chain-title">Implement Existing Plan</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>chainer:run implement the API spec</div>
+                        </div>
+                        <div class="chain-desc">
+                            Have a plan already? Just implement it.
+                            <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                        </div>
+                        <div class="details">
+                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                                <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
+                                <div>1. <code>/ralph-loop</code> will implement <code>specs/api.md</code> (up to 50 passes)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="chain-card">
+                        <div class="chain-title">Isolated Worktree</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>chainer:run build payments in a new worktree</div>
+                        </div>
+                        <div class="chain-desc">
+                            Mention "worktree" for complete isolation.
+                            <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                        </div>
+                        <div class="details">
+                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                                <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
+                                <div style="margin-bottom: 0.5rem;">1. <code>/worktree-manager:start</code> creates <code>~/worktrees/payments/</code> on a new branch</div>
+                                <div style="margin-bottom: 0.5rem;">2. <code>/feature-dev</code> creates an implementation plan</div>
+                                <div style="margin-bottom: 0.5rem;">3. <code>/ralph-loop</code> implements the plan (up to 50 passes)</div>
+                                <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--gray);">All work stays isolated from your main branch.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart Question Handler -->
+        <section id="questions">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Smart Questions</h3>
+                    <h2>Interactive questions<br>for any plugin.</h2>
+                    <p style="max-width: 60ch;">Chainer automatically detects when plugins ask clarifying questions and presents them in an easy-to-use interface. No more reading through long text lists.</p>
+                </div>
+
+                <div class="col-left">
+                    <h4 style="font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">Before: Text wall</h4>
+                    <div class="code-block" style="font-size: 0.75rem; padding: 1rem;">Before I design the architecture:
+
+1. Invader behavior: Should invaders
+   move in formation or side-to-side?
+2. Lives: How many starting lives?
+3. Controls: Arrow keys or A/D?
+4. Audio: Include sound effects?
+5. UI: Start screen with instructions?
+
+Please answer these questions...</div>
+                </div>
+
+                <div class="col-right">
+                    <h4 style="font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">After: Interactive UI</h4>
+                    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; font-size: 0.85rem;">
+                        <div style="margin-bottom: 1.25rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Invader behavior</div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                                    <input type="radio" name="invaders" checked style="accent-color: var(--accent);">
+                                    <span>Formation with swooping attacks</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                    <input type="radio" name="invaders" style="accent-color: var(--accent);">
+                                    <span>Side-to-side movement</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div style="color: var(--gray); font-size: 0.8rem; text-align: center;">Tab through questions • Up/Down to select</div>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--gray);">Chainer detects questions, parses options, and presents them interactively - automatically.</p>
+                </div>
+
+                <div class="col-full" style="margin-top: 2rem;">
+                    <h4 style="font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600;">On the Roadmap</h4>
+                    <div class="grid">
+                        <div class="col-left">
+                            <p><strong>Answer History:</strong> Chainer will remember your choices and suggest previous answers for similar questions.</p>
+                        </div>
+                        <div class="col-right">
+                            <p><strong>Smart Defaults:</strong> Project-type detection will suggest sensible defaults. Game projects get "Arrow keys", APIs get "JWT tokens".</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-full" style="margin-top: 1.5rem; background: var(--light-gray); padding: 1.5rem; border-radius: 8px;">
+                    <p style="margin: 0; max-width: none;"><strong>Works with a growing number of plugins:</strong> Chainer supports plugins that output text questions or use Claude Code's question API. <a href="https://github.com/danielraffel/Chainer/blob/main/SUPPORTED_PLUGINS.md">See what's supported →</a></p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--gray);">Enable in config: <code style="background: var(--code-bg); color: var(--code-text); padding: 0.2rem 0.5rem; border-radius: 3px;">question_handling.enabled: true</code></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom Patterns -->
+        <section id="custom">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Custom Patterns</h3>
+                    <h2>Teach Chainer your workflows.</h2>
+                    <p style="max-width: 60ch;">Define patterns that trigger specific chains. When Chainer sees matching words, it knows what workflow you want.</p>
+                </div>
+                <div class="col-left">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># chainer.config.yaml in your project</span>
+
+patterns:
+  - match: ["with tests", "and test"]
+    chain: plan-implement-test
+
+  - match: ["quick fix", "hotfix"]
+    chain: implement-only
+
+  - match: ["refactor"]
+    chain: plan-only</div>
+                    </div>
+                </div>
+                <div class="col-right" style="display: flex; flex-direction: column; justify-content: center;">
+                    <p style="margin-bottom: 1rem;"><strong>Now you can say:</strong></p>
+                    <div class="code-block" style="margin: 0; padding: 1rem;">/chainer:run Add OAuth with tests</div>
+                    <p style="margin-top: 1rem; color: var(--gray); font-size: 0.95rem;">Chainer detects "with tests" and runs your plan-implement-test chain, which adds <code>npm test</code> after implementation.</p>
+                </div>
+                <div class="col-full" style="margin-top: 2rem;">
+                    <p style="max-width: 60ch; color: var(--gray);">See the <a href="https://github.com/danielraffel/Chainer/tree/main/community-chains">community patterns library</a> for more examples and ready-to-use workflows.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>FAQ</h3>
+                    <h2>Common questions.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-simple-explanation">Can you explain this without all the jargon?</div>
+                        <div class="faq-answer">
+                            <p>Chainer lets you automate sequences of actions in Claude Code by just describing what you want in plain English.</p>
+                            <p><strong>The simple mental model:</strong> You tell Chainer what you want to build. Chainer figures out the steps, shows you what it'll do, and asks for confirmation. Then it runs everything automatically.</p>
+                            <p><strong>How it works:</strong></p>
+                            <p>1. You type something like <code>/chainer:run Add user login</code><br>
+                            2. Chainer shows you: "I'll run feature-dev to plan, then ralph-loop to implement"<br>
+                            3. You click Start (or Edit if you want to change something)<br>
+                            4. Chainer runs each step automatically<br>
+                            5. You come back to working code</p>
+                            <p><strong>Example:</strong> Instead of remembering commands and syntax, just say <code>/chainer:run build payments in a new worktree</code> and Chainer handles creating the isolated workspace, planning, and implementing.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-status">What's the status of this project?</div>
+                        <div class="faq-answer">
+                            <p><strong>Very early beta.</strong> Chainer is experimental and should be considered a proof-of-concept. Only a handful of people have tested it so far.</p>
+                            <p>Expect rough edges, breaking changes, and incomplete features. Some features shown on this site (like Answer History and interactive Start/Edit/Cancel buttons) are designed but not yet implemented.</p>
+                            <p>Use at your own risk. This notice will be updated when the project matures.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-requirements">What do I need to use Chainer?</div>
+                        <div class="faq-answer">
+                            <p>You need <a href="https://claude.ai/code">Claude Code</a> installed. That's it for basic use.</p>
+                            <p>The built-in chains use these plugins, so install them to use those chains:</p>
+                            <p>• <a href="https://www.generouscorp.com/worktree-manager/">Worktree Manager</a> - For the worktree-plan-implement chain<br>
+                            • <a href="https://github.com/anthropics/claude-plugins-official/tree/main/feature-dev">feature-dev</a> - For planning chains<br>
+                            • <a href="https://github.com/anthropics/claude-plugins-official/tree/main/ralph-loop">ralph-loop</a> - For implementation chains</p>
+                            <p><strong>Missing a plugin?</strong> Chainer will detect missing dependencies and show exactly how to install them.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-supported-plugins">What plugins are supported?</div>
+                        <div class="faq-answer">
+                            <p>Chainer officially supports and is tested with:</p>
+                            <p>• <a href="https://github.com/anthropics/claude-plugins-official/tree/main/feature-dev">feature-dev</a> - Planning and architecture<br>
+                            • <a href="https://github.com/anthropics/claude-plugins-official/tree/main/ralph-loop">ralph-loop</a> - Autonomous implementation<br>
+                            • <a href="https://www.generouscorp.com/worktree-manager/">Worktree Manager</a> - Isolated workspaces<br>
+                            • <a href="https://github.com/anthropics/claude-plugins-official/tree/main/frontend-design">frontend-design</a> - UI/UX design</p>
+                            <p>Many other plugins should work in custom chains. See <a href="https://github.com/danielraffel/Chainer/blob/main/SUPPORTED_PLUGINS.md">SUPPORTED_PLUGINS.md</a> for the full compatibility matrix and feature support details.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-create-chains">How do I create my own workflows?</div>
+                        <div class="faq-answer">
+                            <p>Add a <code>chainer.config.yaml</code> file to your project. Define patterns (words that trigger your workflow) and chains (what steps to run):</p>
+                            <pre style="margin: 1rem 0; background: var(--code-bg); color: var(--code-text); padding: 1rem; border-radius: 4px; overflow-x: auto;"><code>patterns:
+  - match: ["with tests", "and test"]
+    chain: plan-implement-test
+
+chains:
+  plan-implement-test:
+    steps:
+      - skill: feature-dev
+      - skill: ralph-loop
+      - script: npm test</code></pre>
+                            <p>Now when you say <code>/chainer:run Add OAuth with tests</code>, Chainer detects "with tests" and runs your custom workflow.</p>
+                            <p>See the <a href="https://github.com/danielraffel/Chainer/tree/main/community-chains">community patterns</a> for more examples.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-vs-manual">Why use Chainer instead of running plugins manually?</div>
+                        <div class="faq-answer">
+                            <p><strong>No syntax to remember:</strong> Just describe what you want. Chainer figures out the right plugins and order.</p>
+                            <p><strong>Transparency:</strong> See exactly what will happen before it runs. Edit or cancel if it's not what you want.</p>
+                            <p><strong>Consistency:</strong> The same steps happen every time, in the same order.</p>
+                            <p><strong>Shareability:</strong> Teams can share patterns so everyone uses the same workflows.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-parallel">Can I run multiple chains in parallel?</div>
+                        <div class="faq-answer">
+                            <p>Yes! Chainer supports parallel execution using tmux.</p>
+                            <p>When you try to run a second chain while one is already running, Chainer detects the conflict and offers to spawn a new tmux window or session. Each chain runs independently in its own isolated environment.</p>
+                            <p>Use <code>/chainer:status</code> to see all running and recently completed chains.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-other-plugins">Do I need to install feature-dev and ralph-loop?</div>
+                        <div class="faq-answer">
+                            <p>No, they're optional. But, Chainer was designed to work best with other plugins like <a href="https://www.generouscorp.com/worktree-manager/">Worktree Manager</a>.</p>
+                            <p>The power comes from pairing Chainer with other plugins for workflow automation. Chainer chains together <a href="https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev">feature-dev</a> (planning) and <a href="https://github.com/anthropics/claude-code/tree/main/plugins/ralph-loop">ralph-loop</a> (implementation) so you can describe what you want in plain English and come back to a completed feature in an isolated worktree.</p>
+                            <p><strong>Don't worry about missing plugins:</strong> Chainer automatically detects missing dependencies before running a chain and shows you exactly how to install them.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-ralph-looping">Why does ralph-loop keep looping after the work is done?</div>
+                        <div class="faq-answer">
+                            <p>This is a known quirk of ralph-loop's design. To exit the loop, Claude must output the literal text <code>&lt;promise&gt;DONE&lt;/promise&gt;</code>. Sometimes Claude completes the work but says things like "Done", "Complete", or "Finished" instead of outputting the exact escape tag.</p>
+                            <p>When this happens, you'll see iterations increment (e.g., "Ralph iteration 25... 26... 27...") with Claude repeatedly confirming completion but not exiting. The loop will run until it hits the max iterations limit (default: 50).</p>
+                            <p><strong>This is harmless but wasteful.</strong> Your work was completed successfully—the extra iterations just burn through API credits. You can manually stop Claude (Ctrl+C) once you see the work is done, or wait for max iterations.</p>
+                            <p><strong>Update:</strong> We've added explicit exit instructions to the task prompt, and testing shows this <strong>significantly improves</strong> Claude's exit behavior. Most tasks now exit cleanly with the proper tag.</p>
+                            <p><strong>If you still see excessive looping:</strong></p>
+                            <p>1. Lower <code>default_max_iterations</code> in your config file (e.g., to 20) to cap wasted iterations.</p>
+                            <p>2. Manually stop Claude (Ctrl+C) once you see the work is done.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-community-chains">How do I share my chains with the community?</div>
+                        <div class="faq-answer">
+                            <p>We'd love to see what workflows you create! To contribute a chain to the community library:</p>
+                            <p>1. Create your chain in a YAML file (e.g., <code>my-workflow.yaml</code>)<br>
+                            2. Fork the <a href="https://github.com/danielraffel/Chainer">Chainer repository</a><br>
+                            3. Add your chain to the <code>community-chains/</code> directory<br>
+                            4. Include a README explaining what it does and what plugins it requires<br>
+                            5. Submit a pull request</p>
+                            <p>Check out existing chains in the <a href="https://github.com/danielraffel/Chainer/tree/main/community-chains">community-chains library</a> for examples.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="faq-parallel-ralph">Can I run multiple ralph-loop loops in parallel worktrees?</div>
+                        <div class="faq-answer">
+                            <p><strong>Not from the same directory.</strong> Ralph-wiggum's state file (<code>.claude/ralph-loop.local.md</code>) is tied to your Claude session's current working directory, not the worktree. If you run multiple Claude sessions from the same parent directory, they'll all see the same state file and interfere with each other.</p>
+                            <p><strong>Workaround:</strong> Run each Claude session <strong>from within the worktree directory</strong> instead of your main project directory:</p>
+                            <p><code>cd ~/worktrees/feature-a<br>claude</code></p>
+                            <p>This way each worktree has its own isolated <code>.claude/</code> directory, and ralph loops won't cross-contaminate. You can then have multiple terminals, each running Claude from a different worktree, all working independently.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/Chainer" style="text-decoration: none;">GitHub Repository ↗</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyInstall(btn) {
+            const code = document.getElementById('install-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
+        function toggleDetails(el) {
+            const details = el.parentElement.nextElementSibling;
+            details.classList.toggle('open');
+            el.textContent = details.classList.contains('open') ? 'Show less' : 'Learn more';
+        }
+
+        // Open FAQ if hash matches
+        if (window.location.hash) {
+            const target = document.getElementById(window.location.hash.substring(1));
+            if (target && target.classList.contains('faq-question')) {
+                target.parentElement.classList.add('open');
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

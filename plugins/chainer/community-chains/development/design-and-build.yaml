@@ -1,0 +1,50 @@
+---
+name: design-and-build
+enabled: true
+description: "Design UI with frontend-design, then implement with ralph-loop"
+inputs:
+  prompt: { required: true, description: "What UI to design and build" }
+  feature_name: { required: true, description: "Feature name for spec file" }
+steps:
+  - name: design
+    type: skill
+    skill: frontend-design:frontend-design
+    args: "{{prompt}}"
+    output:
+      spec_file: "audit/{{feature_name}}-design.md"
+  - name: implement
+    type: script
+    script: |
+      SCRIPT_PATH="$(find ~/.claude/plugins -name 'setup-ralph-loop.sh' -path '*ralph-loop*' 2>/dev/null | head -1)"
+      bash "$SCRIPT_PATH" "Implement UI from {{spec_file}}" --max-iterations 50 --completion-promise DONE
+---
+
+# Design and Build Chain
+
+This chain combines UI/UX design with implementation:
+
+1. **Design Phase**: Uses `frontend-design` plugin to create high-quality UI designs
+2. **Implementation Phase**: Uses `ralph-loop` to iteratively implement the design
+
+## Usage
+
+```bash
+/chainer:run design-and-build \
+  --prompt="Build a modern dashboard" \
+  --feature_name="dashboard"
+```
+
+## Requirements
+
+- `frontend-design` plugin installed
+- `ralph-loop` plugin installed
+- `audit/` directory exists for spec storage
+
+## Example
+
+```bash
+# Design and build a landing page
+/chainer:run design-and-build \
+  --prompt="Create a product landing page with hero section, features grid, and CTA" \
+  --feature_name="landing-page"
+```

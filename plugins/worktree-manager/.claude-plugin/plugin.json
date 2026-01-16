@@ -1,0 +1,24 @@
+{
+  "name": "worktree-manager",
+  "version": "2.0.0",
+  "description": "Effortless git worktrees for parallel development with automatic environment setup",
+  "author": {
+    "name": "Daniel Raffel",
+    "url": "https://danielraffel.me"
+  },
+  "homepage": "https://www.generouscorp.com/worktree-manager/",
+  "repository": "https://github.com/danielraffel/worktree-manager",
+  "license": "MIT",
+  "keywords": ["git", "worktree", "version-control", "productivity", "parallel-development"],
+  "commands": "./commands/",
+  "mcpServers": {
+    "worktree": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.js"
+      ]
+    }
+  }
+}
+
