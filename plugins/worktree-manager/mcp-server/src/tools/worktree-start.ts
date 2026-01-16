@@ -17,6 +17,19 @@ export class WorktreeStartTool {
    * Create a new worktree with auto-setup
    */
   static async execute(params: WorktreeStartParams): Promise<WorktreeStartResult> {
+    const featureName = params.feature_name?.trim();
+    if (!featureName) {
+      return {
+        success: false,
+        worktree_path: '',
+        branch: '',
+        setup_complete: false,
+        setup_messages: [],
+        error: 'Feature name is required',
+        next_steps: ['Run /worktree-manager:create <feature-name>'],
+      };
+    }
+
     // Load configuration
     const cwd = process.cwd();
     const config = ConfigReader.getConfig(cwd);
@@ -25,13 +38,13 @@ export class WorktreeStartTool {
     const baseBranch = params.base_branch || 'main';
     const defaultWorktreePath = path.join(
       config.worktree_base_path,
-      params.feature_name
+      featureName
     );
     const worktreePath = params.worktree_path || defaultWorktreePath;
 
     // Determine branch name - use existing_branch if provided, else create new one
     const useExistingBranch = !!params.existing_branch;
-    const branchName = params.existing_branch || `${config.branch_prefix}${params.feature_name}`;
+    const branchName = params.existing_branch || `${config.branch_prefix}${featureName}`;
 
     try {
       // Step 1: Verify we're in a git repo
@@ -297,7 +310,7 @@ export class WorktreeStartTool {
         if (reusingExisting && fs.existsSync(learningsPath)) {
           // Skip - already exists
         } else {
-          const learningsContent = `# Learnings - ${params.feature_name}
+          const learningsContent = `# Learnings - ${featureName}
 
 ## Overview
 This file captures insights, decisions, and learnings during development.

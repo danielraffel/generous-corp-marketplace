@@ -9246,16 +9246,28 @@ var WorktreeStartTool = class {
    * Create a new worktree with auto-setup
    */
   static async execute(params) {
+    const featureName = params.feature_name?.trim();
+    if (!featureName) {
+      return {
+        success: false,
+        worktree_path: "",
+        branch: "",
+        setup_complete: false,
+        setup_messages: [],
+        error: "Feature name is required",
+        next_steps: ["Run /worktree-manager:create <feature-name>"]
+      };
+    }
     const cwd = process.cwd();
     const config = ConfigReader.getConfig(cwd);
     const baseBranch = params.base_branch || "main";
     const defaultWorktreePath = path5.join(
       config.worktree_base_path,
-      params.feature_name
+      featureName
     );
     const worktreePath = params.worktree_path || defaultWorktreePath;
     const useExistingBranch = !!params.existing_branch;
-    const branchName = params.existing_branch || `${config.branch_prefix}${params.feature_name}`;
+    const branchName = params.existing_branch || `${config.branch_prefix}${featureName}`;
     try {
       const isGitRepo = await GitHelpers.isGitRepo(cwd);
       if (!isGitRepo) {
@@ -9460,7 +9472,7 @@ var WorktreeStartTool = class {
         const learningsPath = path5.join(worktreePath, "LEARNINGS.md");
         if (reusingExisting && fs5.existsSync(learningsPath)) {
         } else {
-          const learningsContent = `# Learnings - ${params.feature_name}
+          const learningsContent = `# Learnings - ${featureName}
 
 ## Overview
 This file captures insights, decisions, and learnings during development.
@@ -10483,6 +10495,7 @@ var TOOLS = [
       properties: {
         feature_name: {
           type: "string",
+          minLength: 1,
           description: "Name of the feature (becomes feature/<name> branch)"
         },
         base_branch: {

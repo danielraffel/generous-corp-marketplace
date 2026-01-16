@@ -19,6 +19,8 @@ Create a new git worktree for parallel feature development with automatic enviro
 /worktree-manager:create <feature-name> [options]
 ```
 
+Feature name is required. If missing, stop and ask the user to re-run the command with a name.
+
 ## What It Does
 
 1. Creates a new git worktree from the current branch
@@ -80,13 +82,22 @@ For automated planning and implementation, use **Chainer** plugin:
 
 ## Implementation
 
+### Step 0: Validate input
+
+If the user did not provide a feature name (no first argument), do not proceed. Respond with an error and the usage line:
+
+```
+Feature name is required.
+Usage: /worktree-manager:create <feature-name> [options]
+```
+
 ### Step 1: Create the worktree
 
 Read the feature name from the user's input and call the MCP tool to create the worktree:
 
 ```javascript
 const result = await mcp__worktree__worktree_start({
-  feature_name: "oauth-flow",  // from user input
+  feature_name: featureName,    // from user input
   base_branch: "main",          // optional, from --base-branch flag
   worktree_path: undefined      // optional, from --worktree-path flag
 });
@@ -198,6 +209,7 @@ Show the worktree creation success message with next steps:
 
 Handle these common errors:
 
+- Missing feature name (show usage and stop)
 - Not in a git repository
 - Worktree path already exists
 - Branch already exists

@@ -37,6 +37,7 @@ const TOOLS: Tool[] = [
       properties: {
         feature_name: {
           type: 'string',
+          minLength: 1,
           description: 'Name of the feature (becomes feature/<name> branch)',
         },
         base_branch: {
