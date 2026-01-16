@@ -10,8 +10,8 @@
     <meta property="og:title" content="Worktree Manager">
     <meta property="og:description" content="A Claude Code plugin designed for AI coding workflows that go beyond a single assistant and into multi-agent collaboration using Git Worktrees.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://danielraffel.github.io/worktree-manager/">
-    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/worktree-manager/refs/heads/main/wtree.png">
+    <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/plugins/worktree-manager/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/worktree-manager/wtree.png">
     <meta property="og:image:width" content="1024">
     <meta property="og:image:height" content="1024">
 
@@ -19,7 +19,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Worktree Manager">
     <meta name="twitter:description" content="A Claude Code plugin designed for AI coding workflows that go beyond a single assistant and into multi-agent collaboration using Git Worktrees.">
-    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/worktree-manager/refs/heads/main/wtree.png">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/worktree-manager/wtree.png">
 
     <style>
         :root {
@@ -455,7 +455,7 @@
             <h1>Parallel workspaces<br>for your code.</h1>
             <div class="grid">
                 <div class="col-left">
-                    <p><b>Worktree Manager</b> creates isolated git worktrees for parallel feature development. Handles the tedious setup so you can focus on building. Pairs with <a href="https://www.generouscorp.com/Chainer">Chainer</a> for workflow automation.</p>
+                    <p><b>Worktree Manager</b> creates isolated git worktrees for parallel feature development. Handles the tedious setup so you can focus on building. Pairs with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for workflow automation.</p>
                 </div>
                 <div class="col-right">
                     <div class="code-block-wrapper">
@@ -470,7 +470,7 @@
                         <strong>Behind that command:</strong><br>
                         1. Creates <code>~/worktrees/payments/</code> directory<br>
                         2. Creates <code>feature/payments</code> branch<br>
-                        3. Auto-detects project type (Node, Swift, & <a href="https://github.com/danielraffel/worktree-manager/blob/21add3106a70de956e8307126fdceab68820f7c5/mcp-server/src/utils/project-detector.ts#L50" target="_blank">20 more</a>)<br>
+                        3. Auto-detects project type (Node, Swift, & <a href="https://github.com/danielraffel/generous-corp-marketplace/blob/master/plugins/worktree-manager/mcp-server/src/utils/project-detector.ts#L50" target="_blank">20 more</a>)<br>
                         4. Offers to run setup (npm install, swift build, etc.)
                     </div>
                 </div>
@@ -507,7 +507,7 @@
                         <li>Rename and delete branches with safety checks</li>
                         <li>Create worktrees from existing branches</li>
                         <li>Automatically initializes git submodules</li>
-                        <li>Pairs with <a href="https://www.generouscorp.com/Chainer">Chainer</a> for workflow automation</li>
+                        <li>Pairs with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for workflow automation</li>
                         <li>Safe experimentation without contaminating main</li>
                         <li>Zero bookkeeping required</li>
                     </ul>
@@ -521,7 +521,7 @@
                 <div class="col-full">
                     <h3>Installation</h3>
                     <h2>Simple setup.</h2>
-                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a>. For automated workflows, also install <a href="https://www.generouscorp.com/Chainer">Chainer</a> plugin.</p>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a>. For automated workflows, also install <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> plugin.</p>
                 </div>
                 <div class="col-full">
                     <div class="code-block-wrapper">
@@ -538,7 +538,7 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
-                        <a href="https://github.com/danielraffel/worktree-manager" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
                         <div style="color: var(--gray); font-size: 0.9rem;">
                             After installation, verify with <code style="background: var(--light-gray); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">/worktree-manager:list</code>
                         </div>
@@ -554,7 +554,7 @@
                 <div class="col-full">
                     <h3>Command Reference</h3>
                     <h2>Quick lookup.</h2>
-                    <p style="max-width: 60ch; margin-bottom: 2rem;">Worktree Manager creates isolated worktrees. For automated workflows (planning + implementation), use <a href="https://www.generouscorp.com/Chainer">Chainer</a>.</p>
+                    <p style="max-width: 60ch; margin-bottom: 2rem;">Worktree Manager creates isolated worktrees. For automated workflows (planning + implementation), use <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a>.</p>
                     <table class="cmd-table">
                         <thead>
                             <tr>
@@ -769,7 +769,7 @@ auto_push: false
                             3. You open Claude Code in that directory and work on the feature.<br>
                             4. Your main project stays clean and stable while experiments happen elsewhere.<br>
                             5. When done, you review the results and decide what to merge back.</p>
-                            <p><strong>For automation:</strong> Pair it with <a href="https://www.generouscorp.com/Chainer">Chainer</a> to automatically chain planning (feature-dev) and implementation (ralph-loop) inside isolated worktrees.</p>
+                            <p><strong>For automation:</strong> Pair it with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> to automatically chain planning (feature-dev) and implementation (ralph-loop) inside isolated worktrees.</p>
                         </div>
                     </div>
                     <div class="faq-item">
@@ -829,7 +829,7 @@ auto_push: false
                             <p><strong>Yes, but you control what gets installed.</strong> We detect your project type and ask you which dependencies to install—we don't run anything without your permission.</p>
                             <p><strong>How it works:</strong></p>
                             <p>1. <strong>You create a worktree</strong> - Run <code>/worktree-manager:create my-feature</code><br>
-                            2. <strong>We scan for ecosystems</strong> - Detects all <a href="https://github.com/danielraffel/worktree-manager/blob/21add3106a70de956e8307126fdceab68820f7c5/mcp-server/src/utils/project-detector.ts#L50" target="_blank">22+ project types</a> in ~100ms<br>
+                            2. <strong>We scan for ecosystems</strong> - Detects all <a href="https://github.com/danielraffel/generous-corp-marketplace/blob/master/plugins/worktree-manager/mcp-server/src/utils/project-detector.ts#L50" target="_blank">22+ project types</a> in ~100ms<br>
                             3. <strong>You pick what to install</strong> - Interactive menu shows options, you select what you need<br>
                             4. <strong>We run only your selections</strong> - Executes only what you chose</p>
                             <p><strong>Example:</strong> Project with Node.js, Rust, and Swift shows:</p>
@@ -865,7 +865,7 @@ auto_push: false
                 <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026</a>
             </div>
             <div class="col-right" style="text-align: right;">
-                <a href="https://github.com/danielraffel/worktree-manager" style="text-decoration: none;">GitHub Repository ↗</a>
+                <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager" style="text-decoration: none;">GitHub Repository ↗</a>
             </div>
         </div>
     </footer>

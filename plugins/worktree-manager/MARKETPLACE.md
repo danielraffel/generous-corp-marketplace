@@ -62,9 +62,9 @@ Test the plugin:
 
 ## Documentation
 
-- **Homepage**: https://www.generouscorp.com/worktree-manager/
-- **GitHub**: https://github.com/danielraffel/worktree-manager
-- **Issues**: https://github.com/danielraffel/worktree-manager/issues
+- **Homepage**: https://www.generouscorp.com/generous-corp-marketplace/plugins/worktree-manager/
+- **GitHub**: https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager
+- **Issues**: https://github.com/danielraffel/generous-corp-marketplace/issues
 
 ## License
 

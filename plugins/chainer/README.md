@@ -414,7 +414,7 @@ Chainer is part of a two-plugin system:
 - **Worktree Manager**: Pure git worktree operations
 - **Chainer**: Universal plugin orchestration
 
-See [FEATURE-PLAN-CHAINER-SPLIT.md](https://github.com/danielraffel/worktree-manager/blob/main/FEATURE-PLAN-CHAINER-SPLIT.md) for architecture details.
+See [FEATURE-PLAN-CHAINER-SPLIT.md](https://github.com/danielraffel/generous-corp-marketplace/blob/master/plugins/worktree-manager/FEATURE-PLAN-CHAINER-SPLIT.md) for architecture details.
 
 ## Roadmap
 
@@ -437,7 +437,7 @@ Built by [Daniel Raffel](https://github.com/danielraffel) for the Claude Code co
 
 ## Links
 
-- [Website](https://danielraffel.github.io/Chainer)
-- [GitHub](https://github.com/danielraffel/Chainer)
-- [Worktree Manager](https://github.com/danielraffel/worktree-manager)
-- [Feature Plan](https://github.com/danielraffel/worktree-manager/blob/main/FEATURE-PLAN-CHAINER-SPLIT.md)
+- [Website](https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/)
+- [GitHub](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/chainer)
+- [Worktree Manager](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager)
+- [Feature Plan](https://github.com/danielraffel/generous-corp-marketplace/blob/master/plugins/worktree-manager/FEATURE-PLAN-CHAINER-SPLIT.md)

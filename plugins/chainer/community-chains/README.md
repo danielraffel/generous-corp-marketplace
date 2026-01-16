@@ -128,6 +128,6 @@ Community chains are shared under the MIT License. By contributing, you agree to
 
 ## Support
 
-- **Issues**: Report problems with community chains on [GitHub Issues](https://github.com/danielraffel/Chainer/issues)
-- **Discussions**: Share ideas in [GitHub Discussions](https://github.com/danielraffel/Chainer/discussions)
+- **Issues**: Report problems with community chains on [GitHub Issues](https://github.com/danielraffel/generous-corp-marketplace/issues)
+- **Discussions**: Share ideas in [GitHub Discussions](https://github.com/danielraffel/generous-corp-marketplace/discussions)
 - **Questions**: Tag your questions with `community-chains`

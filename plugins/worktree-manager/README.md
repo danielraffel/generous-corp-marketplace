@@ -309,7 +309,7 @@ claude
 
 ### Pairs with Chainer
 
-For automated workflows (planning + implementation), pair with [Chainer](https://www.generouscorp.com/Chainer):
+For automated workflows (planning + implementation), pair with [Chainer](https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/):
 
 ```bash
 # Create worktree
@@ -498,7 +498,7 @@ Worktree Manager follows a focused, single-responsibility approach:
 
 ## Related Projects
 
-- **[Chainer](https://www.generouscorp.com/Chainer)** - Universal plugin orchestration for Claude Code (pairs well with Worktree Manager for automated workflows)
+- **[Chainer](https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/)** - Universal plugin orchestration for Claude Code (pairs well with Worktree Manager for automated workflows)
 
 ## Contributing
 
@@ -549,6 +549,6 @@ Built by [Daniel Raffel](https://github.com/danielraffel) for the Claude Code co
 
 ## Links
 
-- [GitHub Repository](https://github.com/danielraffel/worktree-manager)
-- [Chainer Plugin](https://www.generouscorp.com/Chainer)
-- [Documentation Site](https://danielraffel.github.io/worktree-manager/)
+- [GitHub Repository](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager)
+- [Chainer Plugin](https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/)
+- [Documentation Site](https://www.generouscorp.com/generous-corp-marketplace/plugins/worktree-manager/)
