@@ -30,7 +30,7 @@
       "name": "chainer",
       "source": {
         "source": "github",
-        "repo": "danielraffel/Chainer",
+        "repo": "danielraffel/chainer",
         "path": "."
       },
       "description": "Universal plugin orchestration for Claude Code",
