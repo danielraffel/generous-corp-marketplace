@@ -34,7 +34,7 @@ This project consists of two layers:
 │      Claude Code Plugin (Frontend)      │
 │                                         │
 │  • User-facing slash commands           │
-│  • /worktree-manager:create              │
+│  • /worktree-manager:create             │
 │  • /worktree-manager:list               │
 │  • /worktree-manager:status             │
 │  • /worktree-manager:cleanup            │
