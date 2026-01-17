@@ -40,7 +40,7 @@ modified_prompt="$user_prompt"
 
 case "$mode" in
   simple)
-    modified_prompt="${user_prompt}${user_prompt}"
+    modified_prompt="${user_prompt} ${user_prompt}"
     ;;
   verbose)
     modified_prompt="${user_prompt}
@@ -56,7 +56,7 @@ ${user_prompt}"
     ;;
   *)
     # Unknown mode, default to simple
-    modified_prompt="${user_prompt}${user_prompt}"
+    modified_prompt="${user_prompt} ${user_prompt}"
     ;;
 esac
 

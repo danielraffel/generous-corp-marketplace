@@ -11,11 +11,15 @@
     <meta property="og:description" content="Improve LLM accuracy by 76% on list tasks using Google Research's prompt repetition technique.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/prompt-repeater/icon.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Prompt Repeater">
     <meta name="twitter:description" content="Improve LLM accuracy by 76% on list tasks using Google Research's prompt repetition technique.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/prompt-repeater/icon.png">
 
     <style>
         :root {
@@ -331,46 +335,45 @@
             <span class="plugin-name">Prompt Repeater</span>
             <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
             <nav class="nav-links">
-                <a href="#how-it-works">How It Works</a>
                 <a href="#installation">Installation</a>
                 <a href="#usage">Usage</a>
                 <a href="#research">Research</a>
                 <a href="#faq">FAQ</a>
             </nav>
-            <h1>76% better<br>on list tasks.</h1>
+            <h1>Simple technique,<br>proven results.</h1>
             <div class="grid">
                 <div class="col-left">
                     <p><b>Prompt Repeater</b> applies Google Research's prompt repetition technique to improve Claude's accuracy on non-reasoning tasks.</p>
                 </div>
                 <div class="col-right">
-                    <div class="code-block-wrapper">
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        <div class="code-block"><span class="code-comment"># Turn on automatic mode</span>
-auto_apply: true
+                    <div class="code-block" style="margin-top: 0;">Your prompt: <span class="code-command">"What's the 5th item?"</span>
 
-<span class="code-comment"># Every prompt you enter gets repeated</span>
-<span class="code-comment"># Better accuracy, zero extra steps</span></div>
-                    </div>
+Becomes: <span class="code-command">"What's the 5th item? What's the 5th item?"</span>
+
+<span class="code-comment"># With auto_apply: true, prompts are sent twice</span>
+<span class="code-comment"># Claude processes the repeated version</span>
+<span class="code-comment"># You get better accuracy automatically</span></div>
                 </div>
             </div>
         </section>
 
         <!-- Research Stats -->
         <section style="padding-top: calc(var(--spacing-unit) * 2);">
+            <h3>Research Results</h3>
             <div class="grid">
-                <div class="col-left">
+                <div style="grid-column: 1 / 5;">
                     <div class="stat-card">
                         <div class="stat-number">47-0</div>
                         <div class="stat-label">Win-Loss Record</div>
                     </div>
                 </div>
-                <div class="col-right" style="grid-column: 5 / 9;">
+                <div style="grid-column: 5 / 9;">
                     <div class="stat-card">
                         <div class="stat-number">21→97%</div>
                         <div class="stat-label">List Task Accuracy</div>
                     </div>
                 </div>
-                <div style="grid-column: 10 / 13;">
+                <div style="grid-column: 9 / 13;">
                     <div class="stat-card">
                         <div class="stat-number">0ms</div>
                         <div class="stat-label">Latency Penalty</div>
@@ -380,26 +383,6 @@ auto_apply: true
             <p style="text-align: center; margin-top: 1.5rem; color: var(--gray); font-size: 0.9rem; max-width: none;">
                 Source: <a href="https://arxiv.org/abs/2512.14982">Google Research, December 2024</a>
             </p>
-        </section>
-
-        <!-- How It Works -->
-        <section id="how-it-works">
-            <div class="grid">
-                <div class="col-left">
-                    <h3>How It Works</h3>
-                    <h2>Simple technique,<br>proven results.</h2>
-                </div>
-                <div class="col-right">
-                    <p>LLMs process tokens left-to-right where past tokens can't attend to future tokens. This means token order affects accuracy.</p>
-                    <p><strong>Prompt repetition</strong> duplicates your input so each token can attend to every other token, fixing positional limitations in the attention mechanism.</p>
-                    <div class="code-block" style="margin-top: 1.5rem;">Your prompt: <span class="code-command">"What's the 5th item?"</span>
-
-Becomes: <span class="code-command">"What's the 5th item?What's the 5th item?"</span>
-
-<span class="code-comment"># Claude processes the repeated version</span>
-<span class="code-comment"># You get better accuracy automatically</span></div>
-                </div>
-            </div>
         </section>
 
         <!-- Installation -->
@@ -444,7 +427,7 @@ Becomes: <span class="code-command">"What's the 5th item?What's the 5th item?"</
 
                 <div class="col-left">
                     <h4 style="font-size: 1.3rem; margin-bottom: 1rem; font-weight: 600;">Automatic Mode (Recommended)</h4>
-                    <p>Turn it on once, every prompt gets optimized automatically.</p>
+                    <p>Enable it, every prompt gets optimized.</p>
                     <div class="code-block-wrapper">
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                         <div class="code-block"><span class="code-comment"># 1. Copy settings template</span>
@@ -567,7 +550,7 @@ notify: true              <span class="code-comment"># Show when repetition appl
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">Does it slow things down?</div>
                         <div class="faq-answer">
-                            <p><strong>No.</strong> Prompt repetition only affects the parallelizable prefill stage. Research shows no latency penalty for most models and prompt lengths.</p>
+                            <p><strong>It depends.</strong> Prompt repetition only affects the parallelizable prefill stage. Research shows no latency penalty for most models and prompt lengths.</p>
                             <p>The only exception: Claude models with very long prompts (>2000 characters) or triple repetition may see slight prefill latency increase. But generation speed is completely unaffected.</p>
                         </div>
                     </div>
@@ -582,23 +565,26 @@ notify: true              <span class="code-comment"># Show when repetition appl
                         </div>
                     </div>
                     <div class="faq-item">
-                        <div class="faq-question" onclick="toggleFaq(this)">Why does this work?</div>
+                        <div class="faq-question" onclick="toggleFaq(this)">How does this work?</div>
                         <div class="faq-answer">
-                            <p>LLMs are causal language models where past tokens can't attend to future tokens. This means the order of tokens affects prediction performance.</p>
+                            <p><strong>Prompt repetition</strong> duplicates your input so each token can attend to every other token, fixing positional limitations in the attention mechanism.</p>
+                            <p>LLMs process tokens left-to-right where past tokens can't attend to future tokens. This means token order affects accuracy.</p>
                             <p>For example, "<code>&lt;CONTEXT&gt; &lt;QUESTION&gt;</code>" performs differently from "<code>&lt;QUESTION&gt; &lt;CONTEXT&gt;</code>" because tokens at the beginning can't see tokens at the end.</p>
-                            <p>Prompt repetition solves this by duplicating the entire prompt, enabling each token to attend to every other token in at least one of the repetitions. This addresses positional limitations in the attention mechanism.</p>
+                            <p>Prompt repetition solves this by duplicating the entire prompt, enabling each token to attend to every other token in at least one of the repetitions.</p>
                             <p>See the <a href="https://arxiv.org/abs/2512.14982">Google Research paper</a> for the full technical explanation.</p>
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">Is this tested and safe?</div>
                         <div class="faq-answer">
-                            <p><strong>Yes.</strong> This plugin implements a technique from a peer-reviewed Google Research paper published in December 2024.</p>
-                            <p>The research tested prompt repetition on 7 major models (Gemini, GPT-4o, Claude, DeepSeek) across 7 benchmarks and found:</p>
-                            <p>• 47 wins, 0 losses on non-reasoning tasks<br>
-                            • Never performs worse than baseline<br>
-                            • Safe even with reasoning tasks (neutral to slightly positive)</p>
-                            <p>The plugin itself uses safe bash scripting, validates inputs, and doesn't modify any files or make network requests.</p>
+                            <p><strong>This is an early beta.</strong> The plugin implements a technique from a peer-reviewed Google Research paper published in December 2024.</p>
+                            <p><strong>Why we think it's safe:</strong></p>
+                            <p>• Based on research tested on 7 major models (Gemini, GPT-4o, Claude, DeepSeek) across 7 benchmarks<br>
+                            • 47 wins, 0 losses on non-reasoning tasks - never performs worse than baseline<br>
+                            • Safe even with reasoning tasks (neutral to slightly positive)<br>
+                            • Plugin uses safe bash scripting, validates inputs<br>
+                            • Doesn't modify any files or make network requests<br>
+                            • Only manipulates prompt text before sending to Claude</p>
                         </div>
                     </div>
                     <div class="faq-item">

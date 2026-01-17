@@ -40,9 +40,9 @@ When this command is invoked:
    - If unavailable, inform the user that there's no previous message to repeat
 
 2. **Apply simple repetition**
-   - Format: `<QUERY><QUERY>` (the query repeated twice, back-to-back)
-   - No additional framing or text between repetitions
-   - Example: If user asked "What's the 5th item?", process it as "What's the 5th item?What's the 5th item?"
+   - Format: `<QUERY> <QUERY>` (the query repeated twice, separated by a space)
+   - No additional framing or text between repetitions (just a single space)
+   - Example: If user asked "What's the 5th item?", process it as "What's the 5th item? What's the 5th item?"
 
 3. **Process the repeated prompt**
    - Treat the repeated prompt as if it were the original user input
@@ -71,7 +71,7 @@ What's the 3rd name?
 Here's a list of names:
 Alice, Bob, Charlie, David, Emma
 
-What's the 3rd name?Here's a list of names:
+What's the 3rd name? Here's a list of names:
 Alice, Bob, Charlie, David, Emma
 
 What's the 3rd name?

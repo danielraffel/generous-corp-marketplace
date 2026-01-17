@@ -1,0 +1,22 @@
+{
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "type": "prompt",
+      "name": "session-resume",
+      "prompt": "Check if .claude/dp.local.md exists. If it exists, read the file to get the session context and offer to resume the previous design thinking session. Say something like: 'I see you were working on [problem from file]. Would you like to continue where we left off, or start a new design challenge?' If the file doesn't exist, don't mention anything - just wait for the user to start a session."
+    },
+    {
+      "event": "UserPromptSubmit",
+      "type": "prompt",
+      "name": "visual-intent-detection",
+      "prompt": "Detect if the user's message contains visual intent phrases like: 'show me what this looks like', 'visualize this', 'generate an image', 'create a mockup', 'what would this look like', 'I want to see', 'can you show me'. If detected AND image generation is enabled in .claude/dp.local.md (check image_generation_enabled field), automatically invoke the /dp:visualize command with the user's context. Pass along any specific details they mentioned (style, mood, elements, etc.). If image generation is not enabled, suggest enabling it first with /dp:providers."
+    },
+    {
+      "event": "PostToolUse",
+      "type": "prompt",
+      "name": "auto-save-artifacts",
+      "prompt": "If the Write tool was just used to create a design artifact (file in artifacts/images/, artifacts/specs/, artifacts/mockups/, or any image file), automatically add a reference to it in the .claude/dp.local.md file's artifacts array. Format: {type: 'image|spec|mockup', path: '/full/path', created_at: 'ISO timestamp', description: 'brief description'}. Append to existing artifacts array without overwriting previous entries. If .claude/dp.local.md doesn't exist, create it first with proper frontmatter structure."
+    }
+  ]
+}

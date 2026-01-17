@@ -1,0 +1,29 @@
+{
+  "name": "design-partner",
+  "version": "0.1.0",
+  "description": "AI-powered design thinking partner for Claude Code",
+  "type": "module",
+  "main": "scripts/image-generator.js",
+  "scripts": {
+    "test": "node scripts/test-providers.js",
+    "detect-keys": "node scripts/detect-api-keys.js"
+  },
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "design-thinking",
+    "dall-e",
+    "gemini",
+    "image-generation"
+  ],
+  "author": "Daniel Raffel",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

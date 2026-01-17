@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Partner | Plugin for Claude Code</title>
+    <meta name="description" content="AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes through natural conversation.">
+
+    <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
+    <meta property="og:title" content="Design Partner">
+    <meta property="og:description" content="Turn ideas into visuals. AI-powered design thinking for Claude Code.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/design-partner/icon.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Design Partner">
+    <meta name="twitter:description" content="Turn ideas into visuals. AI-powered design thinking for Claude Code.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/design-partner/icon.png">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #667eea;
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: #333;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        /* Components */
+        .plugin-name {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .code-comment { color: #6a6a6a; }
+        .code-command { color: #fff; font-weight: bold; }
+        .code-prompt { color: var(--accent); user-select: none; }
+
+        .btn {
+            display: inline-block;
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-top: var(--spacing-unit);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        /* Copy button */
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #444; color: #fff; }
+        .copy-btn.copied { background: var(--accent); color: #fff; }
+
+        /* Example cards */
+        .example-card {
+            margin-bottom: 1.5rem;
+        }
+        .example-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .example-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+        .learn-more {
+            color: var(--accent);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .learn-more:hover { color: var(--text); }
+        .details {
+            display: none;
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .details.open { display: block; }
+        .details code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        /* Cost table */
+        .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .cost-table th,
+        .cost-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .cost-table th {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+        }
+        .cost-table td {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--gray);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after {
+            content: '−';
+        }
+        .faq-answer {
+            display: none;
+            padding-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #444;
+        }
+        .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+        .faq-item.open .faq-answer { display: block; }
+        .faq-answer code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+
+        <!-- Hero Section -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <span class="plugin-name">Design Partner</span>
+            <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
+            <nav class="nav-links">
+                <a href="#concept">Concept</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#installation">Installation</a>
+                <a href="#examples">Examples</a>
+                <a href="#costs">Costs</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <h1>Explore ideas—guided<br>by a virtual design partner.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p><b>Design Partner</b> turns conversations into visuals. Describe what you're imagining, and see it instantly.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-prompt">/</span>dp:start Let's design a minimalist habit tracker</div>
+                    </div>
+                    <div class="example-desc" style="margin-top: 1rem;">
+                        Turns conversations into visuals through guided design sessions.
+                        <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                    </div>
+                    <div class="details">
+                        <p><strong>Design Partner works two ways:</strong></p>
+                        <p>1. <strong>Guided sessions:</strong> Use <code>/dp:start [project-name]</code> to begin a structured design thinking session with context capture, idea generation, and image creation.</p>
+                        <p>2. <strong>Natural language:</strong> Just describe what you want to see—phrases like "show me", "visualize", or "what would this look like" automatically trigger <code>/dp:visualize</code> to generate images.</p>
+                        <p><strong>Other commands:</strong></p>
+                        <p><code>/dp:visualize [idea-id]</code> - Generate images for specific ideas<br>
+                        <code>/dp:providers</code> - Configure DALL-E 3 or Gemini<br>
+                        <code>/dp:cost</code> - View usage and costs</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Concept -->
+        <section id="concept">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>The Concept</h3>
+                    <h2>Design thinking,<br>powered by AI.</h2>
+                </div>
+                <div class="col-right">
+                    <p>Design Partner brings structured design thinking to Claude Code. Start with a problem, explore ideas, generate visuals, and iterate - all through conversation.</p>
+                    <p><strong>No design tools needed.</strong> Just describe what you're imagining. The plugin handles visual generation through DALL-E 3 or Gemini, tracks your session, and keeps artifacts organized.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="capabilities">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>Capabilities</h3>
+                    <p>From ideation to implementation, all in one conversation.</p>
+                </div>
+                <div class="col-right">
+                    <ul class="feature-list">
+                        <li>Natural language visual generation with DALL-E 3 or Gemini</li>
+                        <li>Guided design thinking sessions with state persistence</li>
+                        <li>Autonomous idea generation from multiple perspectives</li>
+                        <li>Visual refinement and iteration workflows</li>
+                        <li>Automatic artifact tracking and organization</li>
+                        <li>Cost tracking and daily budget limits</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Quick setup with API keys.</h2>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a> and API keys for image generation (OpenAI for DALL-E 3, or Google Cloud for Gemini).</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                        <div class="code-block" id="install-code">
+<span class="code-comment"># 1. Add the marketplace (in Claude Code)</span>
+/plugin marketplace add danielraffel/generous-corp-marketplace
+
+<span class="code-comment"># 2. Install Design Partner</span>
+/plugin install design-partner@generous-corp-marketplace
+
+<span class="code-comment"># 3. Set up API keys</span>
+export OPENAI_API_KEY="sk-..."           <span class="code-comment"># For DALL-E 3</span>
+<span class="code-comment"># OR</span>
+export GOOGLE_API_KEY="..."              <span class="code-comment"># For Gemini</span>
+
+<span class="code-comment"># 4. Configure provider (in Claude Code)</span>
+/dp:providers
+
+<span class="code-comment"># 5. Restart Claude Code</span>
+<span class="code-comment"># Quit and reopen Claude Code to load the plugin</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <div style="color: var(--gray); font-size: 0.9rem;">
+                            Zero build steps required. Installs directly from marketplace.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Example Usage -->
+        <section id="examples">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Natural Language Examples</h3>
+                    <h2>Just describe what you want to see.</h2>
+                    <p style="max-width: 60ch;">Design Partner detects visual intent in natural conversation and automatically generates images.</p>
+                </div>
+
+                <div class="col-left">
+                    <div class="example-card">
+                        <div class="example-title">Visual Exploration</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block">Show me what this looks like as a mobile app</div>
+                        </div>
+                        <div class="example-desc">
+                            Automatically detects visual intent and generates mockups.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="example-card">
+                        <div class="example-title">Iterative Refinement</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block">Make it darker with more spacing</div>
+                        </div>
+                        <div class="example-desc">
+                            Refines previous visuals with natural language edits.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="example-card">
+                        <div class="example-title">Structured Sessions</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>dp:start Build a meditation timer</div>
+                        </div>
+                        <div class="example-desc">
+                            Starts guided design thinking with state tracking.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="example-card">
+                        <div class="example-title">Idea Generation</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>dp:ideas Give me 5 different approaches</div>
+                        </div>
+                        <div class="example-desc">
+                            Autonomous agent generates diverse perspectives.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cost Information -->
+        <section id="costs">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Cost Information</h3>
+                    <h2>Transparent pricing with budget controls.</h2>
+                    <p style="max-width: 60ch;">Design Partner tracks costs and enforces daily budgets. You control spending through provider selection and budget limits.</p>
+                </div>
+                <div class="col-full">
+                    <table class="cost-table">
+                        <thead>
+                            <tr>
+                                <th>Provider</th>
+                                <th>Model</th>
+                                <th>Quality</th>
+                                <th>Cost per Image</th>
+                                <th>Images per $5</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>OpenAI</td>
+                                <td>DALL-E 3</td>
+                                <td>Standard (1024x1024)</td>
+                                <td>$0.040</td>
+                                <td>125</td>
+                            </tr>
+                            <tr>
+                                <td>OpenAI</td>
+                                <td>DALL-E 3</td>
+                                <td>HD (1024x1024)</td>
+                                <td>$0.080</td>
+                                <td>62</td>
+                            </tr>
+                            <tr>
+                                <td>Google</td>
+                                <td>Gemini Imagen 3</td>
+                                <td>Standard (1024x1024)</td>
+                                <td>$0.040</td>
+                                <td>125</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: var(--light-gray); border-radius: 8px;">
+                        <p style="margin: 0; max-width: none;"><strong>Budget Controls:</strong> Set daily limits with <code>/dp:cost</code>. Default limit is $5/day. The plugin tracks spending and stops generation when you hit the limit.</p>
+                        <p style="margin: 0.75rem 0 0 0; font-size: 0.95rem; color: var(--gray);">Cost tracking resets daily at midnight UTC. View current spend with <code>/dp:cost</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>FAQ</h3>
+                    <h2>Common questions.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does natural language visual generation work?</div>
+                        <div class="faq-answer">
+                            <p>Design Partner uses a hook that detects visual intent phrases in your messages like "show me what this looks like", "visualize this", or "create a mockup".</p>
+                            <p>When detected, it automatically calls the <code>/dp:visualize</code> command with your context, generating an image through your configured provider (DALL-E 3 or Gemini).</p>
+                            <p>You can also explicitly use <code>/dp:visualize [description]</code> for full control over the generation.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Which image provider should I use?</div>
+                        <div class="faq-answer">
+                            <p><strong>DALL-E 3 (OpenAI):</strong> Better at understanding complex descriptions, especially UI/UX mockups and product concepts. More artistic interpretation. HD quality available.</p>
+                            <p><strong>Gemini Imagen (Google):</strong> Faster generation, good for quick iterations. Strong at photorealistic images and natural scenes.</p>
+                            <p>Both cost $0.040 per standard quality image. Try both and see which fits your workflow. You can switch providers anytime with <code>/dp:providers</code>.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does session state work?</div>
+                        <div class="faq-answer">
+                            <p>Design Partner saves session state to <code>.claude/dp.local.md</code> in your project. This includes your design challenge, constraints, ideas explored, artifacts generated, and cost tracking.</p>
+                            <p>When you restart Claude Code, the SessionStart hook detects the existing session and offers to resume where you left off.</p>
+                            <p>All generated images and specs are saved to <code>artifacts/</code> and automatically tracked in the state file.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What's the idea generator agent?</div>
+                        <div class="faq-answer">
+                            <p>The idea-generator is an autonomous agent that creates 5 diverse idea directions from different perspectives when you're stuck or want alternatives.</p>
+                            <p>Each idea challenges a different core assumption and includes a description, risk assessment, and explanation of what makes it unique.</p>
+                            <p>Use <code>/dp:ideas</code> to invoke it, or just say "give me more options" during a session.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can I use this without API keys?</div>
+                        <div class="faq-answer">
+                            <p>You can use all design thinking features (ideation, critique, synthesis) without API keys. However, visual generation requires either an OpenAI API key (for DALL-E 3) or Google Cloud API key (for Gemini).</p>
+                            <p>If you try to generate visuals without a configured provider, Design Partner will guide you through setup with <code>/dp:providers</code>.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How do I refine generated images?</div>
+                        <div class="faq-answer">
+                            <p>Use <code>/dp:refine [changes]</code> to iterate on the last generated image. For example: <code>/dp:refine make it darker with more spacing</code>.</p>
+                            <p>The plugin maintains context from the previous generation and applies your refinements, creating a new image while preserving the original.</p>
+                            <p>All versions are saved to <code>artifacts/images/</code> with timestamps for comparison.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What happens when I hit my daily budget?</div>
+                        <div class="faq-answer">
+                            <p>Design Partner tracks your spending in real-time. When you hit your daily limit (default $5), the plugin blocks new image generation and shows your current spend.</p>
+                            <p>You can check remaining budget anytime with <code>/dp:cost</code> or adjust your limit in the settings.</p>
+                            <p>The budget resets daily at midnight UTC. This prevents unexpected API bills while exploring design ideas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner" style="text-decoration: none;">GitHub Repository ↗</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyInstall(btn) {
+            const code = document.getElementById('install-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
+        function toggleDetails(el) {
+            const details = el.parentElement.nextElementSibling;
+            details.classList.toggle('open');
+            el.textContent = details.classList.contains('open') ? 'Show less' : 'Learn more';
+        }
+    </script>
+</body>
+</html>
