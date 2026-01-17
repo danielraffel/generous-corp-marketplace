@@ -113,7 +113,73 @@ const prompt = buildPrompt({
 //  product photography."
 ```
 
-### 5. Check Budget
+### 5. Show Prompt and Offer Copy Option
+
+**IMPORTANT: Before spending money on generation, show the prompt and offer to copy it.**
+
+```
+Enhanced prompt ready:
+
+"A clean, minimalist mobile meditation app interface with a chat-like
+conversation design. The screen shows a gentle conversation between a user
+and an AI meditation guide. At the top, the guide asks 'How are you feeling
+right now?' in soft, calming typography..."
+
+[Full prompt shown]
+
+Options:
+A) Copy prompt to clipboard (paste into ChatGPT/Claude/etc for free)
+B) Generate with DALL-E 3 ($0.04)
+C) Generate with Gemini ($0.02)
+D) Cancel
+```
+
+Use AskUserQuestion:
+```json
+{
+  "questions": [
+    {
+      "question": "Generate now or copy prompt for free use elsewhere?",
+      "header": "Action",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Copy prompt only (free)",
+          "description": "Copy to clipboard - paste into ChatGPT, Claude, etc"
+        },
+        {
+          "label": "Generate with DALL-E 3 ($0.04)",
+          "description": "Best quality, photorealistic"
+        },
+        {
+          "label": "Generate with Gemini ($0.02)",
+          "description": "Good quality, lower cost"
+        }
+      ]
+    }
+  ]
+}
+```
+
+If user selects "Copy prompt only":
+```bash
+# Copy to clipboard (macOS)
+echo "${enhancedPrompt}" | pbcopy
+
+# Show confirmation
+echo "Prompt copied to clipboard!"
+echo ""
+echo "You can now paste this into:"
+echo "- ChatGPT (GPT-4 with DALL-E)"
+echo "- Claude.ai (with computer use)"
+echo "- Midjourney Discord"
+echo "- Any other AI image generator"
+echo ""
+echo "To generate with Design Partner later, run /dp:visualize again"
+exit 0
+```
+
+### 6. Check Budget (if generating)
 
 ```javascript
 const estimatedCost = provider === 'openai' ? 0.04 : 0.02;
@@ -126,7 +192,7 @@ if (currentSpend + estimatedCost > dailyBudget) {
 }
 ```
 
-### 6. Generate Image
+### 7. Generate Image (if not copy-only)
 
 ```bash
 # Call image generator
@@ -135,31 +201,47 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/image-generator.js \
   "${provider}"
 ```
 
-### 7. Download and Save
+### 8. Determine Output Path and Download
 
 ```bash
+# Get configured output path (git repo, downloads, custom, or plugin cache)
+output_config=$(node ${CLAUDE_PLUGIN_ROOT}/scripts/configure-output.js \
+  "${PWD}/.claude/dp.local.md" \
+  "${CLAUDE_PLUGIN_ROOT}")
+
+# Extract paths from JSON
+images_dir=$(echo "$output_config" | jq -r '.imagesDir')
+gallery_path=$(echo "$output_config" | jq -r '.galleryPath')
+output_path=$(echo "$output_config" | jq -r '.outputPath')
+
 # Create unique filename
-img_id="img-$(date +%s)"
+img_id="img-$(printf '%03d' $(($(ls -1 "$images_dir" 2>/dev/null | wc -l) + 1)))"
 filename="${img_id}-${idea_name}.png"
 
 # Download (DALL-E) or save base64 (Gemini)
-curl -o "${CLAUDE_PLUGIN_ROOT}/artifacts/images/${filename}" "${imageUrl}"
+curl -o "${images_dir}/${filename}" "${imageUrl}"
 ```
 
-### 8. Update State
+### 9. Update State
 
 Add to `.claude/dp.local.md`:
 
 ```yaml
+# Save output path config
+output_path_preference: "downloads"  # or "git-repo", "plugin-cache", or custom path
+session_id: "a3f8c2"
+output_path: "${output_path}"
+
 generated_images:
   - id: "img-001"
     idea_id: "idea-001"
+    idea_name: "Gamified Timer"
     prompt: "Original prompt text"
     revised_prompt: "DALL-E revised version"
     provider: "openai"
     size: "1024x1024"
     quality: "standard"
-    file_path: "artifacts/images/img-001-gamified-timer.png"
+    file_path: "${images_dir}/${filename}"  # Full path for gallery
     url: "https://..."
     cost_usd: 0.04
     generated_at: "2026-01-16T14:35:00Z"
@@ -177,7 +259,26 @@ image_generation:
       last_used: "2026-01-16T14:35:00Z"
 ```
 
-### 9. Display Result
+### 10. Open Image and Generate Gallery
+
+```bash
+# Get the full path to the saved image
+full_path="${images_dir}/${filename}"
+
+# Open the image in default viewer (macOS)
+open "${full_path}"
+
+# Generate HTML gallery using the configured output path
+cd "${CLAUDE_PLUGIN_ROOT}"
+node scripts/generate-gallery.js \
+  "${PWD}/.claude/dp.local.md" \
+  "${gallery_path}"
+
+# Open gallery in browser
+open "${gallery_path}"
+```
+
+### 11. Display Result
 
 ```
 Image generated successfully!
@@ -185,19 +286,24 @@ Image generated successfully!
 Details:
 - Provider: DALL-E 3 (OpenAI)
 - Cost: $0.04
-- Time: 12.3 seconds
+- Generation time: 12.3 seconds
 - Size: 1024x1024
 
-Saved to: artifacts/images/img-001-gamified-timer.png
+Saved to: ${output_path}/images/img-001-gamified-timer.png
+
+The image has been opened in your default viewer.
+Gallery: ${gallery_path}
 
 Today's spend: $0.04 / $5.00 budget
 
 DALL-E revised your prompt to:
 "A clean, modern mobile app interface..."
 
-Actions:
-- /dp:refine img-001 - Create variations
-- /dp:visualize - Generate another style
+Next steps:
+- View all images in the gallery (already opened in browser)
+- Copy prompt from gallery to refine it
+- /dp:visualize - Generate another variation
+- /dp:providers configure-output - Change where images are saved
 ```
 
 ## Error Handling

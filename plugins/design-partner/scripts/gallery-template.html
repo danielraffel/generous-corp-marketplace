@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Partner - Generated Images</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #667eea;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            padding: 2rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .image-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: pointer;
+        }
+
+        .image-info {
+            padding: 1.5rem;
+        }
+
+        .image-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-meta {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-bottom: 0.75rem;
+        }
+
+        .image-meta span {
+            display: inline-block;
+            margin-right: 1rem;
+        }
+
+        .image-prompt {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #444;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #ddd;
+        }
+
+        .prompt-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            margin-bottom: 0.25rem;
+        }
+
+        .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        /* Modal for full-size image */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: #fff;
+            color: #000;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Design Partner Gallery</h1>
+            <p class="subtitle">Generated images from your design sessions</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Total Images</span>
+                    <span class="stat-value" id="total-images">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Total Cost</span>
+                    <span class="stat-value" id="total-cost">$0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Session</span>
+                    <span class="stat-value" id="session-name">—</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="gallery" class="gallery">
+            <!-- Images will be inserted here by JavaScript -->
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <h2>No images yet</h2>
+            <p>Generated images will appear here. Start a design session with <code>/dp:start</code> or generate images with <code>/dp:visualize</code></p>
+        </div>
+    </div>
+
+    <!-- Modal for full-size view -->
+    <div id="modal" class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img id="modal-image" src="" alt="">
+    </div>
+
+    <script>
+        // Image data will be injected here
+        const images = __IMAGES_DATA__;
+        const sessionData = __SESSION_DATA__;
+
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            const emptyState = document.getElementById('empty-state');
+
+            if (!images || images.length === 0) {
+                gallery.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            // Update stats
+            document.getElementById('total-images').textContent = images.length;
+            const totalCost = images.reduce((sum, img) => sum + (img.cost_usd || 0), 0);
+            document.getElementById('total-cost').textContent = `$${totalCost.toFixed(2)}`;
+            document.getElementById('session-name').textContent = sessionData?.project_name || 'Current Session';
+
+            // Render images (most recent first)
+            gallery.innerHTML = images.reverse().map(img => `
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="${img.file_path}" alt="${img.idea_name}" onclick="openModal('${img.file_path}')">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">${img.idea_name || img.id}</div>
+                        <div class="image-meta">
+                            <span>${img.provider === 'openai' ? 'DALL-E 3' : 'Gemini'}</span>
+                            <span>${img.size}</span>
+                            <span>$${img.cost_usd}</span>
+                            ${img.quality ? `<span>${img.quality}</span>` : ''}
+                        </div>
+                        <div class="image-prompt">
+                            <div class="prompt-label">${img.metadata?.image_type || 'Prompt'}</div>
+                            ${img.prompt.substring(0, 200)}${img.prompt.length > 200 ? '...' : ''}
+                        </div>
+                        <div class="actions">
+                            <button class="btn" onclick="openInFinder('${img.full_path || img.file_path}')">Show in Finder</button>
+                            <button class="btn btn-secondary" onclick="copyPrompt(\`${img.prompt.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">Copy Prompt</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(imagePath) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modal-image');
+            modalImage.src = imagePath;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function openInFinder(path) {
+            // This will work when opened as file:// URL on macOS
+            // The command will be: open -R /path/to/file
+            alert('File path: ' + path + '\n\nOn macOS, use: open -R "' + path + '"');
+        }
+
+        function copyPath(path) {
+            navigator.clipboard.writeText(path).then(() => {
+                alert('Path copied to clipboard!');
+            });
+        }
+
+        function copyPrompt(prompt) {
+            navigator.clipboard.writeText(prompt).then(() => {
+                alert('Prompt copied to clipboard!');
+            });
+        }
+
+        // Close modal on click outside image
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Render on load
+        renderGallery();
+    </script>
+</body>
+</html>

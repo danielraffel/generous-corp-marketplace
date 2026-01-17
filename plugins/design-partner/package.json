@@ -20,9 +20,10 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "node-fetch": "^3.3.2"
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.1.0"
   },
-  "devDependencies": {},
   "engines": {
     "node": ">=18.0.0"
   }

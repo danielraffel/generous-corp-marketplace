@@ -9,11 +9,13 @@ Design Partner brings structured design thinking methodology to your development
 ### Key Features
 
 - **Natural Language Visual Generation**: Just say "show me what this looks like" and get instant mockups
+- **Prompt Copy Option**: Copy enhanced prompts to use for free in ChatGPT, Claude, or other AI tools
+- **Interactive Gallery**: Beautiful web gallery with all generated images, metadata, and prompt copying
+- **Configurable Output Paths**: Save images to Downloads (default), git repo, custom location, or plugin cache
 - **Guided Design Thinking**: Structured sessions with state persistence across conversations
 - **Autonomous Idea Generation**: AI agent generates 5 diverse idea directions from different perspectives
 - **Multi-Provider Support**: Choose between DALL-E 3 (OpenAI) or Gemini Imagen (Google)
 - **Cost Tracking**: Built-in budget limits and spending transparency
-- **Automatic Artifact Management**: All visuals and specs saved and tracked automatically
 - **Session Persistence**: Resume design sessions exactly where you left off
 
 ## Prerequisites
@@ -65,7 +67,7 @@ In Claude Code:
 
 Follow the prompts to:
 - Select your preferred provider (OpenAI or Gemini)
-- Enable/disable automatic visual generation
+- Configure where images are saved (Downloads, git repo, custom path)
 - Set your daily budget limit (default: $5)
 
 ### 5. Restart Claude Code
@@ -100,6 +102,12 @@ For full control:
 daily streak counter, and celebratory animations.
 Modern design with soft colors.
 ```
+
+The plugin will:
+1. Show you the enhanced prompt
+2. Offer to copy it (for free use in ChatGPT, etc.) or generate ($0.04)
+3. Generate and open the image automatically
+4. Open an interactive gallery in your browser with all images
 
 ### Refine Generated Visuals
 
@@ -136,11 +144,12 @@ View your spending and remaining budget:
 | Command | Description |
 |---------|-------------|
 | `/dp:start [challenge]` | Start a new design thinking session with guided workflow |
-| `/dp:visualize [description]` | Generate an image based on description |
+| `/dp:visualize [description]` | Generate an image or copy prompt for free use elsewhere |
 | `/dp:refine [changes]` | Refine the last generated image with specific changes |
 | `/dp:ideas` | Generate 5 diverse idea directions (uses idea-generator agent) |
 | `/dp:brief` | Show summary of current design session |
-| `/dp:providers` | Configure image generation provider and settings |
+| `/dp:providers` | Configure provider, output path, and settings |
+| `/dp:providers configure-output` | Change where images are saved |
 | `/dp:cost` | View current spending and budget limits |
 | `/dp:mode [explore\|define\|prototype]` | Switch between design thinking phases |
 
@@ -211,17 +220,27 @@ The plugin automatically triggers visual generation when you use:
 
 ## File Structure
 
-```
-.claude/
-  dp.local.md              # Session state (auto-managed)
+Generated images are saved to a configurable location (default: Downloads folder):
 
-artifacts/
-  images/                  # Generated visuals
-    design-1.png
-    design-2.png
-  specs/                   # Design specifications
-  mockups/                 # UI mockups
 ```
+# Default: Downloads folder
+~/Downloads/design-partner-[session-id]/
+  images/                  # Generated visuals
+    img-001-concept.png
+    img-002-mockup.png
+  gallery.html            # Interactive gallery viewer
+
+# If git repo option selected:
+your-project/
+  .claude/
+    design-partner/
+      artifacts/
+        images/            # Generated visuals
+        gallery.html      # Interactive gallery viewer
+    dp.local.md           # Session state (auto-managed)
+```
+
+Configure output location with `/dp:providers configure-output`
 
 ### Session State File
 
@@ -231,9 +250,20 @@ The `.claude/dp.local.md` file tracks:
 - Ideas explored
 - Generated artifacts (paths and descriptions)
 - Cost tracking (daily spend)
-- Session phase (explore/define/prototype)
+- Output path configuration
+- Session ID and preferences
 
 **This file is auto-managed** - you don't need to edit it manually.
+
+### Gallery Viewer
+
+After generating images, an HTML gallery opens automatically showing:
+- All generated images with thumbnails
+- Image metadata (provider, cost, size, quality)
+- Full prompts used for generation
+- "Copy Prompt" buttons for reuse
+- "Show in Finder" to locate files
+- Total cost and session statistics
 
 ## Agents
 
@@ -271,7 +301,7 @@ Design Partner uses three automatic hooks:
 ### 2. Visual Intent Detection (UserPromptSubmit)
 - Monitors messages for visual intent phrases
 - Automatically triggers `/dp:visualize` when detected
-- Only active when image generation is enabled
+- Offers prompt copy or generation options
 
 ### 3. Auto-Save Artifacts (PostToolUse)
 - Tracks new files created in `artifacts/` directories
@@ -297,16 +327,24 @@ Settings are stored in `.claude/dp.local.md` frontmatter:
 
 ```yaml
 ---
+# Image generation
 image_provider: openai           # openai or google
-image_generation_enabled: true   # auto-generation on/off
 daily_budget: 5.00              # USD limit per day
 current_spend: 0.00             # today's spend (auto-tracked)
-last_reset: 2026-01-16          # last budget reset (auto)
+
+# Output paths
+output_path_preference: downloads # downloads, git-repo, plugin-cache, or custom path
+session_id: a3f8c2              # unique session identifier
+output_path: ~/Downloads/design-partner-a3f8c2/
+
+# Session state
 session_phase: explore          # explore|define|prototype
 ---
 ```
 
-Edit with `/dp:providers` or manually in the file.
+Configure with:
+- `/dp:providers` - Change provider, budget
+- `/dp:providers configure-output` - Change where images are saved
 
 ## Development & Contributing
 
@@ -385,7 +423,7 @@ Start a new session:
 ## FAQ
 
 **Q: Can I use this without API keys?**
-A: Yes, for design thinking features (ideation, critique, synthesis). Visual generation requires OpenAI or Google API keys.
+A: Yes! You can use the prompt copy feature to get enhanced prompts for free use in ChatGPT, Claude.ai, or other AI tools. API keys are only needed if you want to generate images directly within the plugin.
 
 **Q: Which provider is better?**
 A: DALL-E 3 excels at UI/UX mockups, Gemini is faster for iterations. Try both!
@@ -394,13 +432,19 @@ A: DALL-E 3 excels at UI/UX mockups, Gemini is faster for iterations. Try both!
 A: Run `/dp:providers` and select a different provider. Works instantly.
 
 **Q: Where are generated images saved?**
-A: All artifacts are saved to `artifacts/images/` with timestamps and tracked in `.claude/dp.local.md`.
+A: By default, images are saved to `~/Downloads/design-partner-[session-id]/`. You can configure this with `/dp:providers configure-output` to use your git repo, a custom path, or the plugin cache.
 
 **Q: Can I resume sessions after closing Claude Code?**
 A: Yes! The SessionStart hook detects existing sessions and offers to resume automatically.
 
 **Q: How accurate is cost tracking?**
 A: Precise to the penny. Tracks every generation in real-time and enforces budget limits before API calls.
+
+**Q: Can I copy prompts without generating images?**
+A: Yes! When you run `/dp:visualize`, you'll see the enhanced prompt and can choose to copy it to your clipboard for free use in ChatGPT, Claude.ai, Midjourney, or any other AI tool.
+
+**Q: How do I view all my generated images?**
+A: An interactive HTML gallery opens automatically after each generation. It shows all images with metadata, costs, and prompts. You can also open it manually from your configured output folder (default: `~/Downloads/design-partner-[session-id]/gallery.html`).
 
 ## License
 

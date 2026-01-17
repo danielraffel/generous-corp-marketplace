@@ -286,6 +286,85 @@ Can also be used to adjust budget settings:
 }
 ```
 
+## Output Path Configuration
+
+**Usage:** `/dp:providers configure-output` or first-time setup prompt
+
+**Process:**
+
+1. **Detect current environment**
+   ```bash
+   node ${CLAUDE_PLUGIN_ROOT}/scripts/configure-output.js "${PWD}/.claude/dp.local.md" "${CLAUDE_PLUGIN_ROOT}"
+   ```
+
+2. **Show current configuration and options**
+   ```
+   Where should generated images be saved?
+
+   Current: Downloads folder (default)
+   Location: ~/Downloads/design-partner-a3f8c2/
+   ```
+
+3. **Use AskUserQuestion to configure**
+   ```json
+   {
+     "questions": [
+       {
+         "question": "Where should generated images be saved?",
+         "header": "Output Path",
+         "multiSelect": false,
+         "options": [
+           {
+             "label": "Downloads folder (Default)",
+             "description": "Easy to find: ~/Downloads/design-partner-[session]/"
+           },
+           {
+             "label": "Git repo (.claude/design-partner/)",
+             "description": "Save in your project repo (gitignored automatically)"
+           },
+           {
+             "label": "Custom path",
+             "description": "Specify your own location"
+           },
+           {
+             "label": "Plugin cache (hidden)",
+             "description": "~/.claude/plugins/cache/... (harder to discover)"
+           }
+         ]
+       }
+     ]
+   }
+   ```
+
+4. **If custom path selected, ask for path**
+   ```
+   Enter custom path (use ~ for home directory):
+   Examples:
+   - ~/Documents/design-partner
+   - ~/Desktop/mockups
+   - /Users/you/projects/designs
+   ```
+
+5. **Update .claude/dp.local.md**
+   ```yaml
+   output_path_preference: "git-repo" # or "downloads", "plugin-cache", or "/custom/path"
+   session_id: "a3f8c2"
+   output_path: "/Users/you/project/.claude/design-partner/artifacts"
+   ```
+
+6. **Create directories and show confirmation**
+   ```
+   Output path configured!
+
+   Images will be saved to:
+   /Users/you/Downloads/design-partner-a3f8c2/images/
+
+   Gallery will be at:
+   /Users/you/Downloads/design-partner-a3f8c2/gallery.html
+
+   You can change this anytime with /dp:providers configure-output
+   ```
+
 ## Example Usage
 
 ```bash
@@ -294,6 +373,9 @@ Can also be used to adjust budget settings:
 
 # Setup new provider
 /dp:providers setup
+
+# Configure where images are saved
+/dp:providers configure-output
 
 # Test all configured providers
 /dp:providers test

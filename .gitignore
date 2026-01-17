@@ -1,0 +1,21 @@
+# OS files
+.DS_Store
+
+# Claude Code plugin state files (project-specific)
+.claude/*.local.md
+.claude/dp.local.md
+
+# Design Partner output (if saved to git repo)
+.claude/design-partner/
+
+# Node modules
+plugins/*/node_modules/
+plugins/*/package-lock.json
+
+# Test artifacts
+plugins/*/test-output/
+plugins/*/artifacts/
+
+# Environment files with API keys
+plugins/*/.env
+plugins/*/.env.local
