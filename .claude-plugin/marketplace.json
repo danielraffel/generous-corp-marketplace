@@ -47,6 +47,19 @@
       "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/prompt-repeater",
       "license": "MIT",
       "keywords": ["optimization", "performance", "prompting", "research", "google"]
+    },
+    {
+      "name": "design-partner",
+      "source": "./plugins/design-partner",
+      "description": "AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes through natural conversation",
+      "version": "0.1.0",
+      "author": {
+        "name": "Daniel Raffel"
+      },
+      "homepage": "https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/",
+      "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner",
+      "license": "MIT",
+      "keywords": ["design", "visualization", "prototyping", "dall-e", "gemini", "image-generation"]
     }
   ]
 }
