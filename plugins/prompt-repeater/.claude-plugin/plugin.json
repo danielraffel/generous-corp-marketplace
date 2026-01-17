@@ -11,6 +11,5 @@
   "license": "MIT",
   "keywords": ["optimization", "performance", "prompting", "research", "google"],
   "commands": "./commands/",
-  "skills": "./skills/",
-  "hooks": "./hooks/"
+  "skills": "./skills/"
 }
