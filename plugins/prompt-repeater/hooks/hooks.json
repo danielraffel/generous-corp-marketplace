@@ -1,0 +1,17 @@
+{
+  "description": "Automatic prompt repetition optimization based on user settings",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/apply-repetition.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

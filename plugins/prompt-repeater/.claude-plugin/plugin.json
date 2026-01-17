@@ -1,0 +1,10 @@
+{
+  "name": "prompt-repeater",
+  "version": "0.1.0",
+  "description": "Leverage Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks",
+  "author": {
+    "name": "Daniel Raffel",
+    "email": "daniel@raffel.com"
+  },
+  "keywords": ["optimization", "performance", "prompting", "research", "google"]
+}

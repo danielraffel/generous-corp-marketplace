@@ -34,6 +34,19 @@
       "repository": "https://github.com/danielraffel/chainer",
       "license": "MIT",
       "keywords": ["orchestration", "workflow", "automation", "plugin-orchestration"]
+    },
+    {
+      "name": "prompt-repeater",
+      "source": "./plugins/prompt-repeater",
+      "description": "Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks",
+      "version": "0.1.0",
+      "author": {
+        "name": "Daniel Raffel"
+      },
+      "homepage": "https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/",
+      "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/prompt-repeater",
+      "license": "MIT",
+      "keywords": ["optimization", "performance", "prompting", "research", "google"]
     }
   ]
 }

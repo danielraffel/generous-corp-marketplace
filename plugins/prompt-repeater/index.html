@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Repeater | Plugin for Claude Code</title>
+    <meta name="description" content="A Claude Code plugin that applies Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks.">
+
+    <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
+    <meta property="og:title" content="Prompt Repeater">
+    <meta property="og:description" content="Improve LLM accuracy by 76% on list tasks using Google Research's prompt repetition technique.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Prompt Repeater">
+    <meta name="twitter:description" content="Improve LLM accuracy by 76% on list tasks using Google Research's prompt repetition technique.">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #667eea;
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: #333;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        /* Components */
+        .plugin-name {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .code-comment { color: #6a6a6a; }
+        .code-command { color: #fff; font-weight: bold; }
+        .code-prompt { color: var(--accent); user-select: none; }
+
+        .btn {
+            display: inline-block;
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-top: var(--spacing-unit);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        /* Copy button */
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #444; color: #fff; }
+        .copy-btn.copied { background: var(--accent); color: #fff; }
+
+        /* Stats cards */
+        .stat-card {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--gray);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after {
+            content: '−';
+        }
+        .faq-answer {
+            display: none;
+            padding-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #444;
+        }
+        .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+        .faq-answer code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+        .faq-item.open .faq-answer { display: block; }
+
+        /* Highlight box */
+        .highlight-box {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+        .highlight-box p {
+            margin: 0;
+            max-width: none;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+
+        <!-- Hero Section -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <span class="plugin-name">Prompt Repeater</span>
+            <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
+            <nav class="nav-links">
+                <a href="#how-it-works">How It Works</a>
+                <a href="#installation">Installation</a>
+                <a href="#usage">Usage</a>
+                <a href="#research">Research</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <h1>76% better<br>on list tasks.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p><b>Prompt Repeater</b> applies Google Research's prompt repetition technique to improve Claude's accuracy on non-reasoning tasks.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># Turn on automatic mode</span>
+auto_apply: true
+
+<span class="code-comment"># Every prompt you enter gets repeated</span>
+<span class="code-comment"># Better accuracy, zero extra steps</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Stats -->
+        <section style="padding-top: calc(var(--spacing-unit) * 2);">
+            <div class="grid">
+                <div class="col-left">
+                    <div class="stat-card">
+                        <div class="stat-number">47-0</div>
+                        <div class="stat-label">Win-Loss Record</div>
+                    </div>
+                </div>
+                <div class="col-right" style="grid-column: 5 / 9;">
+                    <div class="stat-card">
+                        <div class="stat-number">21→97%</div>
+                        <div class="stat-label">List Task Accuracy</div>
+                    </div>
+                </div>
+                <div style="grid-column: 10 / 13;">
+                    <div class="stat-card">
+                        <div class="stat-number">0ms</div>
+                        <div class="stat-label">Latency Penalty</div>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--gray); font-size: 0.9rem; max-width: none;">
+                Source: <a href="https://arxiv.org/abs/2512.14982">Google Research, December 2024</a>
+            </p>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>How It Works</h3>
+                    <h2>Simple technique,<br>proven results.</h2>
+                </div>
+                <div class="col-right">
+                    <p>LLMs process tokens left-to-right where past tokens can't attend to future tokens. This means token order affects accuracy.</p>
+                    <p><strong>Prompt repetition</strong> duplicates your input so each token can attend to every other token, fixing positional limitations in the attention mechanism.</p>
+                    <div class="code-block" style="margin-top: 1.5rem;">Your prompt: <span class="code-command">"What's the 5th item?"</span>
+
+Becomes: <span class="code-command">"What's the 5th item?What's the 5th item?"</span>
+
+<span class="code-comment"># Claude processes the repeated version</span>
+<span class="code-comment"># You get better accuracy automatically</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Ready in seconds.</h2>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a>. Works immediately after install.</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                        <div class="code-block" id="install-code">
+<span class="code-comment"># 1. Add the marketplace (in Claude Code)</span>
+/plugin marketplace add danielraffel/generous-corp-marketplace
+
+<span class="code-comment"># 2. Install Prompt Repeater</span>
+/plugin install prompt-repeater@generous-corp-marketplace
+
+<span class="code-comment"># 3. Restart Claude Code</span>
+<span class="code-comment"># Quit and reopen to load the plugin</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/prompt-repeater" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <div style="color: var(--gray); font-size: 0.9rem;">
+                            Zero dependencies. Pure prompt optimization.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Usage -->
+        <section id="usage">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Usage</h3>
+                    <h2>Two ways to use it.</h2>
+                </div>
+
+                <div class="col-left">
+                    <h4 style="font-size: 1.3rem; margin-bottom: 1rem; font-weight: 600;">Automatic Mode (Recommended)</h4>
+                    <p>Turn it on once, every prompt gets optimized automatically.</p>
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># 1. Copy settings template</span>
+cp .claude/prompt-repeater.local.md.example \
+   .claude/prompt-repeater.local.md
+
+<span class="code-comment"># 2. Edit file, set auto_apply: true</span>
+
+<span class="code-comment"># 3. Restart Claude Code</span>
+
+<span class="code-comment"># Done! All prompts now optimized</span></div>
+                    </div>
+                    <div class="highlight-box">
+                        <p style="font-size: 0.95rem;"><strong>How it works:</strong> You type normally. A hook intercepts your prompt before Claude sees it, repeats it automatically, and you get improved accuracy without any extra steps.</p>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <h4 style="font-size: 1.3rem; margin-bottom: 1rem; font-weight: 600;">Manual Commands</h4>
+                    <p>Apply repetition selectively when you need it.</p>
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># Simple repetition (default)</span>
+<span class="code-prompt">/</span>repeat-last
+
+<span class="code-comment"># Verbose framing</span>
+<span class="code-prompt">/</span>repeat-verbose
+
+<span class="code-comment"># Triple for max accuracy</span>
+<span class="code-prompt">/</span>repeat-3x</div>
+                    </div>
+                    <p style="margin-top: 1.5rem; font-size: 0.95rem; color: var(--gray);">Use commands when you want control over when repetition applies. Great for experimenting to understand when it helps.</p>
+                </div>
+
+                <div class="col-full" style="margin-top: 2rem;">
+                    <h4 style="font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600;">Configuration Options</h4>
+                    <div class="code-block"><span class="code-comment"># .claude/prompt-repeater.local.md</span>
+---
+auto_apply: true          <span class="code-comment"># Turn automatic mode on/off</span>
+default_mode: simple      <span class="code-comment"># simple | verbose | triple</span>
+notify: true              <span class="code-comment"># Show when repetition applied</span>
+---</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Background -->
+        <section id="research">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>Research Background</h3>
+                    <h2>Backed by<br>Google Research.</h2>
+                </div>
+                <div class="col-right">
+                    <p><strong>Paper:</strong> "Prompt Repetition Improves Non-Reasoning LLMs" by Leviathan, Kalman, and Matias (December 2024)</p>
+                    <p><strong>Tested on:</strong> Gemini, GPT-4o, Claude, DeepSeek across 7 benchmarks</p>
+                    <p><strong>Key findings:</strong></p>
+                    <ul style="list-style: none; padding: 0; margin: 1rem 0;">
+                        <li style="margin-bottom: 0.75rem;">✓ 47 wins, 0 losses on non-reasoning tasks</li>
+                        <li style="margin-bottom: 0.75rem;">✓ 21.33% → 97.33% accuracy on list indexing</li>
+                        <li style="margin-bottom: 0.75rem;">✓ No latency penalty (only affects prefill)</li>
+                        <li style="margin-bottom: 0.75rem;">✓ Output format unchanged</li>
+                        <li style="margin-bottom: 0.75rem;">✓ Safe even with reasoning tasks</li>
+                    </ul>
+                    <a href="https://arxiv.org/abs/2512.14982" style="color: var(--accent);">Read the full paper &rarr;</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>FAQ</h3>
+                    <h2>Common questions.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does auto_apply work?</div>
+                        <div class="faq-answer">
+                            <p>When <code>auto_apply: true</code> is set in your settings file, a hook intercepts every prompt you type before Claude processes it. The hook repeats your prompt based on your configured mode (simple, verbose, or triple), then Claude sees the repeated version.</p>
+                            <p><strong>Example:</strong> You type "What's the 5th item?" → Hook transforms it to "What's the 5th item?What's the 5th item?" → Claude processes the repeated version → You get improved accuracy.</p>
+                            <p>The repetition is completely transparent - you just type normally and get better results automatically.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How do I turn it on?</div>
+                        <div class="faq-answer">
+                            <p>1. Copy the example settings file:</p>
+                            <p><code>cp .claude/prompt-repeater.local.md.example .claude/prompt-repeater.local.md</code></p>
+                            <p>2. Edit the file and change <code>auto_apply: false</code> to <code>auto_apply: true</code></p>
+                            <p>3. Restart Claude Code</p>
+                            <p>Now every prompt you enter will automatically be repeated. To turn it off, change back to <code>auto_apply: false</code> and restart.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">When should I use this?</div>
+                        <div class="faq-answer">
+                            <p><strong>Best for non-reasoning tasks:</strong></p>
+                            <p>• Multiple choice questions<br>
+                            • List navigation (find Nth item, find between items)<br>
+                            • Simple fact retrieval<br>
+                            • Pattern matching</p>
+                            <p><strong>Less effective for:</strong></p>
+                            <p>• Multi-step planning<br>
+                            • Complex debugging<br>
+                            • Tasks already using chain-of-thought</p>
+                            <p>The good news: It's safe even for reasoning tasks (neutral to slightly positive), so you can leave automatic mode on and it won't hurt performance.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What are the different modes?</div>
+                        <div class="faq-answer">
+                            <p><strong>Simple</strong> (recommended): <code>&lt;QUERY&gt;&lt;QUERY&gt;</code> - Default mode, works well for most tasks</p>
+                            <p><strong>Verbose</strong>: <code>&lt;QUERY&gt; Let me repeat that: &lt;QUERY&gt;</code> - Sometimes marginally better with framing text</p>
+                            <p><strong>Triple</strong>: Three repetitions - Maximum accuracy for list navigation tasks, but longer input</p>
+                            <p>Start with simple mode. Research shows all three perform similarly on most tasks, with triple providing the best results on specific list-heavy tasks.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Does it slow things down?</div>
+                        <div class="faq-answer">
+                            <p><strong>No.</strong> Prompt repetition only affects the parallelizable prefill stage. Research shows no latency penalty for most models and prompt lengths.</p>
+                            <p>The only exception: Claude models with very long prompts (>2000 characters) or triple repetition may see slight prefill latency increase. But generation speed is completely unaffected.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can I use manual commands instead of automatic mode?</div>
+                        <div class="faq-answer">
+                            <p>Yes! Keep <code>auto_apply: false</code> in your settings (or don't create a settings file at all). Then use these commands:</p>
+                            <p><code>/repeat-last</code> - Apply simple repetition to your last prompt<br>
+                            <code>/repeat-verbose</code> - Apply verbose repetition<br>
+                            <code>/repeat-3x</code> - Apply triple repetition</p>
+                            <p>This gives you full control over when repetition applies. Great for experimenting to understand when it helps.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Why does this work?</div>
+                        <div class="faq-answer">
+                            <p>LLMs are causal language models where past tokens can't attend to future tokens. This means the order of tokens affects prediction performance.</p>
+                            <p>For example, "<code>&lt;CONTEXT&gt; &lt;QUESTION&gt;</code>" performs differently from "<code>&lt;QUESTION&gt; &lt;CONTEXT&gt;</code>" because tokens at the beginning can't see tokens at the end.</p>
+                            <p>Prompt repetition solves this by duplicating the entire prompt, enabling each token to attend to every other token in at least one of the repetitions. This addresses positional limitations in the attention mechanism.</p>
+                            <p>See the <a href="https://arxiv.org/abs/2512.14982">Google Research paper</a> for the full technical explanation.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Is this tested and safe?</div>
+                        <div class="faq-answer">
+                            <p><strong>Yes.</strong> This plugin implements a technique from a peer-reviewed Google Research paper published in December 2024.</p>
+                            <p>The research tested prompt repetition on 7 major models (Gemini, GPT-4o, Claude, DeepSeek) across 7 benchmarks and found:</p>
+                            <p>• 47 wins, 0 losses on non-reasoning tasks<br>
+                            • Never performs worse than baseline<br>
+                            • Safe even with reasoning tasks (neutral to slightly positive)</p>
+                            <p>The plugin itself uses safe bash scripting, validates inputs, and doesn't modify any files or make network requests.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What's the catch?</div>
+                        <div class="faq-answer">
+                            <p><strong>None, really.</strong> Prompt repetition is a simple technique with proven benefits and no downsides.</p>
+                            <p>The only considerations:</p>
+                            <p>• Input length doubles (or triples with triple mode), so very long prompts may approach context limits<br>
+                            • Effectiveness varies by task type (best for non-reasoning, neutral for reasoning)<br>
+                            • Requires restart to change settings (hooks load at session start)</p>
+                            <p>But there's no performance penalty, no cost increase (beyond doubled input tokens), and never worse accuracy than baseline.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/prompt-repeater" style="text-decoration: none;">GitHub Repository ↗</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyInstall(btn) {
+            const code = document.getElementById('install-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
+        // Open FAQ if hash matches
+        if (window.location.hash) {
+            const target = document.querySelector(window.location.hash);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+---
+# Prompt Repeater Configuration
+#
+# Copy this file to .claude/prompt-repeater.local.md to activate automatic repetition
+# Or create your own .claude/prompt-repeater.local.md with these settings
+
+# Auto-apply repetition to all prompts (default: false)
+# Set to true to automatically repeat every prompt you enter
+auto_apply: false
+
+# Repetition mode (default: simple)
+# Options:
+#   simple  - <QUERY><QUERY> (recommended)
+#   verbose - <QUERY> Let me repeat that: <QUERY>
+#   triple  - Three repetitions for maximum accuracy
+default_mode: simple
+
+# Show notification when repetition is applied (default: true)
+# Set to false for silent operation
+notify: true
+---
+
+# Prompt Repeater Settings
+
+This file configures automatic prompt repetition for non-reasoning tasks.
+
+## Quick Start
+
+To enable automatic repetition:
+
+1. Copy this file to `.claude/prompt-repeater.local.md`
+2. Change `auto_apply: false` to `auto_apply: true`
+3. Restart Claude Code
+
+## Configuration Options
+
+### auto_apply
+
+Controls whether prompts are automatically repeated.
+
+- `false` (default): No automatic repetition. Use `/repeat-last`, `/repeat-verbose`, or `/repeat-3x` commands manually
+- `true`: Automatically apply repetition to every prompt based on `default_mode`
+
+**When to enable:**
+- You frequently work with non-reasoning tasks (lists, multiple choice)
+- You want maximum performance without manual commands
+- You understand when repetition helps vs. when it doesn't
+
+**When to keep disabled:**
+- You prefer manual control via commands
+- You work primarily with complex reasoning tasks
+- You want to selectively apply repetition
+
+### default_mode
+
+Choose which repetition variant to use when `auto_apply: true`.
+
+- **`simple`** (recommended): `<QUERY><QUERY>` - Best default, works well for most tasks
+- **`verbose`**: `<QUERY> Let me repeat that: <QUERY>` - Sometimes marginally better
+- **`triple`**: Three repetitions - Maximum accuracy for list navigation, but longer input
+
+**Recommendations:**
+- Start with `simple` for general use
+- Use `triple` if you frequently work with long lists or complex pattern matching
+- Use `verbose` if you prefer more natural framing
+
+### notify
+
+Controls whether you see a notification when repetition is applied.
+
+- `true` (default): Show "🔁 Auto-repetition applied (mode: simple)" message
+- `false`: Silent mode - repetition happens without notification
+
+**Recommendations:**
+- Keep `true` initially to understand when repetition is being applied
+- Switch to `false` once you're comfortable with automatic mode
+
+## Example Configurations
+
+### Conservative (Manual Control)
+
+```yaml
+---
+auto_apply: false
+default_mode: simple
+notify: true
+---
+```
+
+Use commands (`/repeat-last`, `/repeat-3x`) to manually apply repetition when needed.
+
+### Balanced (Auto Simple)
+
+```yaml
+---
+auto_apply: true
+default_mode: simple
+notify: true
+---
+```
+
+Automatically apply simple repetition to all prompts. Good for mixed workloads.
+
+### Aggressive (Auto Triple)
+
+```yaml
+---
+auto_apply: true
+default_mode: triple
+notify: false
+---
+```
+
+Maximum accuracy for list-heavy work. Silent operation for experienced users.
+
+### Silent Simple
+
+```yaml
+---
+auto_apply: true
+default_mode: simple
+notify: false
+---
+```
+
+Automatic repetition without notifications. Clean interface.
+
+## When Auto-Apply Helps
+
+Enable `auto_apply: true` when you frequently work with:
+
+- ✅ Multiple choice questions
+- ✅ List navigation (find Nth, find between items)
+- ✅ Simple queries and fact retrieval
+- ✅ Pattern matching tasks
+
+## When to Keep Manual
+
+Keep `auto_apply: false` and use commands when:
+
+- ⚠️ You work primarily with complex reasoning tasks
+- ⚠️ You want selective control over when repetition applies
+- ⚠️ You're experimenting to understand when it helps
+- ⚠️ Your prompts are often very long (context limits)
+
+## Toggling On/Off
+
+**To enable:**
+1. Set `auto_apply: true` in this file
+2. Restart Claude Code
+
+**To disable:**
+1. Set `auto_apply: false` in this file
+2. Restart Claude Code
+
+**Or delete the file entirely** to disable automatic repetition.
+
+## Research Background
+
+Based on Google Research paper "Prompt Repetition Improves Non-Reasoning LLMs":
+- 47 wins, 0 losses on benchmarks
+- No latency penalty
+- Especially effective for list tasks (21% → 97% accuracy)
+- Safe even with reasoning tasks (neutral to slightly positive)
+
+See the prompt-repetition-optimization skill for detailed guidance on when repetition helps.
+
+## Troubleshooting
+
+**Repetition not applying:**
+- Check that this file is named `.claude/prompt-repeater.local.md` (not `.example`)
+- Verify `auto_apply: true` is set
+- Restart Claude Code (hooks load at session start)
+
+**Want different modes for different tasks:**
+- Keep `auto_apply: false`
+- Use `/repeat-last`, `/repeat-verbose`, or `/repeat-3x` commands selectively
+
+**Repetition applying when you don't want it:**
+- Set `auto_apply: false` and restart Claude Code
+- Or delete this file entirely
