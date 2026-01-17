@@ -1,0 +1,17 @@
+{
+  "name": "design-partner",
+  "version": "0.1.0",
+  "description": "AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes through natural conversation",
+  "author": {
+    "name": "Daniel Raffel",
+    "email": "daniel@generouscorp.com"
+  },
+  "homepage": "https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/",
+  "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner",
+  "license": "MIT",
+  "keywords": ["design-thinking", "ideation", "prototyping", "visualization", "image-generation", "dall-e", "gemini", "product-design"],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/"
+}

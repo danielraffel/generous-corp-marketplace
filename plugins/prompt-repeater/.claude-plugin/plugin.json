@@ -1,10 +1,16 @@
 {
   "name": "prompt-repeater",
   "version": "0.1.0",
-  "description": "Leverage Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks",
+  "description": "Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks",
   "author": {
     "name": "Daniel Raffel",
-    "email": "daniel@raffel.com"
+    "email": "daniel@generouscorp.com"
   },
-  "keywords": ["optimization", "performance", "prompting", "research", "google"]
+  "homepage": "https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/",
+  "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/prompt-repeater",
+  "license": "MIT",
+  "keywords": ["optimization", "performance", "prompting", "research", "google"],
+  "commands": "./commands/",
+  "skills": "./skills/",
+  "hooks": "./hooks/"
 }
