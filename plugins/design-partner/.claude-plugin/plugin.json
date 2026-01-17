@@ -11,5 +11,7 @@
   "license": "MIT",
   "keywords": ["design-thinking", "ideation", "prototyping", "visualization", "image-generation", "dall-e", "gemini", "product-design"],
   "commands": "./commands/",
-  "skills": "./skills/"
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
 }
