@@ -259,15 +259,9 @@ image_generation:
       last_used: "2026-01-16T14:35:00Z"
 ```
 
-### 10. Open Image and Generate Gallery
+### 10. Generate Gallery and Open Browser
 
 ```bash
-# Get the full path to the saved image
-full_path="${images_dir}/${filename}"
-
-# Open the image in default viewer (macOS)
-open "${full_path}"
-
 # Generate HTML gallery using the configured output path
 cd "${CLAUDE_PLUGIN_ROOT}"
 node scripts/generate-gallery.js \
@@ -291,8 +285,10 @@ Details:
 
 Saved to: ${output_path}/images/img-001-gamified-timer.png
 
-The image has been opened in your default viewer.
-Gallery: ${gallery_path}
+Gallery opened in browser: ${gallery_path}
+
+To open the image file directly:
+  open "${output_path}/images/img-001-gamified-timer.png"
 
 Today's spend: $0.04 / $5.00 budget
 
