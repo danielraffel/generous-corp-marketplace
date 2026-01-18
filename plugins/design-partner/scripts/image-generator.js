@@ -198,22 +198,22 @@ async function generateWithGemini(prompt, size, quality = 'pro') {
 
   const data = await response.json();
 
-  // Extract image from inline_data format
+  // Extract image from inlineData format (camelCase, not snake_case!)
   const candidate = data.candidates?.[0];
   if (!candidate) {
     throw new Error('No candidates in response');
   }
 
   const imagePart = candidate.content?.parts?.find(
-    (part) => part.inline_data?.mime_type?.startsWith('image/')
+    (part) => part.inlineData?.mimeType?.startsWith('image/')
   );
 
-  if (!imagePart || !imagePart.inline_data?.data) {
+  if (!imagePart || !imagePart.inlineData?.data) {
     throw new Error('No image data in response');
   }
 
   // Extract base64 image data
-  const imageBase64 = imagePart.inline_data.data;
+  const imageBase64 = imagePart.inlineData.data;
 
   return {
     imageBase64,
