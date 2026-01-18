@@ -5,13 +5,39 @@
  * Detects and validates API keys from multiple sources
  */
 
-import { config } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/**
+ * Parse .env file manually (no dependencies needed)
+ */
+function parseEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return {};
+
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const env = {};
+
+  content.split('\n').forEach(line => {
+    line = line.trim();
+    // Skip comments and empty lines
+    if (!line || line.startsWith('#')) return;
+
+    const match = line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      let value = match[2].trim();
+      // Remove quotes if present
+      value = value.replace(/^["']|["']$/g, '');
+      env[key] = value;
+    }
+  });
+
+  return env;
+}
 
 /**
  * Detect API keys from multiple sources
@@ -30,37 +56,53 @@ export function detectApiKeys() {
   // 1. Check .env in plugin root
   const pluginEnv = path.join(__dirname, '..', '.env');
   if (fs.existsSync(pluginEnv)) {
-    config({ path: pluginEnv });
-    sources.push('.env (plugin root)');
+    const envVars = parseEnvFile(pluginEnv);
+    if (envVars.OPENAI_API_KEY) {
+      keys.openai = envVars.OPENAI_API_KEY;
+      sources.push('.env (plugin root)');
+    }
+    if (envVars.GEMINI_API_KEY) {
+      keys.gemini = envVars.GEMINI_API_KEY;
+      sources.push('.env (plugin root)');
+    }
+    if (envVars.GEMINI_PROJECT_ID) {
+      keys.geminiProjectId = envVars.GEMINI_PROJECT_ID;
+      sources.push('.env (plugin root)');
+    }
   }
 
   // 2. Check .env in project root (go up to plugins, then marketplace)
   const projectEnv = path.join(__dirname, '..', '..', '..', '.env');
   if (fs.existsSync(projectEnv)) {
-    config({ path: projectEnv });
-    sources.push('.env (project root)');
+    const envVars = parseEnvFile(projectEnv);
+    if (envVars.OPENAI_API_KEY && !keys.openai) {
+      keys.openai = envVars.OPENAI_API_KEY;
+      sources.push('.env (project root)');
+    }
+    if (envVars.GEMINI_API_KEY && !keys.gemini) {
+      keys.gemini = envVars.GEMINI_API_KEY;
+      sources.push('.env (project root)');
+    }
+    if (envVars.GEMINI_PROJECT_ID && !keys.geminiProjectId) {
+      keys.geminiProjectId = envVars.GEMINI_PROJECT_ID;
+      sources.push('.env (project root)');
+    }
   }
 
   // 3. Check process.env (bash profile, etc.)
-  if (process.env.OPENAI_API_KEY) {
+  if (process.env.OPENAI_API_KEY && !keys.openai) {
     keys.openai = process.env.OPENAI_API_KEY;
-    if (!sources.includes('OPENAI_API_KEY from environment')) {
-      sources.push('OPENAI_API_KEY from environment');
-    }
+    sources.push('OPENAI_API_KEY from environment');
   }
 
-  if (process.env.GEMINI_API_KEY) {
+  if (process.env.GEMINI_API_KEY && !keys.gemini) {
     keys.gemini = process.env.GEMINI_API_KEY;
-    if (!sources.includes('GEMINI_API_KEY from environment')) {
-      sources.push('GEMINI_API_KEY from environment');
-    }
+    sources.push('GEMINI_API_KEY from environment');
   }
 
-  if (process.env.GEMINI_PROJECT_ID) {
+  if (process.env.GEMINI_PROJECT_ID && !keys.geminiProjectId) {
     keys.geminiProjectId = process.env.GEMINI_PROJECT_ID;
-    if (!sources.includes('GEMINI_PROJECT_ID from environment')) {
-      sources.push('GEMINI_PROJECT_ID from environment');
-    }
+    sources.push('GEMINI_PROJECT_ID from environment');
   }
 
   return {

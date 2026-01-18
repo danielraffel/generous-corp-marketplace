@@ -6,18 +6,27 @@
  * Based on the egyptology pattern
  */
 
-import { config } from 'dotenv';
 import fetch from 'node-fetch';
 import fs from 'fs/promises';
 import { execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { detectApiKeys } from './detect-api-keys.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
-config({ path: path.join(__dirname, '..', '.env') });
+// Load API keys into environment if not already set
+const detection = detectApiKeys();
+if (detection.keys.openai && !process.env.OPENAI_API_KEY) {
+  process.env.OPENAI_API_KEY = detection.keys.openai;
+}
+if (detection.keys.gemini && !process.env.GEMINI_API_KEY) {
+  process.env.GEMINI_API_KEY = detection.keys.gemini;
+}
+if (detection.keys.geminiProjectId && !process.env.GEMINI_PROJECT_ID) {
+  process.env.GEMINI_PROJECT_ID = detection.keys.geminiProjectId;
+}
 
 /**
  * Generate image using specified provider
