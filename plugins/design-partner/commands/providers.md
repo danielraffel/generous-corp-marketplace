@@ -33,7 +33,7 @@ OpenAI DALL-E 3
 
 Google Gemini Imagen
    - Status: Not configured
-   - Cost: $0.03/image
+   - Cost: FREE (experimental)
    - Setup: Run /dp:providers setup
 
 Default: DALL-E 3
@@ -69,7 +69,7 @@ Use AskUserQuestion:
         },
         {
           "label": "Google Gemini",
-          "description": "Budget-friendly, $0.03/image"
+          "description": "Budget-friendly, FREE (experimental)"
         },
         {
           "label": "Ask each time",
@@ -171,7 +171,7 @@ Summary:
        },
        {
          "label": "Google Gemini",
-         "description": "Budget-friendly, $0.03/image - Get key at: https://aistudio.google.com/api-keys"
+         "description": "Budget-friendly, FREE (experimental) - Get key at: https://aistudio.google.com/api-keys"
        }
      ]
    }

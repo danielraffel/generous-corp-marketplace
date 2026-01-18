@@ -129,7 +129,8 @@ async function generateWithDallE(prompt, size, quality) {
 }
 
 /**
- * Gemini Imagen generation using native Gemini API format
+ * Gemini image generation using Gemini 2.0 Flash model
+ * Based on working implementation from egyptology
  */
 async function generateWithGemini(prompt, size) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -138,24 +139,29 @@ async function generateWithGemini(prompt, size) {
     throw new Error('GEMINI_API_KEY not found in environment');
   }
 
-  // Map size to aspect ratio
+  // Map size to aspect ratio for prompt
   const aspectRatio = size === '1792x1024' ? '16:9' :
                       size === '1024x1792' ? '9:16' : '1:1';
 
-  // Native Gemini API format (not OpenAI-compatible)
-  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
+  // Gemini 2.0 Flash with image generation (working model from egyptology)
+  const model = 'gemini-2.0-flash-exp-image-generation';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'x-goog-api-key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      instances: [{
-        prompt
+      contents: [{
+        parts: [{
+          text: prompt
+        }]
       }],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio
+      generationConfig: {
+        temperature: 1.0,
+        topK: 40,
+        topP: 0.95
       }
     })
   });
@@ -184,19 +190,30 @@ async function generateWithGemini(prompt, size) {
 
   const data = await response.json();
 
-  // Native format returns generatedImages array with base64 data
-  const imageBase64 = data.generatedImages?.[0]?.bytesBase64Encoded;
+  // Extract image from inline_data format (Gemini 2.0 Flash response format)
+  const candidate = data.candidates?.[0];
+  if (!candidate) {
+    throw new Error('No candidates in response');
+  }
 
-  if (!imageBase64) {
+  const imagePart = candidate.content?.parts?.find(
+    (part) => part.inline_data?.mime_type?.startsWith('image/')
+  );
+
+  if (!imagePart || !imagePart.inline_data?.data) {
     throw new Error('No image data in response');
   }
+
+  // Extract base64 image data
+  const imageBase64 = imagePart.inline_data.data;
 
   return {
     imageBase64,
     provider: 'gemini',
-    cost: 0.03,
+    cost: 0.00, // Gemini 2.0 Flash is currently free
     size,
-    aspectRatio
+    aspectRatio,
+    model: 'gemini-2.0-flash-exp'
   };
 }
 
