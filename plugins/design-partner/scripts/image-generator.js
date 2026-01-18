@@ -129,7 +129,7 @@ async function generateWithDallE(prompt, size, quality) {
 }
 
 /**
- * Gemini Imagen generation using Gemini API (OpenAI-compatible endpoint)
+ * Gemini Imagen generation using native Gemini API format
  */
 async function generateWithGemini(prompt, size) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -138,24 +138,38 @@ async function generateWithGemini(prompt, size) {
     throw new Error('GEMINI_API_KEY not found in environment');
   }
 
-  // Gemini API uses OpenAI-compatible endpoint for Imagen
-  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/images/generations', {
+  // Map size to aspect ratio
+  const aspectRatio = size === '1792x1024' ? '16:9' :
+                      size === '1024x1792' ? '9:16' : '1:1';
+
+  // Native Gemini API format (not OpenAI-compatible)
+  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
+      'x-goog-api-key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'imagen-3.0-generate-002',
-      prompt,
-      n: 1,
-      size,
-      response_format: 'b64_json'
+      instances: [{
+        prompt
+      }],
+      parameters: {
+        sampleCount: 1,
+        aspectRatio
+      }
     })
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const errorText = await response.text();
+    let errorMessage = 'Gemini generation failed';
+
+    try {
+      const error = JSON.parse(errorText);
+      errorMessage = error.error?.message || errorText;
+    } catch {
+      errorMessage = errorText;
+    }
 
     if (response.status === 401 || response.status === 403) {
       throw new Error('Invalid Gemini API key');
@@ -165,17 +179,24 @@ async function generateWithGemini(prompt, size) {
       throw new Error('Rate limit exceeded. Try again in 1 minute.');
     }
 
-    throw new Error(error.error?.message || 'Gemini generation failed');
+    throw new Error(errorMessage);
   }
 
   const data = await response.json();
-  const imageBase64 = data.data[0].b64_json;
+
+  // Native format returns generatedImages array with base64 data
+  const imageBase64 = data.generatedImages?.[0]?.bytesBase64Encoded;
+
+  if (!imageBase64) {
+    throw new Error('No image data in response');
+  }
 
   return {
     imageBase64,
     provider: 'gemini',
     cost: 0.03,
-    size
+    size,
+    aspectRatio
   };
 }
 
