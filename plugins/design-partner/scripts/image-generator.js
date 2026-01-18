@@ -153,11 +153,12 @@ async function generateWithGemini(prompt, size, quality = 'pro') {
     ? 'gemini-2.5-flash-image'
     : 'gemini-3-pro-image-preview';
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
+      'x-goog-api-key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -165,16 +166,7 @@ async function generateWithGemini(prompt, size, quality = 'pro') {
         parts: [{
           text: prompt
         }]
-      }],
-      generationConfig: {
-        temperature: 1.0,
-        topK: 40,
-        topP: 0.95,
-        responseModalities: ["TEXT", "IMAGE"],
-        imageConfig: {
-          aspectRatio: aspectRatio
-        }
-      }
+      }]
     })
   });
 
