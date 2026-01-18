@@ -33,7 +33,7 @@ OpenAI DALL-E 3
 
 Google Gemini Imagen
    - Status: Not configured
-   - Cost: $0.02/image
+   - Cost: $0.03/image
    - Setup: Run /dp:providers setup
 
 Default: DALL-E 3
@@ -44,6 +44,8 @@ Budget:
    - Today's spend: $0.12 (2%)
    - Remaining: $4.88
    - Resets: Tonight at midnight
+
+Note: Pricing shown is estimated and may not reflect current API rates. Actual costs may vary.
 ```
 
 ### 2. Set Default Provider
@@ -67,7 +69,7 @@ Use AskUserQuestion:
         },
         {
           "label": "Google Gemini",
-          "description": "Budget-friendly, $0.02/image"
+          "description": "Budget-friendly, $0.03/image"
         },
         {
           "label": "Ask each time",
@@ -169,7 +171,7 @@ Summary:
        },
        {
          "label": "Google Gemini",
-         "description": "Budget-friendly, $0.02/image - Get key at: https://aistudio.google.com/api-keys"
+         "description": "Budget-friendly, $0.03/image - Get key at: https://aistudio.google.com/api-keys"
        }
      ]
    }
@@ -204,18 +206,15 @@ Summary:
    ```
    Google Gemini Setup
 
-   Get your credentials:
+   Get your API key:
    1. Visit: https://aistudio.google.com/api-keys
    2. Click "Create API Key"
    3. Copy the API key (starts with AIza...)
-   4. Note your Project ID shown on the same page
 
    Paste your API key: [user input]
-   Paste your Project ID: [user input]
 
    Save to your shell profile (~/.zshrc or ~/.bashrc):
    export GEMINI_API_KEY="your-key-here"
-   export GEMINI_PROJECT_ID="your-project-id"
 
    Then restart your terminal or run: source ~/.zshrc
 

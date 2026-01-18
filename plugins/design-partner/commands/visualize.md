@@ -23,7 +23,7 @@ No image generation providers configured.
 
 To generate images, you'll need an API key from:
 - OpenAI DALL-E 3: https://platform.openai.com/api-keys (~$0.04/image)
-- Google Gemini: https://aistudio.google.com/app/apikey (~$0.02/image)
+- Google Gemini: https://aistudio.google.com/app/apikey (~$0.03/image)
 
 Run /dp:providers setup to configure.
 ```
@@ -73,7 +73,7 @@ Run /dp:providers setup to configure.
           "description": "Best quality, photorealistic (Recommended)"
         },
         {
-          "label": "Gemini Imagen - $0.02",
+          "label": "Gemini Imagen - $0.03",
           "description": "Good quality, budget-friendly"
         },
         {
@@ -130,7 +130,7 @@ right now?' in soft, calming typography..."
 Options:
 A) Copy prompt to clipboard (paste into ChatGPT/Claude/etc for free)
 B) Generate with DALL-E 3 ($0.04)
-C) Generate with Gemini ($0.02)
+C) Generate with Gemini ($0.03)
 D) Cancel
 ```
 
@@ -152,7 +152,7 @@ Use AskUserQuestion:
           "description": "Best quality, photorealistic"
         },
         {
-          "label": "Generate with Gemini ($0.02)",
+          "label": "Generate with Gemini ($0.03)",
           "description": "Good quality, lower cost"
         }
       ]

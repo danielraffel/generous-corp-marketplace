@@ -6,9 +6,7 @@
  * Based on the egyptology pattern
  */
 
-import fetch from 'node-fetch';
 import fs from 'fs/promises';
-import { execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { detectApiKeys } from './detect-api-keys.js';
@@ -23,9 +21,6 @@ if (detection.keys.openai && !process.env.OPENAI_API_KEY) {
 }
 if (detection.keys.gemini && !process.env.GEMINI_API_KEY) {
   process.env.GEMINI_API_KEY = detection.keys.gemini;
-}
-if (detection.keys.geminiProjectId && !process.env.GEMINI_PROJECT_ID) {
-  process.env.GEMINI_PROJECT_ID = detection.keys.geminiProjectId;
 }
 
 /**
@@ -134,47 +129,28 @@ async function generateWithDallE(prompt, size, quality) {
 }
 
 /**
- * Gemini Imagen generation
+ * Gemini Imagen generation using Gemini API (OpenAI-compatible endpoint)
  */
 async function generateWithGemini(prompt, size) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const projectId = process.env.GEMINI_PROJECT_ID;
 
-  // Try gcloud auth first, fallback to API key
-  let accessToken;
-  try {
-    accessToken = execSync('gcloud auth print-access-token', {
-      encoding: 'utf-8'
-    }).trim();
-  } catch (e) {
-    if (!apiKey) {
-      throw new Error('Neither gcloud auth nor GEMINI_API_KEY available');
-    }
-    accessToken = apiKey;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY not found in environment');
   }
 
-  if (!projectId && !apiKey) {
-    throw new Error('GEMINI_PROJECT_ID required for Gemini Imagen');
-  }
-
-  // Map size to aspect ratio
-  const aspectRatio = size === '1792x1024' ? '16:9' :
-                      size === '1024x1792' ? '9:16' : '1:1';
-
-  const endpoint = `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/imagen-3.0-generate-001:predict`;
-
-  const response = await fetch(endpoint, {
+  // Gemini API uses OpenAI-compatible endpoint for Imagen
+  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/images/generations', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      instances: [{ prompt }],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio
-      }
+      model: 'imagen-3.0-generate-002',
+      prompt,
+      n: 1,
+      size,
+      response_format: 'b64_json'
     })
   });
 
@@ -182,21 +158,24 @@ async function generateWithGemini(prompt, size) {
     const error = await response.json();
 
     if (response.status === 401 || response.status === 403) {
-      throw new Error('Invalid Gemini credentials');
+      throw new Error('Invalid Gemini API key');
+    }
+
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Try again in 1 minute.');
     }
 
     throw new Error(error.error?.message || 'Gemini generation failed');
   }
 
   const data = await response.json();
-  const imageBase64 = data.predictions[0].bytesBase64Encoded;
+  const imageBase64 = data.data[0].b64_json;
 
   return {
     imageBase64,
     provider: 'gemini',
-    cost: 0.020,
-    size,
-    aspectRatio
+    cost: 0.03,
+    size
   };
 }
 
@@ -209,7 +188,8 @@ async function generateWithGemini(prompt, size) {
  */
 export async function downloadImage(url, outputPath) {
   const response = await fetch(url);
-  const buffer = await response.buffer();
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
   await fs.writeFile(outputPath, buffer);
   return outputPath;
 }
@@ -227,17 +207,6 @@ export async function saveBase64Image(base64Data, outputPath) {
   return outputPath;
 }
 
-/**
- * Detect available API keys
- *
- * @returns {Object} Object with boolean flags for each provider
- */
-export function detectApiKeys() {
-  return {
-    openai: !!process.env.OPENAI_API_KEY,
-    gemini: !!process.env.GEMINI_API_KEY || !!process.env.GEMINI_PROJECT_ID
-  };
-}
 
 // CLI usage
 if (import.meta.url === `file://${process.argv[1]}`) {

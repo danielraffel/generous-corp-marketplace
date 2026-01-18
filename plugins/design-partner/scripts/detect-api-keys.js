@@ -49,8 +49,7 @@ export function detectApiKeys() {
   const sources = [];
   const keys = {
     openai: null,
-    gemini: null,
-    geminiProjectId: null
+    gemini: null
   };
 
   // 1. Check .env in plugin root
@@ -63,10 +62,6 @@ export function detectApiKeys() {
     }
     if (envVars.GEMINI_API_KEY) {
       keys.gemini = envVars.GEMINI_API_KEY;
-      sources.push('.env (plugin root)');
-    }
-    if (envVars.GEMINI_PROJECT_ID) {
-      keys.geminiProjectId = envVars.GEMINI_PROJECT_ID;
       sources.push('.env (plugin root)');
     }
   }
@@ -83,10 +78,6 @@ export function detectApiKeys() {
       keys.gemini = envVars.GEMINI_API_KEY;
       sources.push('.env (project root)');
     }
-    if (envVars.GEMINI_PROJECT_ID && !keys.geminiProjectId) {
-      keys.geminiProjectId = envVars.GEMINI_PROJECT_ID;
-      sources.push('.env (project root)');
-    }
   }
 
   // 3. Check process.env (bash profile, etc.)
@@ -100,16 +91,12 @@ export function detectApiKeys() {
     sources.push('GEMINI_API_KEY from environment');
   }
 
-  if (process.env.GEMINI_PROJECT_ID && !keys.geminiProjectId) {
-    keys.geminiProjectId = process.env.GEMINI_PROJECT_ID;
-    sources.push('GEMINI_PROJECT_ID from environment');
-  }
 
   return {
     keys,
     sources,
     hasOpenAI: !!keys.openai,
-    hasGemini: !!keys.gemini || !!keys.geminiProjectId
+    hasGemini: !!keys.gemini
   };
 }
 
@@ -154,15 +141,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log('');
 
   if (result.hasGemini) {
-    console.log('Google Gemini: Configured');
-    if (result.keys.gemini) {
-      console.log(`   Key: ${result.keys.gemini.substring(0, 20)}...`);
-    }
-    if (result.keys.geminiProjectId) {
-      console.log(`   Project: ${result.keys.geminiProjectId}`);
-    }
+    console.log('Google Gemini (Imagen 3): Configured');
+    console.log(`   Key: ${result.keys.gemini.substring(0, 20)}...`);
   } else {
-    console.log('Google Gemini: Not configured');
+    console.log('Google Gemini (Imagen 3): Not configured');
   }
 
   if (result.sources.length > 0) {

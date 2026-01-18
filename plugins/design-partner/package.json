@@ -1,6 +1,6 @@
 {
   "name": "design-partner",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "AI-powered design thinking partner for Claude Code",
   "type": "module",
   "main": "scripts/image-generator.js",
