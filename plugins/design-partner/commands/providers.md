@@ -169,7 +169,7 @@ Summary:
        },
        {
          "label": "Google Gemini",
-         "description": "Budget-friendly, $0.02/image - Get key at: https://aistudio.google.com/app/apikey"
+         "description": "Budget-friendly, $0.02/image - Get key at: https://aistudio.google.com/api-keys"
        }
      ]
    }
@@ -189,6 +189,11 @@ Summary:
 
    Paste your API key: [user input]
 
+   Save to your shell profile (~/.zshrc or ~/.bashrc):
+   export OPENAI_API_KEY="your-key-here"
+
+   Then restart your terminal or run: source ~/.zshrc
+
    Testing connection...
    [Runs test generation]
 
@@ -200,12 +205,19 @@ Summary:
    Google Gemini Setup
 
    Get your credentials:
-   1. Visit: https://aistudio.google.com/app/apikey
-   2. Create API key
-   3. Also need Google Cloud Project ID
+   1. Visit: https://aistudio.google.com/api-keys
+   2. Click "Create API Key"
+   3. Copy the API key (starts with AIza...)
+   4. Note your Project ID shown on the same page
 
    Paste your API key: [user input]
    Paste your Project ID: [user input]
+
+   Save to your shell profile (~/.zshrc or ~/.bashrc):
+   export GEMINI_API_KEY="your-key-here"
+   export GEMINI_PROJECT_ID="your-project-id"
+
+   Then restart your terminal or run: source ~/.zshrc
 
    Testing connection...
    [Runs test generation]
