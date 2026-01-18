@@ -30,7 +30,7 @@ if (detection.keys.gemini && !process.env.GEMINI_API_KEY) {
  * @param {string} options.prompt - Image description prompt
  * @param {string} [options.provider='openai'] - Provider to use (openai|gemini)
  * @param {string} [options.size='1024x1024'] - Image size
- * @param {string} [options.quality='standard'] - Quality level (DALL-E only: standard|hd)
+ * @param {string} [options.quality='standard'] - Quality level (DALL-E: standard|hd, Gemini: pro|flash)
  * @returns {Promise<Object>} Generation result with image data and metadata
  */
 export async function generateImage({
@@ -47,7 +47,7 @@ export async function generateImage({
     if (provider === 'openai') {
       result = await generateWithDallE(prompt, size, quality);
     } else if (provider === 'gemini') {
-      result = await generateWithGemini(prompt, size);
+      result = await generateWithGemini(prompt, size, quality);
     } else {
       throw new Error(`Unknown provider: ${provider}`);
     }
@@ -129,22 +129,30 @@ async function generateWithDallE(prompt, size, quality) {
 }
 
 /**
- * Gemini image generation using Gemini 2.0 Flash model
+ * Gemini image generation using Nano Banana models
+ * Supports both Gemini 3 Pro (default) and Gemini 2.5 Flash
  * Based on working implementation from egyptology
+ *
+ * @param {string} prompt - Image generation prompt
+ * @param {string} size - Image size (1024x1024, 1792x1024, 1024x1792)
+ * @param {string} quality - Model quality: 'pro' (default) or 'flash'
  */
-async function generateWithGemini(prompt, size) {
+async function generateWithGemini(prompt, size, quality = 'pro') {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY not found in environment');
   }
 
-  // Map size to aspect ratio for prompt
+  // Map size to aspect ratio
   const aspectRatio = size === '1792x1024' ? '16:9' :
                       size === '1024x1792' ? '9:16' : '1:1';
 
-  // Gemini 2.0 Flash with image generation (working model from egyptology)
-  const model = 'gemini-2.0-flash-exp-image-generation';
+  // Select model based on quality parameter
+  const model = quality === 'flash'
+    ? 'gemini-2.5-flash-image'
+    : 'gemini-3-pro-image-preview';
+
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
@@ -161,7 +169,11 @@ async function generateWithGemini(prompt, size) {
       generationConfig: {
         temperature: 1.0,
         topK: 40,
-        topP: 0.95
+        topP: 0.95,
+        responseModalities: ["TEXT", "IMAGE"],
+        imageConfig: {
+          aspectRatio: aspectRatio
+        }
       }
     })
   });
@@ -185,12 +197,16 @@ async function generateWithGemini(prompt, size) {
       throw new Error('Rate limit exceeded. Try again in 1 minute.');
     }
 
+    if (response.status === 503) {
+      throw new Error('Service temporarily overloaded. Try again in a moment.');
+    }
+
     throw new Error(errorMessage);
   }
 
   const data = await response.json();
 
-  // Extract image from inline_data format (Gemini 2.0 Flash response format)
+  // Extract image from inline_data format
   const candidate = data.candidates?.[0];
   if (!candidate) {
     throw new Error('No candidates in response');
@@ -210,10 +226,11 @@ async function generateWithGemini(prompt, size) {
   return {
     imageBase64,
     provider: 'gemini',
-    cost: 0.00, // Gemini 2.0 Flash is currently free
+    cost: 0.00, // Currently free during preview (pricing may change)
     size,
     aspectRatio,
-    model: 'gemini-2.0-flash-exp'
+    model: model,
+    quality: quality
   };
 }
 

@@ -73,7 +73,7 @@ Run /dp:providers setup to configure.
           "description": "Best quality, photorealistic (Recommended)"
         },
         {
-          "label": "Gemini Imagen - FREE",
+          "label": "Gemini 3 Pro - Free (preview)",
           "description": "Good quality, budget-friendly"
         },
         {
@@ -130,7 +130,7 @@ right now?' in soft, calming typography..."
 Options:
 A) Copy prompt to clipboard (paste into ChatGPT/Claude/etc for free)
 B) Generate with DALL-E 3 ($0.04)
-C) Generate with Gemini (FREE)
+C) Generate with Gemini (free preview)
 D) Cancel
 ```
 
@@ -152,7 +152,7 @@ Use AskUserQuestion:
           "description": "Best quality, photorealistic"
         },
         {
-          "label": "Generate with Gemini (FREE)",
+          "label": "Generate with Gemini (free preview)",
           "description": "Good quality, lower cost"
         }
       ]

@@ -31,9 +31,10 @@ OpenAI DALL-E 3
    - Last used: Today 2:30 PM
    - Rate limit: 5/min
 
-Google Gemini Imagen
+Google Gemini Nano Banana Pro
    - Status: Not configured
-   - Cost: FREE (experimental)
+   - Model: gemini-3-pro-image-preview (default)
+   - Cost: Currently free during preview (subject to change)
    - Setup: Run /dp:providers setup
 
 Default: DALL-E 3
@@ -170,8 +171,8 @@ Summary:
          "description": "Best quality, $0.04/image - Get key at: https://platform.openai.com/api-keys"
        },
        {
-         "label": "Google Gemini",
-         "description": "Budget-friendly, FREE (experimental) - Get key at: https://aistudio.google.com/api-keys"
+         "label": "Google Gemini Nano Banana Pro",
+         "description": "High quality, currently free (preview) - Get key at: https://aistudio.google.com/api-keys"
        }
      ]
    }
@@ -202,9 +203,9 @@ Summary:
    Success! DALL-E 3 is ready to use.
    ```
 
-   **Gemini Setup:**
+   **Gemini Nano Banana Pro Setup:**
    ```
-   Google Gemini Setup
+   Google Gemini Nano Banana Pro Setup
 
    Get your API key:
    1. Visit: https://aistudio.google.com/api-keys
@@ -218,10 +219,15 @@ Summary:
 
    Then restart your terminal or run: source ~/.zshrc
 
+   Models available:
+   - gemini-3-pro-image-preview (default, highest quality)
+   - gemini-2.5-flash-image (faster alternative)
+
    Testing connection...
    [Runs test generation]
 
-   Success! Gemini is ready to use.
+   Success! Gemini Nano Banana Pro is ready to use.
+   Currently free during preview (pricing subject to change).
    ```
 
 4. **Create or update .env file**
