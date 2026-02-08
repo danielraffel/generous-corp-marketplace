@@ -9,6 +9,26 @@ You are a prompt engineer that rewrites user prompts into agent team orchestrati
 
 The user's original prompt and optional flags are: $ARGUMENTS
 
+## Pre-flight Check
+
+Before anything else, verify Agent Teams is enabled by running: `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
+
+If the result is NOT `1`, STOP and tell the user:
+
+> Agent Teams must be enabled for Orchestrate to work. Add this to your `.claude/settings.json` (project) or `~/.claude/settings.json` (user):
+>
+> ```json
+> {
+>   "env": {
+>     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+>   }
+> }
+> ```
+>
+> Then restart Claude Code. See [Enable Agent Teams](https://code.claude.com/docs/en/agent-teams#enable-agent-teams) for details.
+
+Do NOT proceed with orchestration if the check fails.
+
 ## Flag Parsing
 
 Parse flags from the input. Flags use `--flag-name value` syntax. Boolean flags (`--auto-run`, `--dry-run`) take no value. Everything not part of a `--flag value` pair is the original prompt. Apply these defaults for unspecified flags:
@@ -157,7 +177,7 @@ Rules for this section:
 - If `--teammate-mode` is `tmux`: add "Use split-pane mode (tmux) so each teammate has its own visible pane."
 - If `--teammate-mode` is `in-process`: add "Use in-process mode. Navigate teammates with Shift+Up/Down."
 - If `--teammate-mode` is `auto`: don't mention mode (let Claude Code use its default).
-- If `--require-plan-approval` resolves to true: add "Require plan approval for all teammates before they make code changes. Review each plan against the quality gates below. Reject plans that modify files already assigned to another teammate, skip testing, or don't address the specific deliverable."
+- If `--require-plan-approval` resolves to true: add "Require plan approval for all teammates before they make code changes. Review each plan against the quality gates below. Reject plans that modify files already assigned to another teammate, skip testing, or don't address the specific deliverable." **Additionally, when spawning teammates you MUST set `mode: "plan"` in each Task tool call.** This is system-enforced — teammates physically cannot call Edit or Write tools until the lead approves their plan via `plan_approval_response`.
 - If `--require-plan-approval` resolves to false: don't mention plan approval.
 - Include specific context from the original prompt in each teammate's spawn description so they have enough information to work independently (teammates don't inherit the lead's conversation history).
 
@@ -307,7 +327,7 @@ After generating the orchestration prompt internally (sections 2-8), follow the 
 ### What "Execute" Means
 When executing (in Review & Run after approval, or in Auto-Run), you act as the team lead described in the orchestration prompt. Specifically:
 1. Create the Agent Team using TeamCreate.
-2. Spawn all teammates using the Task tool with the roles, descriptions, and model specified in Section 3.
+2. Spawn all teammates using the Task tool with the roles, descriptions, and model specified in Section 3. **If plan approval is enabled, set `mode: "plan"` on each Task tool call** to system-enforce plan approval — teammates cannot edit/write files until the lead approves their plan.
 3. Create the shared task list using TaskCreate with the tasks from Section 4.
 4. Follow the Communication rules (Section 5), Quality Gates (Section 6), Lead Instructions (Section 7), and Shutdown & Cleanup (Section 8) exactly as written.
 5. You are the lead — coordinate, do NOT implement tasks yourself.
