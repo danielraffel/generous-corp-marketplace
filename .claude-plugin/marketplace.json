@@ -36,6 +36,19 @@
       "keywords": ["orchestration", "workflow", "automation", "plugin-orchestration"]
     },
     {
+      "name": "orchestrate",
+      "source": "./plugins/orchestrate",
+      "description": "Transform any task description into a structured agent team orchestration prompt",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Raffel"
+      },
+      "homepage": "https://www.generouscorp.com/generous-corp-marketplace/plugins/orchestrate/",
+      "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/orchestrate",
+      "license": "MIT",
+      "keywords": ["agent-teams", "orchestration", "parallel", "coordination", "prompt-engineering"]
+    },
+    {
       "name": "prompt-repeater",
       "source": "./plugins/prompt-repeater",
       "description": "Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks",

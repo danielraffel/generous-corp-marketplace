@@ -17,12 +17,13 @@ Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md
 
 - **[worktree-manager](plugins/worktree-manager)** - Effortless git worktrees for parallel development with automatic environment setup
 - **[chainer](plugins/chainer)** - Universal plugin orchestration for Claude Code
+- **[orchestrate](plugins/orchestrate)** - Transform any task description into a structured agent team orchestration prompt
 - **[prompt-repeater](plugins/prompt-repeater)** - Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks
 - **[design-partner](plugins/design-partner)** - AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes
 
 ## Skills Available
 
-- **[claude](skills/claude)** - A skill designed for use in a CLI like Codex to route a task to Anthropic Claude (for “consult Claude” workflows) and returns the result.
+- **[claude](skills/claude)** - A skill designed for use in a CLI like Codex to route a task to Anthropic Claude (for "consult Claude" workflows) and returns the result.
 
 ## Installation
 
@@ -49,6 +50,11 @@ Chainer:
 Prompt Repeater:
 ```
 /plugin install prompt-repeater@generous-corp-marketplace
+```
+
+Orchestrate:
+```
+/plugin install orchestrate@generous-corp-marketplace
 ```
 
 Design Partner:
@@ -104,6 +110,7 @@ Usage in Claude Code:
 
 - [Worktree Manager Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/worktree-manager/)
 - [Chainer Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/)
+- [Orchestrate Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/orchestrate/)
 - [Prompt Repeater Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/)
 - [Design Partner Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/)
 - [Generous Corp](https://www.generouscorp.com/projects.html)

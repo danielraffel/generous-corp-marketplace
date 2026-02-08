@@ -1,0 +1,10 @@
+{
+  "name": "orchestrate",
+  "version": "1.0.0",
+  "description": "Generate agent team orchestration prompts from any task description",
+  "author": {
+    "name": "Daniel Raffel"
+  },
+  "license": "MIT",
+  "keywords": ["agent-teams", "orchestration", "parallel", "coordination"]
+}

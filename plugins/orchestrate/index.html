@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orchestrate | Plugin for Claude Code</title>
+    <meta name="description" content="A Claude Code plugin that orchestrates agent teams directly from any task description.">
+
+    <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
+    <meta property="og:title" content="Orchestrate">
+    <meta property="og:description" content="Transform any task into a coordinated agent team. One command, review, execute.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/plugins/orchestrate/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/orchestrate/icon.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Orchestrate">
+    <meta name="twitter:description" content="Transform any task into a coordinated agent team. One command, review, execute.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/orchestrate/icon.png">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #e67e22;
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: #333;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        /* Components */
+        .plugin-name {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .code-comment { color: #6a6a6a; }
+        .code-command { color: #fff; font-weight: bold; }
+        .code-prompt { color: var(--accent); user-select: none; }
+
+        .btn {
+            display: inline-block;
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-top: var(--spacing-unit);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        /* Copy button */
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #444; color: #fff; }
+        .copy-btn.copied { background: var(--accent); color: #fff; }
+
+        /* Example cards */
+        .example-card {
+            margin-bottom: 1.5rem;
+        }
+        .example-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .example-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+        .learn-more {
+            color: var(--accent);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .learn-more:hover { color: var(--text); }
+        .details {
+            display: none;
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .details.open { display: block; }
+        .details code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        /* Flag table */
+        .flag-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .flag-table th,
+        .flag-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .flag-table th {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+        }
+        .flag-table td {
+            font-size: 0.9rem;
+        }
+        .flag-table code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--gray);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after {
+            content: '\2212';
+        }
+        .faq-answer {
+            display: none;
+            padding-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #444;
+        }
+        .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+        .faq-item.open .faq-answer { display: block; }
+        .faq-answer code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+
+        <!-- Hero Section -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <span class="plugin-name">Orchestrate</span>
+            <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
+            <nav class="nav-links">
+                <a href="#concept">Concept</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#installation">Installation</a>
+                <a href="#examples">Examples</a>
+                <a href="#flags">Flags</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <h1>One prompt,<br>a whole team.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p><b>Orchestrate</b> turns any task description into a coordinated agent team — plan, review, and execute, all in one session.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-prompt">/</span>orchestrate Fix the login 500 errors after last deploy</div>
+                    </div>
+                    <div class="example-desc" style="margin-top: 1rem;">
+                        Shows a plan summary, then executes directly on approval. No copy/paste needed.
+                        <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
+                    </div>
+                    <div class="details">
+                        <p><strong>Orchestrate generates a plan, shows a summary, and executes on approval:</strong></p>
+                        <p>1. <strong>Summary:</strong> Type detected, team roles, task count, key settings</p>
+                        <p>2. <strong>Review:</strong> Say "go" to execute, "show" to see full prompt, or give feedback</p>
+                        <p>3. <strong>Execute:</strong> Creates the team, spawns teammates, builds task list, coordinates as lead</p>
+                        <p style="margin-top: 0.75rem;"><strong>The generated plan covers:</strong></p>
+                        <p>Goal &middot; Team Setup &middot; Task List &middot; Communication &middot; Quality Gates &middot; Lead Instructions &middot; Shutdown &amp; Cleanup</p>
+                        <p style="margin-top: 0.75rem;">Use <code>--auto-run</code> to skip review, or <code>--dry-run</code> for raw prompt text.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Concept -->
+        <section id="concept">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>The Concept</h3>
+                    <h2>From task to<br>coordinated team.</h2>
+                </div>
+                <div class="col-right">
+                    <p>Agent teams are powerful but complex to set up. You need to think about roles, task lists, file ownership, communication rules, quality gates, and shutdown procedures.</p>
+                    <p><strong>Orchestrate does that thinking for you.</strong> Describe your task, review the plan, and it executes directly — creating the team, assigning tasks, and coordinating the work in your current session.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="capabilities">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>Capabilities</h3>
+                    <p>Detects what kind of work you're doing and builds the right team.</p>
+                </div>
+                <div class="col-right">
+                    <ul class="feature-list">
+                        <li>Auto-detects prompt type: debugging, feature, refactor, or research</li>
+                        <li>Selects role-appropriate teammates (2-5 based on complexity)</li>
+                        <li>Generates shared task lists with dependencies and file boundaries</li>
+                        <li>Reviews plan with you, then executes directly in your session</li>
+                        <li>Includes communication rules and challenge patterns</li>
+                        <li>Smart model defaults: Opus for key thinkers, Sonnet for the rest</li>
+                        <li>Interactive setup wizard to configure settings visually</li>
+                        <li>Adds type-appropriate quality gates</li>
+                        <li>Handles shutdown and cleanup automatically</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Ready in seconds.</h2>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a> and <a href="https://code.claude.com/docs/en/agent-teams">Agent Teams</a> enabled.</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                        <div class="code-block" id="install-code">
+<span class="code-comment"># 1. Add the marketplace (in Claude Code)</span>
+/plugin marketplace add danielraffel/generous-corp-marketplace
+
+<span class="code-comment"># 2. Install Orchestrate</span>
+/plugin install orchestrate@generous-corp-marketplace
+
+<span class="code-comment"># 3. Enable Agent Teams (add to settings.json)</span>
+<span class="code-comment"># ~/.claude/settings.json or .claude/settings.json</span>
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+
+<span class="code-comment"># 4. Restart Claude Code</span>
+<span class="code-comment"># Quit and reopen to load the plugin</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/orchestrate" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <div style="color: var(--gray); font-size: 0.9rem;">
+                            Zero build steps. Pure prompt engineering.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Example Usage -->
+        <section id="examples">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Examples</h3>
+                    <h2>Four prompt types,<br>four team shapes.</h2>
+                    <p style="max-width: 60ch;">Orchestrate detects what kind of work you're doing and generates the right team structure.</p>
+                </div>
+
+                <div class="col-left">
+                    <div class="example-card">
+                        <div class="example-title">Debugging</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate The login endpoint returns 500 errors intermittently after the last deploy</div>
+                        </div>
+                        <div class="example-desc">
+                            Hypothesis testers, repro builder, log digger, fix proposer.
+                            <span class="learn-more" onclick="toggleDetails(this)">See team</span>
+                        </div>
+                        <div class="details">
+                            <p><strong>Generated team:</strong></p>
+                            <p>1. <strong>Hypothesis-A Tester</strong> - Investigates the most likely root cause</p>
+                            <p>2. <strong>Hypothesis-B Tester</strong> - Explores an alternative theory independently</p>
+                            <p>3. <strong>Repro Builder</strong> - Creates a minimal reproduction / failing test</p>
+                            <p>4. <strong>Log/Telemetry Digger</strong> - Searches logs, git history for clues</p>
+                            <p>5. <strong>Fix Proposer</strong> - Once hypotheses converge, proposes and reviews the fix</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="example-card">
+                        <div class="example-title">New Feature</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate Implement a real-time notification system with WebSocket backend and bell UI</div>
+                        </div>
+                        <div class="example-desc">
+                            Architect, backend, frontend, tests/QA, reviewer.
+                            <span class="learn-more" onclick="toggleDetails(this)">See team</span>
+                        </div>
+                        <div class="details">
+                            <p><strong>Generated team:</strong></p>
+                            <p>1. <strong>Architect</strong> - Designs approach, defines interfaces and data flow</p>
+                            <p>2. <strong>Backend Engineer</strong> - Implements server-side logic, WebSocket, data models</p>
+                            <p>3. <strong>Frontend Engineer</strong> - Implements notification bell UI, client-side logic</p>
+                            <p>4. <strong>Tests/QA Engineer</strong> - Writes unit and integration tests</p>
+                            <p>5. <strong>Reviewer/Perf Engineer</strong> - Reviews for correctness, performance, security</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="example-card">
+                        <div class="example-title">Refactor</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate Refactor the authentication module to use JWT instead of session cookies</div>
+                        </div>
+                        <div class="example-desc">
+                            Architect, two implementers, tests/regression, devil's advocate.
+                            <span class="learn-more" onclick="toggleDetails(this)">See team</span>
+                        </div>
+                        <div class="details">
+                            <p><strong>Generated team:</strong></p>
+                            <p>1. <strong>Architect / Code Owner</strong> - Defines target architecture and migration strategy</p>
+                            <p>2. <strong>Implementation-A</strong> - Refactors one portion of the codebase</p>
+                            <p>3. <strong>Implementation-B</strong> - Refactors another portion in parallel</p>
+                            <p>4. <strong>Tests/Regression</strong> - Updates tests, ensures behavior is preserved</p>
+                            <p>5. <strong>Devil's Advocate</strong> - Challenges the approach, finds edge cases</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="example-card">
+                        <div class="example-title">Research</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate Evaluate GraphQL vs REST vs gRPC for our microservices API layer</div>
+                        </div>
+                        <div class="example-desc">
+                            Researcher, critic, synthesizer, devil's advocate.
+                            <span class="learn-more" onclick="toggleDetails(this)">See team</span>
+                        </div>
+                        <div class="details">
+                            <p><strong>Generated team:</strong></p>
+                            <p>1. <strong>Researcher</strong> - Deep-dives into each option, gathers evidence</p>
+                            <p>2. <strong>Critic</strong> - Stress-tests each option, finds weaknesses</p>
+                            <p>3. <strong>Synthesizer</strong> - Compares findings, produces structured comparison</p>
+                            <p>4. <strong>Devil's Advocate</strong> - Argues against emerging consensus</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flags -->
+        <section id="flags">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Flags</h3>
+                    <h2>Fine-tune when needed.</h2>
+                    <p style="max-width: 60ch;">All flags are optional with strong defaults. Most users won't need them.</p>
+                </div>
+                <div class="col-full">
+                    <table class="flag-table">
+                        <thead>
+                            <tr>
+                                <th>Flag</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>--auto-run</code></td>
+                                <td>off</td>
+                                <td>Skip review and execute immediately.</td>
+                            </tr>
+                            <tr>
+                                <td><code>--dry-run</code></td>
+                                <td>off</td>
+                                <td>Output raw prompt text only (for copy/paste).</td>
+                            </tr>
+                            <tr>
+                                <td><code>--team-size</code></td>
+                                <td><code>auto</code></td>
+                                <td>Number of teammates. Auto picks 2-5 based on complexity.</td>
+                            </tr>
+                            <tr>
+                                <td><code>--models</code></td>
+                                <td><code>auto</code></td>
+                                <td>Model for teammates. Auto assigns Opus to key reasoning roles, Sonnet to rest.</td>
+                            </tr>
+                            <tr>
+                                <td><code>--require-plan-approval</code></td>
+                                <td><code>auto</code></td>
+                                <td>Require lead approval before code changes. Auto enables for code work.</td>
+                            </tr>
+                            <tr>
+                                <td><code>--teammate-mode</code></td>
+                                <td><code>auto</code></td>
+                                <td>Display mode. Auto lets Claude Code decide (tmux if available).</td>
+                            </tr>
+                            <tr>
+                                <td><code>--quality-gates</code></td>
+                                <td><code>tests + lint + docs</code></td>
+                                <td>Quality standards teammates must meet.</td>
+                            </tr>
+                            <tr>
+                                <td><code>--output-style</code></td>
+                                <td><code>standard</code></td>
+                                <td>Controls task count and detail. Options: concise, standard, verbose.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-full" style="margin-top: 2rem;">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># Interactive setup wizard — walks you through all settings</span>
+<span class="code-prompt">/</span>orchestrate-config Fix the checkout bug
+
+<span class="code-comment"># Default: review plan, then execute on approval</span>
+<span class="code-prompt">/</span>orchestrate Fix the checkout bug
+
+<span class="code-comment"># Skip review, execute immediately</span>
+<span class="code-prompt">/</span>orchestrate Fix the checkout bug --auto-run
+
+<span class="code-comment"># All-Sonnet for cost savings, raw text output</span>
+<span class="code-prompt">/</span>orchestrate Fix the checkout bug --dry-run --models sonnet</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>FAQ</h3>
+                    <h2>Common questions.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What are Agent Teams?</div>
+                        <div class="faq-answer">
+                            <p>Agent Teams is an experimental Claude Code feature that lets you spawn multiple AI teammates that work in parallel on a shared task list. A team lead coordinates, and teammates communicate via messages.</p>
+                            <p>It's disabled by default. Enable it by adding <code>"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"</code> to your settings.json env, or set the environment variable before starting Claude Code.</p>
+                            <p>See the <a href="https://code.claude.com/docs/en/agent-teams">Agent Teams documentation</a> for full details.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What does Orchestrate actually do?</div>
+                        <div class="faq-answer">
+                            <p>By default, Orchestrate generates an orchestration plan, shows you a compact summary (team roles, task count, settings), and waits for your approval. When you say "go", it executes directly — creating the team, spawning teammates, building the task list, and coordinating as team lead.</p>
+                            <p>With <code>--dry-run</code>, it outputs the raw prompt text for you to copy/paste into a new session. With <code>--auto-run</code>, it skips review and executes immediately.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What are the execution modes?</div>
+                        <div class="faq-answer">
+                            <p><strong>Review &amp; Run (default):</strong> Shows a summary, waits for you to say "go", "show" (to see the full prompt), or give feedback to adjust. Safest option for unfamiliar tasks.</p>
+                            <p><strong>Auto-run (<code>--auto-run</code>):</strong> Briefly announces the plan and immediately executes. Good for when you trust the defaults and want speed.</p>
+                            <p><strong>Dry-run (<code>--dry-run</code>):</strong> Outputs the raw orchestration prompt as text. Useful for saving prompts, sharing them, or pasting into a different session.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does model assignment work?</div>
+                        <div class="faq-answer">
+                            <p>By default (<code>--models auto</code>), Orchestrate assigns Opus to the key reasoning role on each team — the one making critical design decisions or synthesizing complex findings — and Sonnet to implementation and support roles. This balances quality where it matters most with cost efficiency.</p>
+                            <p>For example, on a Feature team the Architect gets Opus while Backend, Frontend, Tests/QA, and Reviewer get Sonnet. On a Debugging team, all roles get Sonnet since the work is primarily tracing and analysis.</p>
+                            <p>Use <code>--models sonnet</code> to force all-Sonnet (cheapest), <code>--models opus</code> for all-Opus (max capability), or <code>/orchestrate-config</code> to choose interactively.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does prompt type detection work?</div>
+                        <div class="faq-answer">
+                            <p>Orchestrate analyzes keywords in your prompt to classify it into one of four categories:</p>
+                            <p><strong>Debugging:</strong> bug, fix, error, crash, failing, broken, investigate, regression, 500, timeout, flaky</p>
+                            <p><strong>Feature:</strong> add, implement, create, build, new, feature, integrate, endpoint, component</p>
+                            <p><strong>Refactor:</strong> refactor, restructure, migrate, upgrade, modernize, extract, simplify, rename</p>
+                            <p><strong>Research:</strong> evaluate, compare, investigate options, recommend, assess, tradeoffs, RFC</p>
+                            <p>If ambiguous, it defaults to Research/Decision.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can teammates edit the same files?</div>
+                        <div class="faq-answer">
+                            <p>No - by design. The generated task list assigns distinct file ownership to each teammate to avoid merge conflicts. If a conflict is discovered, the second teammate must message the lead to resolve ownership.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What's the difference between message and broadcast?</div>
+                        <div class="faq-answer">
+                            <p><code>message</code> sends to one specific teammate. Use it for targeted updates, sharing findings relevant to another's work, or challenging assumptions.</p>
+                            <p><code>broadcast</code> sends to all teammates. Use it sparingly - each broadcast costs tokens for every teammate. Reserve it for announcements that affect everyone (design doc ready, API contract changed).</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What is /orchestrate-config?</div>
+                        <div class="faq-answer">
+                            <p>An interactive setup wizard. Instead of memorizing flags, run <code>/orchestrate-config &lt;your task&gt;</code> and it walks you through choosing execution mode, model strategy, team size, and plan approval — then outputs a ready-to-run <code>/orchestrate</code> command.</p>
+                            <p>It also shows you the detected task type, the team roles that will be created, and which model each role will use, so you can see exactly what you're getting before you run it.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Do I need to install anything else?</div>
+                        <div class="faq-answer">
+                            <p>Just <a href="https://claude.ai/code">Claude Code</a> with Agent Teams enabled. Orchestrate is a pure prompt engineering plugin - no dependencies, no build steps, no MCP servers.</p>
+                            <p>The generated prompt works with Claude Code's built-in agent team functionality.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/orchestrate" style="text-decoration: none;">GitHub Repository ↗</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyInstall(btn) {
+            const code = document.getElementById('install-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
+        function toggleDetails(el) {
+            const details = el.parentElement.nextElementSibling;
+            details.classList.toggle('open');
+            el.textContent = details.classList.contains('open') ? 'Show less' : 'Learn more';
+        }
+
+        // Open FAQ if hash matches
+        if (window.location.hash) {
+            const target = document.getElementById(window.location.hash.substring(1));
+            if (target && target.classList.contains('faq-question')) {
+                target.parentElement.classList.add('open');
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
