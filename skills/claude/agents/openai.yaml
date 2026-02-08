@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude"
+  short_description: "Generate Claude prompt packages or run Claude bridge mode"
+  default_prompt: "Use $claude to ask Claude directly (bridge mode default). Use $claude package when you specifically want a prompt package."
