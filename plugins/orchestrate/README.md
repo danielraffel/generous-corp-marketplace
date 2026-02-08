@@ -6,7 +6,7 @@ A Claude Code plugin that orchestrates agent teams directly from any task descri
 
 `/orchestrate` takes a free-text prompt and turns it into a coordinated agent team — generating the plan, letting you review it, and executing it directly in your current session. No copy/paste needed.
 
-By default, Orchestrate shows a compact summary of the plan (team roles, task count, settings) and waits for your approval before executing. You can also use `--auto-run` to skip review, or `--dry-run` to get the raw prompt text for manual use.
+By default, Orchestrate enhances your prompt into a clear goal statement, shows a compact plan summary (team roles, task count, settings), and presents interactive buttons to approve, edit, or inspect the plan before executing. You can also use `--auto-run` to skip review, or `--dry-run` to get the raw prompt text for manual use.
 
 ## Installation
 
@@ -36,7 +36,7 @@ Not sure which flags to use? The config wizard walks you through it:
 /orchestrate-config <your prompt>
 ```
 
-It detects your task type, shows the team that will be created with model assignments, and asks a few questions. Then it outputs a ready-to-run `/orchestrate` command with all your choices.
+It detects your task type, shows the team that will be created with model assignments, and asks a few questions (mode, models, approval, and a "Launch" button). When you hit Launch, it hands off directly to `/orchestrate` — no copy/paste needed.
 
 ### Execution modes
 
@@ -44,7 +44,7 @@ It detects your task type, shows the team that will be created with model assign
 ```
 /orchestrate Fix the login 500 errors after last deploy
 ```
-Shows: type detected, team roles, task count, settings. Say "go" to execute, "show" to see full prompt, or give feedback.
+Enhances your prompt, shows plan summary, and presents interactive buttons: Go, Edit prompt, Use original, or Show full plan.
 
 **Auto-run** — generates plan, briefly announces, immediately executes:
 ```
@@ -127,7 +127,7 @@ Use `--models sonnet` to override with all-Sonnet (most cost-efficient) or `--mo
 2. **Detects prompt type**: debugging, feature, refactor, or research
 3. **Selects roles** appropriate to the prompt type
 4. **Generates an orchestration plan** with 8 sections:
-   - Goal (your original prompt verbatim)
+   - Goal (enhanced version of your prompt, or original in auto-run/dry-run modes)
    - Team Setup (roles, model, mode, plan approval)
    - Task List (deliverables, ownership, dependencies)
    - Communication (message vs broadcast, challenge patterns)
@@ -136,7 +136,7 @@ Use `--models sonnet` to override with all-Sonnet (most cost-efficient) or `--mo
    - Shutdown & Cleanup (graceful shutdown, lead-only cleanup)
    - Enablement instructions (dry-run only, for copy/paste use)
 5. **Executes based on mode**:
-   - **Default**: Shows summary, waits for approval, then creates the team and coordinates directly
+   - **Default**: Enhances your prompt, shows summary with interactive review buttons (Go / Edit / Use original / Show full plan), then creates the team on approval
    - **`--auto-run`**: Briefly announces, then creates the team and coordinates immediately
    - **`--dry-run`**: Outputs the raw prompt text (with enablement block) for manual use
 

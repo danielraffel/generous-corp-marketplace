@@ -395,8 +395,8 @@
                     </div>
                     <div class="details">
                         <p><strong>Orchestrate generates a plan, shows a summary, and executes on approval:</strong></p>
-                        <p>1. <strong>Summary:</strong> Type detected, team roles, task count, key settings</p>
-                        <p>2. <strong>Review:</strong> Say "go" to execute, "show" to see full prompt, or give feedback</p>
+                        <p>1. <strong>Enhance:</strong> Rewrites your prompt into a clear, structured goal statement</p>
+                        <p>2. <strong>Review:</strong> Shows enhanced prompt + plan summary with interactive buttons (Go, Edit, Use original, Show full plan)</p>
                         <p>3. <strong>Execute:</strong> Creates the team, spawns teammates, builds task list, coordinates as lead</p>
                         <p style="margin-top: 0.75rem;"><strong>The generated plan covers:</strong></p>
                         <p>Goal &middot; Team Setup &middot; Task List &middot; Communication &middot; Quality Gates &middot; Lead Instructions &middot; Shutdown &amp; Cleanup</p>
@@ -677,14 +677,14 @@
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">What does Orchestrate actually do?</div>
                         <div class="faq-answer">
-                            <p>By default, Orchestrate generates an orchestration plan, shows you a compact summary (team roles, task count, settings), and waits for your approval. When you say "go", it executes directly — creating the team, spawning teammates, building the task list, and coordinating as team lead.</p>
+                            <p>By default, Orchestrate enhances your prompt into a clear goal statement, generates an orchestration plan, and shows an interactive review screen with the enhanced prompt and plan summary. You get buttons to approve (Go), edit the prompt, use your original wording, or inspect the full plan — then it executes directly, creating the team and coordinating as lead.</p>
                             <p>With <code>--dry-run</code>, it outputs the raw prompt text for you to copy/paste into a new session. With <code>--auto-run</code>, it skips review and executes immediately.</p>
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">What are the execution modes?</div>
                         <div class="faq-answer">
-                            <p><strong>Review &amp; Run (default):</strong> Shows a summary, waits for you to say "go", "show" (to see the full prompt), or give feedback to adjust. Safest option for unfamiliar tasks.</p>
+                            <p><strong>Review &amp; Run (default):</strong> Enhances your prompt, shows a plan summary, and presents interactive buttons — Go, Edit prompt, Use original, or Show full plan. Safest option for unfamiliar tasks.</p>
                             <p><strong>Auto-run (<code>--auto-run</code>):</strong> Briefly announces the plan and immediately executes. Good for when you trust the defaults and want speed.</p>
                             <p><strong>Dry-run (<code>--dry-run</code>):</strong> Outputs the raw orchestration prompt as text. Useful for saving prompts, sharing them, or pasting into a different session.</p>
                         </div>
@@ -724,7 +724,7 @@
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">What is /orchestrate-config?</div>
                         <div class="faq-answer">
-                            <p>An interactive setup wizard. Instead of memorizing flags, run <code>/orchestrate-config &lt;your task&gt;</code> and it walks you through choosing execution mode, model strategy, team size, and plan approval — then outputs a ready-to-run <code>/orchestrate</code> command.</p>
+                            <p>An interactive setup wizard. Instead of memorizing flags, run <code>/orchestrate-config &lt;your task&gt;</code> and it walks you through choosing execution mode, model strategy, and plan approval — then launches <code>/orchestrate</code> directly. No copy/paste needed.</p>
                             <p>It also shows you the detected task type, the team roles that will be created, and which model each role will use, so you can see exactly what you're getting before you run it.</p>
                         </div>
                     </div>
