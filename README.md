@@ -1,8 +1,12 @@
 # Generous Corp Marketplace
 
-Official Claude Code plugin marketplace for Generous Corp plugins.
+Official Claude Code plugin marketplace and Codex skills for Generous Corp.
 
-## Plugins Available
+## Codex Skills
+
+- **[claude](https://github.com/danielraffel/generous-corp-marketplace/tree/master/skills/claude)** - When using Codex ask $claude for tips
+
+## Claude Code Plugins
 
 - **[worktree-manager](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager)** - Effortless git worktrees for parallel development with automatic environment setup
 - **[chainer](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/chainer)** - Universal plugin orchestration for Claude Code
