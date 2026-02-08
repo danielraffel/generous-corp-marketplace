@@ -110,68 +110,31 @@ Options:
 2. **"Always on"** — description: "All teammates submit plans for lead review"
 3. **"Never"** — description: "Teammates proceed without approval"
 
-## Step 4: Build the Command
+## Step 4: Build and Execute
 
-Based on the user's answers, construct the `/orchestrate` command.
+After receiving the user's config answers, build the command arguments and immediately invoke `/orchestrate` using the Skill tool. Do NOT display a summary table. Do NOT output "copy the command" or similar text.
 
-Start with: `/orchestrate [TASK PROMPT]`
+Build the arguments string: start with the task prompt, then add flags only when they differ from defaults:
+- Auto-run → `--auto-run`
+- Dry-run → `--dry-run`
+- All Sonnet → `--models sonnet` | All Opus → `--models opus` | All Haiku → `--models haiku`
+- Small team → `--team-size 2` or `3` | Medium → `--team-size 3` or `4` | Large → `--team-size 5` or `6`
+- Always approval → `--require-plan-approval true` | Never → `--require-plan-approval false`
+- Smart defaults and Auto options add no flags.
 
-Add flags based on selections — **only include flags that differ from defaults**:
+Then output ONE short line and invoke the Skill:
 
-| Selection | Flag to add |
-|-----------|-------------|
-| Auto-run | `--auto-run` |
-| Dry-run | `--dry-run` |
-| All Sonnet | `--models sonnet` |
-| All Opus | `--models opus` |
-| All Haiku | `--models haiku` |
-| Smart defaults | *(no flag — this is `--models auto`)* |
-| Small (2-3) | `--team-size 2` or `--team-size 3` (pick based on task) |
-| Medium (3-4) | `--team-size 3` or `--team-size 4` (pick based on task) |
-| Large (5-6) | `--team-size 5` or `--team-size 6` (pick based on task) |
-| Auto team size | *(no flag)* |
-| Always on approval | `--require-plan-approval true` |
-| Never approval | `--require-plan-approval false` |
-| Auto approval | *(no flag)* |
+> Launching orchestration...
 
-## Step 5: Present Summary
+Use the Skill tool: `skill: "orchestrate"`, `args: "[task prompt] [--flags if any]"`
 
-Display the configured command and a settings summary:
-
----
-
-**Your configured command:**
-
-```
-/orchestrate [TASK PROMPT] [--flags...]
-```
-
-| Setting | Value |
-|---------|-------|
-| Type | [detected type] |
-| Mode | [Review & Run / Auto-run / Dry-run] |
-| Team | [N teammates: role list] |
-| Models | [Smart defaults / All Sonnet / All Opus / All Haiku] |
-| Plan approval | [Auto / Always / Never] |
-| Quality gates | tests + lint + docs *(default)* |
-| Output style | standard *(default)* |
-| Teammate mode | auto *(default)* |
-
-**Additional flags you can add manually:**
-- `--quality-gates "custom string"` — change quality standards
-- `--output-style concise|verbose` — adjust task detail level
-- `--teammate-mode in-process|tmux` — force display mode
-
-Copy the command above and paste it to run, or provide feedback to adjust.
-
----
+The `/orchestrate` command will handle showing the review, letting the user edit, and confirming before execution. Your job is done after invoking it.
 
 ## Rules
 
-1. Always detect and display the prompt type before asking questions.
-2. Show the team roles with their smart model defaults so users can see what "auto" means.
-3. Adapt model descriptions to the detected prompt type (don't show generic text).
-4. Only include flags in the output command that differ from defaults — if the user picks all recommended options, the command should be just `/orchestrate [TASK]` with no flags.
-5. If the user provides feedback after seeing the summary, adjust and show the updated command.
-6. Keep the interaction concise — 2 steps max (preview + questions), then show the command.
-7. Do NOT execute the orchestration yourself. Your job is to produce the command for the user to run.
+1. Always detect and display the prompt type before asking config questions.
+2. Show team roles with smart model defaults so users see what "auto" means.
+3. Adapt model descriptions to the detected prompt type.
+4. Only include flags that differ from defaults.
+5. After receiving config answers, IMMEDIATELY invoke the Skill tool. Do NOT display a summary table, settings table, flags list, or "copy the command" text.
+6. The review/edit/go flow is handled by `/orchestrate` itself — do not duplicate it here.

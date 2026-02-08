@@ -250,17 +250,43 @@ After generating the orchestration prompt internally (sections 2-8), follow the 
 3. Output ONLY the orchestration prompt. No preamble, no commentary, no closing remarks.
 
 ### Review & Run Mode (default — no flag)
-1. Do NOT output the full orchestration prompt. Instead, present a compact summary:
-   - **Type detected**: (e.g., "Debugging/Incident")
-   - **Team**: list teammate roles and count (e.g., "3 teammates: Hypothesis-A Tester, Repro Builder, Fix Proposer")
-   - **Tasks**: total count and key deliverables (e.g., "8 tasks covering root cause analysis, reproduction, and fix")
-   - **Settings**: model, plan approval, quality gates (e.g., "Sonnet, plan approval on, tests + lint")
-2. Then ask: **"Say 'go' to execute, 'show' to see the full prompt, or provide feedback to adjust."**
-3. Wait for user response:
-   - **"go"** (or clear approval): Execute the orchestration prompt directly — create the team, spawn teammates, build the task list, and coordinate as team lead. Follow all 8 sections as instructions.
-   - **"show"**: Display the full orchestration prompt in a code block (without enablement block since you're already in Claude Code), then ask again.
-   - **Feedback/adjustments**: Incorporate the feedback, regenerate the plan, show the updated summary, and ask again.
-   - **"cancel"**: Stop. Do not execute.
+1. Do NOT output the full orchestration prompt. Instead, present a review screen with the original prompt and a compact summary:
+
+   ---
+
+   **Your prompt:**
+
+   > [Display the user's FULL original task prompt here, exactly as provided (excluding --flags)]
+
+   **Plan summary:**
+   - **Type**: [detected type] (e.g., "Debugging/Incident")
+   - **Team**: [count] teammates — [role list] (e.g., "3 teammates — Hypothesis-A Tester, Repro Builder, Fix Proposer")
+   - **Tasks**: [total count] covering [key deliverables] (e.g., "8 tasks covering root cause analysis, reproduction, and fix")
+   - **Models**: [model assignment] (e.g., "Opus for Architect, Sonnet for rest")
+   - **Plan approval**: [on/off/auto]
+   - **Quality gates**: [gates]
+
+   ---
+
+2. **CRITICAL: You MUST use AskUserQuestion here — do NOT use plain text like "say go" or "type show". The user expects interactive buttons.**
+
+   Use AskUserQuestion with this question:
+
+   **Question: Ready to go? (header: "Go")**
+   Options:
+   1. **"Go (Recommended)"** — description: "Execute this orchestration now"
+   2. **"Edit prompt"** — description: "Modify the task prompt before running"
+   3. **"Show full plan"** — description: "See the complete orchestration prompt before deciding"
+   4. **"Cancel"** — description: "Stop, don't execute anything"
+
+   Then WAIT for the user's response.
+
+3. Based on the user's answer:
+   - **Go**: Execute the orchestration prompt directly — create the team, spawn teammates, build the task list, and coordinate as team lead. Follow all 8 sections as instructions.
+   - **Edit prompt**: Display the current task prompt and ask the user to provide an updated version. Then regenerate the plan with the new prompt and return to step 1 to show the updated review screen.
+   - **Show full plan**: Display the full orchestration prompt in a code block (without enablement block since you're already in Claude Code). Then use AskUserQuestion again with the same options (Go / Edit prompt / Cancel) so the user can decide after reviewing.
+   - **Cancel**: Stop. Do not execute.
+   - **Other (free text)**: Treat as feedback/adjustments. Incorporate the feedback, regenerate the plan, and return to step 1 to show the updated review screen.
 
 ### Auto-Run Mode (`--auto-run`)
 1. Do NOT output the full orchestration prompt or wait for approval.
