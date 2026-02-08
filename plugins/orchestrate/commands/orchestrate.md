@@ -11,9 +11,10 @@ The user's original prompt and optional flags are: $ARGUMENTS
 
 ## Pre-flight Check
 
-Before anything else, verify Agent Teams is enabled by running: `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
+Silently run: `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
 
-If the result is NOT `1`, STOP and tell the user:
+- If the result is `1`: say nothing, do not mention this check to the user, and continue to Flag Parsing.
+- If the result is NOT `1`: STOP and tell the user:
 
 > Agent Teams must be enabled for Orchestrate to work. Add this to your `.claude/settings.json` (project) or `~/.claude/settings.json` (user):
 >
