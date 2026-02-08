@@ -1,21 +1,32 @@
 # Generous Corp Marketplace
 
-Official Claude Code plugin marketplace and Codex skills for Generous Corp.
+Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md`) you can use with **OpenAI Codex** and **Claude Code**.
 
-## Codex Skills
+## Contents
 
-- **[claude](https://github.com/danielraffel/generous-corp-marketplace/tree/master/skills/claude)** - When using Codex ask $claude for tips
+- [Plugins Available](#plugins-available)
+- [Skills Available](#skills-available)
+- [Installation](#installation)
+  - [Claude Code: Add the Marketplace + Install Plugins](#claude-code-add-the-marketplace--install-plugins)
+  - [OpenAI Codex: Install Skills](#openai-codex-install-skills)
+  - [Claude Code: Install Skills](#claude-code-install-skills)
+- [Links](#links)
+- [License](#license)
 
-## Claude Code Plugins
+## Plugins Available
 
-- **[worktree-manager](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager)** - Effortless git worktrees for parallel development with automatic environment setup
-- **[chainer](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/chainer)** - Universal plugin orchestration for Claude Code
-- **[prompt-repeater](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/prompt-repeater)** - Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks
-- **[design-partner](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner)** - AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes
+- **[worktree-manager](plugins/worktree-manager)** - Effortless git worktrees for parallel development with automatic environment setup
+- **[chainer](plugins/chainer)** - Universal plugin orchestration for Claude Code
+- **[prompt-repeater](plugins/prompt-repeater)** - Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks
+- **[design-partner](plugins/design-partner)** - AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes
+
+## Skills Available
+
+- **[claude](skills/claude)** - A Codex/Claude Code skill that routes a task to Anthropic Claude (for “consult Claude” workflows) and returns the result.
 
 ## Installation
 
-### Add the Marketplace
+### Claude Code: Add the Marketplace + Install Plugins
 
 In Claude Code, run:
 
@@ -23,29 +34,71 @@ In Claude Code, run:
 /plugin marketplace add danielraffel/generous-corp-marketplace
 ```
 
-### Install Plugins
+Then install plugins:
 
-**Worktree Manager**:
-```bash
+Worktree Manager:
+```
 /plugin install worktree-manager@generous-corp-marketplace
 ```
 
-**Chainer**:
-```bash
+Chainer:
+```
 /plugin install chainer@generous-corp-marketplace
 ```
 
-**Prompt Repeater**:
-```bash
+Prompt Repeater:
+```
 /plugin install prompt-repeater@generous-corp-marketplace
 ```
 
-**Design Partner**:
-```bash
+Design Partner:
+```
 /plugin install design-partner@generous-corp-marketplace
 ```
 
 Then restart Claude Code.
+
+---
+
+### OpenAI Codex: Install Skills
+
+Codex scans for skills in repo or user locations under .agents/skills. Recommended options:
+ - Per-repo (share with a team): <repo>/.agents/skills/<skill-name>/
+ - User-wide: ~/.agents/skills/<skill-name>/
+
+Example: install this repo’s claude skill user-wide via symlink:
+```
+git clone https://github.com/danielraffel/generous-corp-marketplace
+cd generous-corp-marketplace
+
+mkdir -p ~/.agents/skills
+ln -s "$(pwd)/skills/claude" ~/.agents/skills/claude
+```
+
+Usage in Codex:
+ - Run /skills (or type $claude) to select a skill, or invoke it directly when relevant.
+
+---
+
+### Claude Code: Install Skills
+
+Claude Code loads skills from:
+ - Personal: ~/.claude/skills/<skill-name>/SKILL.md
+ - Project: .claude/skills/<skill-name>/SKILL.md
+
+Example: symlink the same claude skill into your personal Claude skills folder:
+```
+git clone https://github.com/danielraffel/generous-corp-marketplace
+cd generous-corp-marketplace
+
+mkdir -p ~/.claude/skills
+ln -s "$(pwd)/skills/claude" ~/.claude/skills/claude
+```
+
+Usage in Claude Code:
+ - Invoke directly with /claude ... (or let it trigger based on its description).
+
+---
 
 ## Links
 
@@ -53,7 +106,7 @@ Then restart Claude Code.
 - [Chainer Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/)
 - [Prompt Repeater Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/)
 - [Design Partner Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/)
-- [Generous Corp](https://www.generouscorp.com/)
+- [Generous Corp](https://www.generouscorp.com/projects.html)
 
 ## License
 
