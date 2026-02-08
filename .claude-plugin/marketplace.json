@@ -39,7 +39,7 @@
       "name": "orchestrate",
       "source": "./plugins/orchestrate",
       "description": "Transform any task description into a structured agent team orchestration prompt",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "author": {
         "name": "Daniel Raffel"
       },

@@ -50,7 +50,7 @@ When you receive all 4 answers, look at Q4:
 - Always approval → `--require-plan-approval true` | Never → `--require-plan-approval false`
 - Default/Auto/Recommended selections → no flags
 
-Then call: Skill(skill: "orchestrate", args: "[prompt] [flags]")
+Then call: Skill(skill: "orchestrate:orchestrate", args: "[prompt] [flags]")
 
 **If Q4 = "Show command"**: Display the `/orchestrate [prompt] [flags]` command as text.
 

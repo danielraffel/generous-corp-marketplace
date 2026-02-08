@@ -135,7 +135,7 @@ In Review & Run or Auto-Run mode: skip this section entirely (you are already ex
 ```
 ## Goal
 
-[The user's original prompt VERBATIM, excluding any --flags]
+[In Review & Run mode: use the improved/enhanced prompt that the user approved. In Auto-Run or Dry-Run mode: use the user's original prompt VERBATIM, excluding any --flags.]
 ```
 
 ### Section 3: Team Setup
@@ -250,13 +250,24 @@ After generating the orchestration prompt internally (sections 2-8), follow the 
 3. Output ONLY the orchestration prompt. No preamble, no commentary, no closing remarks.
 
 ### Review & Run Mode (default — no flag)
-1. Do NOT output the full orchestration prompt. Instead, present a review screen with the original prompt and a compact summary:
+1. First, **improve the user's prompt**. Rewrite it into a clear, structured goal statement while preserving the original intent. The improved prompt should:
+   - Be specific about what needs to be done and what "done" looks like
+   - Add scope boundaries (what's in/out)
+   - Clarify deliverables
+   - Keep it concise (2-4 sentences max)
+   - NOT change the user's intent — only clarify and structure it
+
+   For example: "lets review the project and figure out what's left" → "Conduct a gap analysis comparing the current project against the reference implementation. Identify missing features, incomplete functionality, and remaining work items. Produce a prioritized list of gaps with effort estimates."
+
+2. Then present a review screen showing the **improved** prompt and a compact summary:
 
    ---
 
-   **Your prompt:**
+   **Enhanced prompt:**
 
-   > [Display the user's FULL original task prompt here, exactly as provided (excluding --flags)]
+   > [Display the IMPROVED version of the user's prompt]
+
+   *Original: [user's original prompt in italics for reference]*
 
    **Plan summary:**
    - **Type**: [detected type] (e.g., "Debugging/Incident")
@@ -268,25 +279,25 @@ After generating the orchestration prompt internally (sections 2-8), follow the 
 
    ---
 
-2. **CRITICAL: You MUST use AskUserQuestion here — do NOT use plain text like "say go" or "type show". The user expects interactive buttons.**
+3. **CRITICAL: You MUST use AskUserQuestion here — do NOT use plain text like "say go" or "type show". The user expects interactive buttons.**
 
    Use AskUserQuestion with this question:
 
    **Question: Ready to go? (header: "Go")**
    Options:
-   1. **"Go (Recommended)"** — description: "Execute this orchestration now"
-   2. **"Edit prompt"** — description: "Modify the task prompt before running"
-   3. **"Show full plan"** — description: "See the complete orchestration prompt before deciding"
-   4. **"Cancel"** — description: "Stop, don't execute anything"
+   1. **"Go (Recommended)"** — description: "Execute with the enhanced prompt"
+   2. **"Edit prompt"** — description: "Modify the prompt before running"
+   3. **"Use original"** — description: "Run with original prompt instead"
+   4. **"Show full plan"** — description: "See the complete orchestration prompt"
 
    Then WAIT for the user's response.
 
-3. Based on the user's answer:
-   - **Go**: Execute the orchestration prompt directly — create the team, spawn teammates, build the task list, and coordinate as team lead. Follow all 8 sections as instructions.
-   - **Edit prompt**: Display the current task prompt and ask the user to provide an updated version. Then regenerate the plan with the new prompt and return to step 1 to show the updated review screen.
-   - **Show full plan**: Display the full orchestration prompt in a code block (without enablement block since you're already in Claude Code). Then use AskUserQuestion again with the same options (Go / Edit prompt / Cancel) so the user can decide after reviewing.
-   - **Cancel**: Stop. Do not execute.
-   - **Other (free text)**: Treat as feedback/adjustments. Incorporate the feedback, regenerate the plan, and return to step 1 to show the updated review screen.
+4. Based on the user's answer:
+   - **Go**: Execute the orchestration using the **improved** prompt as the Goal (Section 2). Create the team, spawn teammates, build the task list, and coordinate as team lead. Follow all 8 sections as instructions.
+   - **Edit prompt**: Display the improved prompt and ask the user to provide their own version. Then regenerate the plan with the edited prompt and return to step 2 to show the updated review screen.
+   - **Use original**: Execute the orchestration using the user's **original** prompt verbatim as the Goal. Follow all 8 sections as instructions.
+   - **Show full plan**: Display the full orchestration prompt in a code block (without enablement block since you're already in Claude Code). Then use AskUserQuestion again with the same options so the user can decide after reviewing.
+   - **Other (free text)**: Treat as feedback/adjustments. Incorporate the feedback, regenerate the plan, and return to step 2 to show the updated review screen.
 
 ### Auto-Run Mode (`--auto-run`)
 1. Do NOT output the full orchestration prompt or wait for approval.
