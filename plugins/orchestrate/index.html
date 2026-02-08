@@ -619,7 +619,7 @@
                             <tr>
                                 <td><code>--require-plan-approval</code></td>
                                 <td><code>auto</code></td>
-                                <td>Require lead approval before code changes. Auto enables for code work.</td>
+                                <td>Require lead approval before code changes. System-enforced via <code>mode: "plan"</code>. Auto enables for code work.</td>
                             </tr>
                             <tr>
                                 <td><code>--teammate-mode</code></td>
@@ -670,8 +670,8 @@
                         <div class="faq-question" onclick="toggleFaq(this)">What are Agent Teams?</div>
                         <div class="faq-answer">
                             <p>Agent Teams is an experimental Claude Code feature that lets you spawn multiple AI teammates that work in parallel on a shared task list. A team lead coordinates, and teammates communicate via messages.</p>
-                            <p>It's disabled by default. Enable it by adding <code>"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"</code> to your settings.json env, or set the environment variable before starting Claude Code.</p>
-                            <p>See the <a href="https://code.claude.com/docs/en/agent-teams">Agent Teams documentation</a> for full details.</p>
+                            <p>It's disabled by default. Enable it by adding <code>"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"</code> to your settings.json env, or set the environment variable before starting Claude Code. Orchestrate checks this automatically and will guide you through setup if it's not enabled.</p>
+                            <p>See <a href="https://code.claude.com/docs/en/agent-teams#enable-agent-teams">Enable Agent Teams</a> for setup details, or the full <a href="https://code.claude.com/docs/en/agent-teams">Agent Teams documentation</a> for how teams work.</p>
                         </div>
                     </div>
                     <div class="faq-item">
@@ -715,6 +715,13 @@
                         </div>
                     </div>
                     <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Is plan approval actually enforced?</div>
+                        <div class="faq-answer">
+                            <p>Yes — it's system-enforced, not just a prompt suggestion. When plan approval is on, Orchestrate spawns teammates with <code>mode: "plan"</code> in the Task tool call. This means teammates physically cannot call Edit or Write tools until the lead approves their plan. This works regardless of your permission settings (including bypass mode).</p>
+                            <p>By default (<code>--require-plan-approval auto</code>), plan approval is enabled for code work (features, refactors, debugging with fixes) and disabled for pure research tasks.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">What's the difference between message and broadcast?</div>
                         <div class="faq-answer">
                             <p><code>message</code> sends to one specific teammate. Use it for targeted updates, sharing findings relevant to another's work, or challenging assumptions.</p>
@@ -731,8 +738,8 @@
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">Do I need to install anything else?</div>
                         <div class="faq-answer">
-                            <p>Just <a href="https://claude.ai/code">Claude Code</a> with Agent Teams enabled. Orchestrate is a pure prompt engineering plugin - no dependencies, no build steps, no MCP servers.</p>
-                            <p>The generated prompt works with Claude Code's built-in agent team functionality.</p>
+                            <p>Just <a href="https://claude.ai/code">Claude Code</a> with <a href="https://code.claude.com/docs/en/agent-teams#enable-agent-teams">Agent Teams enabled</a>. Orchestrate is a pure prompt engineering plugin — no dependencies, no build steps, no MCP servers.</p>
+                            <p>Orchestrate checks for Agent Teams automatically when you run it. If it's not enabled, you'll get setup instructions and a link to the docs.</p>
                         </div>
                     </div>
                 </div>

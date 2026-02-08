@@ -92,7 +92,7 @@ All flags are optional with strong defaults. Most users won't need them.
 | `--dry-run` | *(boolean)* | off | Output the raw orchestration prompt as text only (legacy copy/paste mode). |
 | `--team-size` | `auto`, `2`-`6` | `auto` | Number of teammates. Auto picks 2-5 based on task complexity. |
 | `--models` | `auto`, `sonnet`, `haiku`, `opus`, custom | `auto` | Model for teammates. Auto assigns Opus to key reasoning roles, Sonnet to rest. |
-| `--require-plan-approval` | `auto`, `true`, `false` | `auto` | Require lead to approve plans before code changes. Auto enables for code work. |
+| `--require-plan-approval` | `auto`, `true`, `false` | `auto` | Require lead to approve plans before code changes. System-enforced via `mode: "plan"`. Auto enables for code work. |
 | `--teammate-mode` | `auto`, `in-process`, `tmux` | `auto` | Display mode. Auto lets Claude Code decide (tmux if available). |
 | `--quality-gates` | string | `"tests + lint + docs where relevant"` | Quality standards teammates must meet. |
 | `--output-style` | `concise`, `standard`, `verbose` | `standard` | Controls task count and description detail. |
@@ -123,7 +123,8 @@ Use `--models sonnet` to override with all-Sonnet (most cost-efficient) or `--mo
 
 ## How it works
 
-1. **Parses flags** from your input (everything else is the original prompt)
+1. **Checks prerequisites** — verifies Agent Teams is enabled, shows setup instructions if not
+2. **Parses flags** from your input (everything else is the original prompt)
 2. **Detects prompt type**: debugging, feature, refactor, or research
 3. **Selects roles** appropriate to the prompt type
 4. **Generates an orchestration plan** with 8 sections:
@@ -158,7 +159,7 @@ Or set the environment variable before starting Claude Code:
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ```
 
-The generated orchestration prompt also includes these enablement instructions at the top, so if you forget, you'll be reminded.
+Orchestrate checks this automatically before running — if Agent Teams isn't enabled, it'll tell you exactly what to add and link to the docs.
 
 For full details on agent teams (display modes, plan approval, delegate mode, messaging, limitations), see the [Agent Teams documentation](https://code.claude.com/docs/en/agent-teams).
 
