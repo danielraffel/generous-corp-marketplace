@@ -22,7 +22,7 @@ Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md
 
 ## Skills Available
 
-- **[claude](skills/claude)** - A Codex/Claude Code skill that routes a task to Anthropic Claude (for “consult Claude” workflows) and returns the result.
+- **[claude](skills/claude)** - A skill designed for use in a CLI like Codex to route a task to Anthropic Claude (for “consult Claude” workflows) and returns the result.
 
 ## Installation
 
