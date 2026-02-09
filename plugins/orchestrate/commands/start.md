@@ -30,6 +30,15 @@ Silently run: `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
 
 Do NOT proceed with orchestration if the check fails.
 
+## Plugin Detection
+
+Silently read `~/.claude/plugins/installed_plugins.json`. Do NOT print anything to the user about this check — no "checking plugins", no "detected X", no "consider installing Y". This is purely internal state used later when composing spawn descriptions.
+
+1. Read the file silently. If it doesn't exist or can't be parsed as JSON, treat as empty and continue.
+2. Check for the key `frontend-design@claude-plugins-official`. If present, store internally: `has_frontend_design = true`.
+3. Check for the key `feature-dev@claude-plugins-official`. If present, store internally: `has_feature_dev = true`.
+4. Continue to Flag Parsing. Never mention this check or its results to the user.
+
 ## Flag Parsing
 
 Parse flags from the input. Flags use `--flag-name value` syntax. Boolean flags (`--auto-run`, `--dry-run`) take no value. Everything not part of a `--flag value` pair is the original prompt. Apply these defaults for unspecified flags:
@@ -56,10 +65,11 @@ Parse flags from the input. Flags use `--flag-name value` syntax. Boolean flags 
     - Feature: Architect=Opus, all others=Sonnet
     - Refactor: Architect/Code Owner=Opus, all others=Sonnet
     - Research: Synthesizer=Opus, all others=Sonnet
+    - Design/UI: Design Lead=Opus, all others=Sonnet
   explicit values: sonnet (all same), haiku (all same), opus (all same), or a custom model string (e.g. "claude-sonnet-4-5-20250929")
 
 - `--require-plan-approval auto`
-  auto = true when the prompt implies code changes (feature, refactor, debugging with fixes), false for pure research/review/investigation
+  auto = true when the prompt implies code changes (feature, refactor, debugging with fixes, design/UI), false for pure research/review/investigation
   true = all teammates must submit plans and get lead approval before making code changes
   false = teammates proceed directly without plan approval
 
@@ -75,9 +85,9 @@ Parse flags from the input. Flags use `--flag-name value` syntax. Boolean flags 
     "research log + recommendation + tradeoffs"
 
 - `--output-style standard`
-  concise = minimal task descriptions, fewer tasks per teammate (1-2)
-  standard = clear deliverables, boundaries, and 2-3 tasks per teammate
-  verbose = detailed instructions per teammate, 3-4 tasks each, explicit file ownership, step-by-step guidance
+  concise = minimal task descriptions, fewer tasks per teammate (3-4)
+  standard = clear deliverables, boundaries, and 5-6 tasks per teammate
+  verbose = detailed instructions per teammate, 6-8 tasks each, explicit file ownership, step-by-step guidance
 
 ## Prompt Type Detection
 
@@ -87,6 +97,9 @@ Analyze the original prompt (excluding flags) and classify into ONE category:
 **New Feature** - signals: add, implement, create, build, new, feature, support for, integrate, endpoint, page, component, webhook, notification, authentication
 **Refactor** - signals: refactor, restructure, reorganize, migrate, upgrade, modernize, extract, simplify, clean up, rename, decouple, consolidate, split, move
 **Research/Decision** - signals: evaluate, compare, investigate options, should we, which, recommend, research, decide, assess, tradeoffs, RFC, proposal, ADR, choose between
+**Design/UI** - signals: design, UI, UX, interface, layout, landing page, dashboard, page design, wireframe, mockup, prototype, responsive, mobile design, styling, theme, dark mode, visual, aesthetic, typography, color palette, component library, design system
+
+If both Design/UI and New Feature signals are present: Design/UI wins when the prompt emphasizes appearance, aesthetics, layout, or visual direction. New Feature wins when the prompt emphasizes functionality, data flow, or backend logic.
 
 If the prompt doesn't clearly match one category, pick the closest fit. If truly ambiguous, default to Research/Decision.
 
@@ -121,6 +134,12 @@ Based on detected prompt type, select roles. Adapt role descriptions to the spec
 - **Synthesizer**: Compares findings across options. Produces a structured comparison with clear recommendation.
 - **Devil's Advocate**: Argues against the emerging consensus. Ensures the team doesn't anchor on the first plausible answer.
 - **Implementation Scout**: (optional, for larger tasks) Prototypes the top candidate to validate feasibility.
+
+### Design/UI (default 3-4 teammates)
+- **Design Lead**: Defines aesthetic direction, color palette, typography, spacing system, and component hierarchy. Produces a design brief or style guide.
+- **Frontend Engineer**: Implements the UI — HTML, CSS, JS/TS, framework components. Translates the design direction into production code.
+- **Accessibility/Responsiveness Reviewer**: Reviews for WCAG compliance, responsive breakpoints, cross-browser compatibility, and semantic HTML.
+- **UX Critic**: Challenges layout choices, interaction patterns, and information hierarchy. Tests edge cases (long text, empty states, error states, loading states).
 
 When `--team-size` is 2, pick the two most impactful roles. When 3, pick three. Etc. Scale task counts with output-style.
 
@@ -165,6 +184,8 @@ In Review & Run or Auto-Run mode: skip this section entirely (you are already ex
 
 Create an Agent Team to accomplish the goal above. You are the team lead. Your job is to coordinate, NOT to implement. Use delegate mode (Shift+Tab) to restrict yourself to coordination-only tools.
 
+Teammates automatically load CLAUDE.md from the working directory. Project conventions, coding standards, or architectural guidelines in CLAUDE.md will be followed by all teammates.
+
 Spawn the following teammates [using MODEL for each]:
 
 1. **ROLE** - [Description adapted to the specific prompt. Include enough context in each spawn prompt so the teammate can work independently without the lead's conversation history.]
@@ -181,6 +202,10 @@ Rules for this section:
 - If `--require-plan-approval` resolves to true: add "Require plan approval for all teammates before they make code changes. Review each plan against the quality gates below. Reject plans that modify files already assigned to another teammate, skip testing, or don't address the specific deliverable." **Additionally, when spawning teammates you MUST set `mode: "plan"` in each Task tool call.** This is system-enforced — teammates physically cannot call Edit or Write tools until the lead approves their plan via `plan_approval_response`.
 - If `--require-plan-approval` resolves to false: don't mention plan approval.
 - Include specific context from the original prompt in each teammate's spawn description so they have enough information to work independently (teammates don't inherit the lead's conversation history).
+- If `frontend-design` plugin is detected as installed: add to the Frontend Engineer's spawn description: "The frontend-design skill is available — use it for distinctive, production-grade aesthetics."
+- If `feature-dev` plugin is detected as installed: add to the Design Lead's spawn description: "The code-architect agent is available — use it for architecture blueprints." Add to the Accessibility/Responsiveness Reviewer's spawn description: "The code-reviewer agent is available — use it for quality review."
+- These enhancements apply to ANY prompt type where the relevant roles exist (e.g., Frontend Engineer in Feature teams also benefits from frontend-design if detected).
+- Never mention plugins that aren't detected. Never suggest installing them.
 
 ### Section 4: Task List
 ```
@@ -195,13 +220,12 @@ Create a shared task list with these tasks. Assign ownership to specific teammat
 ```
 
 Rules:
-- concise style: 1-2 tasks per teammate, brief descriptions
-- standard style: 2-3 tasks per teammate, clear deliverables
-- verbose style: 3-4 tasks per teammate, detailed step-by-step
+- concise style: 3-4 tasks per teammate, brief descriptions
+- standard style: 5-6 tasks per teammate, clear deliverables
+- verbose style: 6-8 tasks per teammate, detailed step-by-step
 - Tasks must avoid same-file edits across teammates
 - Use dependencies (#N) to sequence work that builds on prior tasks
 - Include specific file paths or directories when the prompt provides enough context
-- Aim for 5-6 tasks per teammate to keep them productive (per docs best practice)
 
 ### Section 5: Communication
 ```
@@ -226,12 +250,21 @@ Rules:
 - No file should be edited by more than one teammate. If a conflict is discovered, the second teammate must message the lead to resolve ownership.
 - Lint/format checks must pass.
 - If making architectural changes, document the rationale.
+- **Verification before completion**: Before marking ANY task complete, the teammate MUST: (1) run tests and lint, (2) include the test/lint output in the completion message, (3) list all files changed. Completions missing this evidence should be rejected by the lead.
 [If plan approval is enabled:] The lead should reject plans that don't include test coverage or that modify files assigned to another teammate.
 
-[For research/design work:]
+[For research work:]
 - Each analysis must include a "what I checked" log: files read, docs consulted, experiments run.
 - Findings must include specific evidence (benchmarks, code references, case studies), not just opinions.
 - Final recommendation must include explicit tradeoffs and risks.
+- **Verification before completion**: Before marking ANY task complete, the teammate MUST include a "what I checked" log and cite specific evidence (file paths, doc URLs, benchmark numbers). Completions with only opinions or summaries should be rejected by the lead.
+
+[For design/UI work:]
+- Visual consistency: colors, spacing, and typography must follow the design brief.
+- Responsive: layouts must work at mobile (375px), tablet (768px), and desktop (1280px+).
+- Accessibility: semantic HTML, sufficient color contrast, keyboard navigable.
+- Edge states: empty states, error states, loading states, and long content must be handled.
+- **Verification before completion**: Before marking ANY task complete, the teammate MUST include screenshots or describe the visual result at key breakpoints. Completions without visual verification should be rejected by the lead.
 ```
 
 Adapt quality gates based on `--quality-gates` flag value and prompt type. Use the flag value as the primary statement, then add type-specific details.
@@ -244,10 +277,11 @@ As team lead, you MUST:
 1. Create the team and task list, then WAIT for teammates to complete their work. Do NOT implement tasks yourself. Stay in delegate mode.
 2. Monitor teammate progress via their status messages and task list updates. If a teammate appears stuck, message them with specific guidance or reassign their tasks to another teammate.
 3. [If plan approval enabled:] Review and approve/reject teammate plans. Reject plans that don't meet quality gates, modify shared files, or miss the deliverable scope.
-4. When all tasks are complete, synthesize findings into a clear summary:
+4. Verify completion messages include required evidence: for code work, check for test/lint output and files-changed list; for research, check for "what I checked" log and specific citations. Reject completions missing evidence and ask the teammate to re-submit.
+5. When all tasks are complete, synthesize findings into a clear summary:
    [For code work:] List all files changed, tests added/modified, lint/format status, and any remaining TODOs.
    [For research:] Present the structured comparison, recommendation with confidence level, dissenting views, and concrete next steps.
-5. After synthesis, proceed to shutdown and cleanup.
+6. After synthesis, proceed to shutdown and cleanup.
 ```
 
 ### Section 8: Shutdown & Cleanup
@@ -280,7 +314,7 @@ After generating the orchestration prompt internally (sections 2-8), follow the 
 
    For example: "lets review the project and figure out what's left" → "Conduct a gap analysis comparing the current project against the reference implementation. Identify missing features, incomplete functionality, and remaining work items. Produce a prioritized list of gaps with effort estimates."
 
-2. Then present a review screen showing the **improved** prompt and a compact summary:
+2. Silently run `echo $TMUX` to detect tmux availability. Then present a review screen showing the **improved** prompt and a compact summary:
 
    ---
 
@@ -296,6 +330,7 @@ After generating the orchestration prompt internally (sections 2-8), follow the 
    - **Tasks**: [total count] covering [key deliverables] (e.g., "8 tasks covering root cause analysis, reproduction, and fix")
    - **Models**: [model assignment] (e.g., "Opus for Architect, Sonnet for rest")
    - **Plan approval**: [on/off/auto]
+   - **Display**: [Only show this line if `--teammate-mode` was explicitly set by the user (show that value), OR if `$TMUX` is non-empty (show "Split panes (tmux detected)"). If `$TMUX` is empty and no explicit mode was set, omit this line entirely.]
    - **Quality gates**: [gates]
 
    ---

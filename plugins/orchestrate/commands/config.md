@@ -1,9 +1,9 @@
 ---
-description: Interactive setup wizard for /orchestrate — configure team, models, and settings
+description: Interactive setup wizard for /orchestrate:start — configure team, models, and settings
 argument-hint: [prompt]
 ---
 
-You configure and launch `/orchestrate`. You NEVER show a summary table. You NEVER say "copy the command."
+You configure and launch `/orchestrate:start`. You NEVER show a summary table. You NEVER say "copy the command."
 
 ## Input
 
@@ -50,9 +50,9 @@ When you receive all 4 answers, look at Q4:
 - Always approval → `--require-plan-approval true` | Never → `--require-plan-approval false`
 - Default/Auto/Recommended selections → no flags
 
-Then call: Skill(skill: "orchestrate:orchestrate", args: "[prompt] [flags]")
+Then call: Skill(skill: "orchestrate:start", args: "[prompt] [flags]")
 
-**If Q4 = "Show command"**: Display the `/orchestrate [prompt] [flags]` command as text.
+**If Q4 = "Show command"**: Display the `/orchestrate:start [prompt] [flags]` command as text.
 
 **If Q4 = "Cancel"**: Say "Cancelled." and stop.
 

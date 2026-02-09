@@ -197,6 +197,7 @@
             line-height: 1.7;
             margin-top: 1rem;
             white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .code-comment { color: #6a6a6a; }
@@ -387,7 +388,7 @@
                 <div class="col-right">
                     <div class="code-block-wrapper">
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        <div class="code-block"><span class="code-prompt">/</span>orchestrate Fix the login 500 errors after last deploy</div>
+                        <div class="code-block"><span class="code-prompt">/</span>orchestrate:start Fix the login 500 errors after last deploy</div>
                     </div>
                     <div class="example-desc" style="margin-top: 1rem;">
                         Shows a plan summary, then executes directly on approval. No copy/paste needed.
@@ -429,7 +430,7 @@
                 </div>
                 <div class="col-right">
                     <ul class="feature-list">
-                        <li>Auto-detects prompt type: debugging, feature, refactor, or research</li>
+                        <li>Auto-detects prompt type: debugging, feature, refactor, research, or design/UI</li>
                         <li>Selects role-appropriate teammates (2-5 based on complexity)</li>
                         <li>Generates shared task lists with dependencies and file boundaries</li>
                         <li>Reviews plan with you, then executes directly in your session</li>
@@ -437,6 +438,7 @@
                         <li>Smart model defaults: Opus for key thinkers, Sonnet for the rest</li>
                         <li>Interactive setup wizard to configure settings visually</li>
                         <li>Adds type-appropriate quality gates</li>
+                        <li>Detects installed plugins (frontend-design, feature-dev) and enhances teammates automatically</li>
                         <li>Handles shutdown and cleanup automatically</li>
                     </ul>
                 </div>
@@ -485,7 +487,7 @@
             <div class="grid">
                 <div class="col-full">
                     <h3>Examples</h3>
-                    <h2>Four prompt types,<br>four team shapes.</h2>
+                    <h2>Five prompt types,<br>five team shapes.</h2>
                     <p style="max-width: 60ch;">Orchestrate detects what kind of work you're doing and generates the right team structure.</p>
                 </div>
 
@@ -494,7 +496,7 @@
                         <div class="example-title">Debugging</div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-prompt">/</span>orchestrate The login endpoint returns 500 errors intermittently after the last deploy</div>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate:start The login endpoint returns 500 errors intermittently after the last deploy</div>
                         </div>
                         <div class="example-desc">
                             Hypothesis testers, repro builder, log digger, fix proposer.
@@ -515,7 +517,7 @@
                         <div class="example-title">New Feature</div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-prompt">/</span>orchestrate Implement a real-time notification system with WebSocket backend and bell UI</div>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate:start Implement a real-time notification system with WebSocket backend and bell UI</div>
                         </div>
                         <div class="example-desc">
                             Architect, backend, frontend, tests/QA, reviewer.
@@ -536,7 +538,7 @@
                         <div class="example-title">Refactor</div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-prompt">/</span>orchestrate Refactor the authentication module to use JWT instead of session cookies</div>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate:start Refactor the authentication module to use JWT instead of session cookies</div>
                         </div>
                         <div class="example-desc">
                             Architect, two implementers, tests/regression, devil's advocate.
@@ -557,7 +559,7 @@
                         <div class="example-title">Research</div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-prompt">/</span>orchestrate Evaluate GraphQL vs REST vs gRPC for our microservices API layer</div>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate:start Evaluate GraphQL vs REST vs gRPC for our microservices API layer</div>
                         </div>
                         <div class="example-desc">
                             Researcher, critic, synthesizer, devil's advocate.
@@ -569,6 +571,26 @@
                             <p>2. <strong>Critic</strong> - Stress-tests each option, finds weaknesses</p>
                             <p>3. <strong>Synthesizer</strong> - Compares findings, produces structured comparison</p>
                             <p>4. <strong>Devil's Advocate</strong> - Argues against emerging consensus</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-full">
+                    <div class="example-card">
+                        <div class="example-title">Design/UI</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>orchestrate:start Design a settings page with dark mode toggle, account preferences, and notification controls</div>
+                        </div>
+                        <div class="example-desc">
+                            Design lead, frontend engineer, accessibility reviewer, UX critic.
+                            <span class="learn-more" onclick="toggleDetails(this)">See team</span>
+                        </div>
+                        <div class="details">
+                            <p><strong>Generated team:</strong></p>
+                            <p>1. <strong>Design Lead</strong> - Defines aesthetic direction, color palette, typography, spacing</p>
+                            <p>2. <strong>Frontend Engineer</strong> - Implements the UI, translates design into production code</p>
+                            <p>3. <strong>Accessibility/Responsiveness Reviewer</strong> - Reviews WCAG compliance, responsive breakpoints</p>
+                            <p>4. <strong>UX Critic</strong> - Challenges layout choices, tests edge cases</p>
                         </div>
                     </div>
                 </div>
@@ -640,16 +662,16 @@
                     <div class="code-block-wrapper">
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                         <div class="code-block"><span class="code-comment"># Interactive setup wizard — walks you through all settings</span>
-<span class="code-prompt">/</span>orchestrate-config Fix the checkout bug
+<span class="code-prompt">/</span>orchestrate:config Fix the checkout bug
 
 <span class="code-comment"># Default: review plan, then execute on approval</span>
-<span class="code-prompt">/</span>orchestrate Fix the checkout bug
+<span class="code-prompt">/</span>orchestrate:start Fix the checkout bug
 
 <span class="code-comment"># Skip review, execute immediately</span>
-<span class="code-prompt">/</span>orchestrate Fix the checkout bug --auto-run
+<span class="code-prompt">/</span>orchestrate:start Fix the checkout bug --auto-run
 
 <span class="code-comment"># All-Sonnet for cost savings, raw text output</span>
-<span class="code-prompt">/</span>orchestrate Fix the checkout bug --dry-run --models sonnet</div>
+<span class="code-prompt">/</span>orchestrate:start Fix the checkout bug --dry-run --models sonnet</div>
                     </div>
                 </div>
             </div>
@@ -691,18 +713,19 @@
                         <div class="faq-answer">
                             <p>By default (<code>--models auto</code>), Orchestrate assigns Opus to the key reasoning role on each team — the one making critical design decisions or synthesizing complex findings — and Sonnet to implementation and support roles. This balances quality where it matters most with cost efficiency.</p>
                             <p>For example, on a Feature team the Architect gets Opus while Backend, Frontend, Tests/QA, and Reviewer get Sonnet. On a Debugging team, all roles get Sonnet since the work is primarily tracing and analysis.</p>
-                            <p>Use <code>--models sonnet</code> to force all-Sonnet (cheapest), <code>--models opus</code> for all-Opus (max capability), or <code>/orchestrate-config</code> to choose interactively.</p>
+                            <p>Use <code>--models sonnet</code> to force all-Sonnet (cheapest), <code>--models opus</code> for all-Opus (max capability), or <code>/orchestrate:config</code> to choose interactively.</p>
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">How does prompt type detection work?</div>
                         <div class="faq-answer">
-                            <p>Orchestrate analyzes keywords in your prompt to classify it into one of four categories:</p>
+                            <p>Orchestrate analyzes keywords in your prompt to classify it into one of five categories:</p>
                             <p><strong>Debugging:</strong> bug, fix, error, crash, failing, broken, investigate, regression, 500, timeout, flaky</p>
                             <p><strong>Feature:</strong> add, implement, create, build, new, feature, integrate, endpoint, component</p>
                             <p><strong>Refactor:</strong> refactor, restructure, migrate, upgrade, modernize, extract, simplify, rename</p>
                             <p><strong>Research:</strong> evaluate, compare, investigate options, recommend, assess, tradeoffs, RFC</p>
-                            <p>If ambiguous, it defaults to Research/Decision.</p>
+                            <p><strong>Design/UI:</strong> design, UI, UX, interface, layout, landing page, dashboard, wireframe, mockup, theme, dark mode, visual, aesthetic, typography, color palette</p>
+                            <p>If both Design/UI and Feature signals are present, Design/UI wins when the emphasis is visual/aesthetic; Feature wins when the emphasis is functionality. If ambiguous, it defaults to Research/Decision.</p>
                         </div>
                     </div>
                     <div class="faq-item">
@@ -726,10 +749,52 @@
                         </div>
                     </div>
                     <div class="faq-item">
-                        <div class="faq-question" onclick="toggleFaq(this)">What is /orchestrate-config?</div>
+                        <div class="faq-question" onclick="toggleFaq(this)">What is /orchestrate:config?</div>
                         <div class="faq-answer">
-                            <p>An interactive setup wizard. Instead of memorizing flags, run <code>/orchestrate-config &lt;your task&gt;</code> and it walks you through choosing execution mode, model strategy, and plan approval — then launches <code>/orchestrate</code> directly. No copy/paste needed.</p>
+                            <p>An interactive setup wizard. Instead of memorizing flags, run <code>/orchestrate:config &lt;your task&gt;</code> and it walks you through choosing execution mode, model strategy, and plan approval using Claude Code's <code>AskUserQuestion</code> tool — then launches <code>/orchestrate:start</code> directly. No copy/paste needed.</p>
                             <p>It also shows you the detected task type, the team roles that will be created, and which model each role will use, so you can see exactly what you're getting before you run it.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can I enforce quality gates with hooks?</div>
+                        <div class="faq-answer">
+                            <p>Yes, but through your own settings, not the plugin. Orchestrate doesn't ship hooks because plugin-level hooks fire globally on ALL agent teams, not just Orchestrate's.</p>
+                            <p>You can add hooks to your <code>.claude/settings.json</code> that run automatically on team events:</p>
+                            <p><strong>TaskCompleted</strong> — run tests or lint after each task (e.g., <code>npm test</code>, <code>pytest</code>)</p>
+                            <p><strong>TeammateIdle</strong> — check for merge conflicts when a teammate pauses</p>
+                            <p>See the <a href="https://code.claude.com/docs/en/hooks">Hooks documentation</a> for setup details, or the project README for example configurations.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What are the known limitations?</div>
+                        <div class="faq-answer">
+                            <p><strong>No session resumption</strong> — <code>/resume</code> doesn't restore in-process teammates. If a session ends, start a new orchestration.</p>
+                            <p><strong>One team per session</strong> — clean up the current team before starting a new one.</p>
+                            <p><strong>Shutdown can be slow</strong> — teammates finish their current work before shutting down gracefully.</p>
+                            <p><strong>Teammates inherit lead's permissions</strong> — you can't set per-teammate permission levels at spawn time.</p>
+                            <p><strong>Delegate mode is user-only</strong> — the lead prompt says "use delegate mode" but there's no API to set it programmatically. Toggle it with Shift+Tab.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">When should I use Orchestrate vs regular subagents?</div>
+                        <div class="faq-answer">
+                            <p><strong>Use Orchestrate (agent teams)</strong> when teammates need to communicate, challenge each other's work, or coordinate on shared outcomes. Teams excel at debugging (competing hypotheses), research (critic/advocate patterns), and complex features where design decisions affect multiple implementers.</p>
+                            <p><strong>Use regular subagents (Task tool)</strong> for focused, independent parallel tasks where agents don't need to talk to each other — like running tests, searching code, or doing isolated file edits. Subagents use fewer tokens since there's no inter-agent messaging overhead.</p>
+                            <p>Rule of thumb: if the work benefits from debate or coordination, use Orchestrate. If it's "do these 3 things independently," use subagents directly.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Does Orchestrate work with the frontend-design or feature-dev plugins?</div>
+                        <div class="faq-answer">
+                            <p>Yes, if installed. Orchestrate silently detects them and enhances relevant teammates' instructions — for example, the Frontend Engineer gets a note about the <code>frontend-design</code> skill, and the Design Lead gets a note about the <code>code-architect</code> agent.</p>
+                            <p>No plugins are required — every team works fully standalone. Orchestrate never suggests installing plugins or mentions what it detected.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can I customize which team roles or prompt types are used?</div>
+                        <div class="faq-answer">
+                            <p>Orchestrate is pure prompt engineering — the team roles, prompt type signals, and quality gates are all defined in <code>commands/start.md</code>. To customize: fork the plugin or edit the file directly.</p>
+                            <p>Prompt type signals are in the "Prompt Type Detection" section, roles are in "Role Selection", and quality gates are in "Section 6: Quality Gates". Changes take effect immediately — no build step needed.</p>
                         </div>
                     </div>
                     <div class="faq-item">

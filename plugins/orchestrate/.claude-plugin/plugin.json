@@ -1,6 +1,6 @@
 {
   "name": "orchestrate",
-  "version": "1.0.9",
+  "version": "1.2.0",
   "description": "Generate agent team orchestration prompts from any task description",
   "author": {
     "name": "Daniel Raffel"
