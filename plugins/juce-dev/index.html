@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>juce-dev | Plugin for Claude Code</title>
+    <meta name="description" content="A Claude Code plugin that creates JUCE audio plugin projects from the JUCE-Plugin-Starter template with a streamlined, prompt-driven workflow.">
+
+    <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
+    <meta property="og:title" content="juce-dev">
+    <meta property="og:description" content="Create JUCE audio plugin projects from a starter template — no more 15 sequential shell prompts.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/plugins/juce-dev/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/juce-dev/image.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="juce-dev">
+    <meta name="twitter:description" content="Create JUCE audio plugin projects from a starter template — no more 15 sequential shell prompts.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielraffel/generous-corp-marketplace/refs/heads/master/plugins/juce-dev/image.png">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #b45309;
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: #333;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        .plugin-name {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .code-comment { color: #6a6a6a; }
+        .code-command { color: #fff; font-weight: bold; }
+        .code-prompt { color: var(--accent); user-select: none; }
+
+        .btn {
+            display: inline-block;
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-top: var(--spacing-unit);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #444; color: #fff; }
+        .copy-btn.copied { background: var(--accent); color: #fff; }
+
+        .workflow-card {
+            margin-bottom: 1.5rem;
+        }
+        .workflow-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .workflow-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+        .learn-more {
+            color: var(--accent);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .learn-more:hover { color: var(--text); }
+        .details {
+            display: none;
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .details.open { display: block; }
+
+        .cmd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .cmd-table th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--light-gray);
+            font-weight: 600;
+            border-bottom: 2px solid var(--text);
+        }
+        .cmd-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+            vertical-align: top;
+        }
+        .cmd-table tr:hover {
+            background: #fafafa;
+        }
+        .cmd-table code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            word-break: break-all;
+            white-space: normal;
+        }
+
+        @media (max-width: 768px) {
+            .cmd-table thead {
+                display: none;
+            }
+            .cmd-table, .cmd-table tbody, .cmd-table tr, .cmd-table td {
+                display: block;
+                width: 100%;
+            }
+            .cmd-table tr {
+                margin-bottom: 1.5rem;
+                border: 1px solid var(--light-gray);
+                border-radius: 8px;
+                padding: 1rem;
+                background: #fff;
+            }
+            .cmd-table tr:hover {
+                background: #fff;
+            }
+            .cmd-table td {
+                padding: 0.5rem 0;
+                border-bottom: none;
+            }
+            .cmd-table td:first-child {
+                font-weight: 600;
+                font-size: 1.1rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid var(--light-gray);
+                margin-bottom: 0.5rem;
+            }
+            .cmd-table td:nth-child(2) {
+                padding-top: 0.75rem;
+            }
+            .cmd-table td:nth-child(2)::before {
+                content: "Command: ";
+                font-weight: 600;
+                color: var(--gray);
+                font-size: 0.8rem;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+            .cmd-table td:nth-child(3)::before {
+                content: "What happens: ";
+                font-weight: 600;
+                color: var(--gray);
+                font-size: 0.8rem;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+            .cmd-table code {
+                display: inline-block;
+                word-break: break-all;
+                white-space: normal;
+                font-size: 0.8rem;
+            }
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--gray);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-question::after {
+            content: '−';
+        }
+        .faq-answer {
+            display: none;
+            padding-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #444;
+        }
+        .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+        .faq-item.open .faq-answer { display: block; }
+
+    </style>
+</head>
+<body>
+
+    <main class="container">
+
+        <!-- Hero Section -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <span class="plugin-name">juce-dev</span>
+            <a href="https://code.claude.com/docs/en/plugins" class="tag">Plugin for Claude Code</a>
+            <nav class="nav-links">
+                <a href="#how-it-works">How it works</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#installation">Installation</a>
+                <a href="#commands">Commands</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <h1>Audio plugins<br>from a prompt.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p><b>juce-dev</b> creates JUCE audio plugin projects from the <a href="https://github.com/danielraffel/JUCE-Plugin-Starter">JUCE-Plugin-Starter</a> template. One command replaces 15 sequential shell prompts with a clean, guided workflow.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-prompt">/</span>juce-dev:create "My Cool Synth"</div>
+                    </div>
+                    <div class="workflow-desc" style="margin-top: 1rem;">
+                        Creates a ready-to-build AU/VST3/Standalone project.
+                        <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                    </div>
+                    <div class="details">
+                        <strong>Behind that command:</strong><br>
+                        1. Locates the JUCE-Plugin-Starter template<br>
+                        2. Loads your developer settings from .env<br>
+                        3. Asks for project config via clean UI prompts<br>
+                        4. Copies template, replaces all placeholders<br>
+                        5. Generates class names, bundle IDs, 4-letter codes<br>
+                        6. Initializes git, optionally creates GitHub repo<br>
+                        7. Ready to build: <code>./scripts/generate_and_open_xcode.sh</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>How It Works</h3>
+                    <h2>Template to project<br>in one step.</h2>
+                </div>
+                <div class="col-right">
+                    <p>The JUCE-Plugin-Starter template comes with an interactive shell script that asks 15+ questions one at a time. Miss one and you start over.</p>
+                    <p><strong>juce-dev replaces that with grouped prompts</strong> using Claude Code's AskUserQuestion UI. Your developer settings are loaded from the template's .env — if they look right, confirm once and move on. Want to change something? Walk through each setting individually.</p>
+                    <p>All settings go to the new project only. The template stays untouched.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Capabilities -->
+        <section id="capabilities">
+            <div class="grid">
+                <div class="col-left">
+                    <h3>Capabilities</h3>
+                    <p>Everything the init script does, with a better interface and optional GPU UI integration.</p>
+                </div>
+                <div class="col-right">
+                    <ul class="feature-list">
+                        <li>Creates AU, VST3, and Standalone plugin projects</li>
+                        <li>Auto-generates class names, namespaces, bundle IDs</li>
+                        <li>Generates valid JUCE 4-letter plugin and manufacturer codes</li>
+                        <li>Replaces all 9 template placeholders across source files</li>
+                        <li>Optional Visage Metal GPU UI integration with patches</li>
+                        <li>Optional DiagnosticKit for user crash reporting</li>
+                        <li>Reuses developer settings from template .env</li>
+                        <li>Initializes git and optionally creates GitHub repos</li>
+                        <li>JUCE fetched via FetchContent with shared cache</li>
+                        <li>Ready to build immediately after creation</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Simple setup.</h2>
+                    <p style="max-width: 60ch;">Requires <a href="https://claude.ai/code">Claude Code</a>, Xcode, and CMake. The <a href="https://github.com/danielraffel/JUCE-Plugin-Starter">JUCE-Plugin-Starter</a> template will be cloned automatically if not found locally.</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                        <div class="code-block" id="install-code">
+<span class="code-comment"># 1. Add the marketplace (in Claude Code)</span>
+/plugin marketplace add danielraffel/generous-corp-marketplace
+
+<span class="code-comment"># 2. Install the plugin</span>
+/plugin install juce-dev@generous-corp-marketplace
+
+<span class="code-comment"># 3. Restart Claude Code</span>
+<span class="code-comment"># Quit and reopen Claude Code to load the plugin</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/juce-dev" class="btn" style="margin: 0;">View on GitHub &rarr;</a>
+                        <div style="color: var(--gray); font-size: 0.9rem;">
+                            After installation, verify with <code style="background: var(--light-gray); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">/juce-dev:create</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commands -->
+        <section id="commands">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Commands</h3>
+                    <h2>Two commands.</h2>
+                    <p style="max-width: 60ch; margin-bottom: 2rem;">Create a new project or add Visage to an existing one.</p>
+                    <table class="cmd-table">
+                        <thead>
+                            <tr>
+                                <th>What you want</th>
+                                <th>Command</th>
+                                <th>What happens</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Create a new plugin</td>
+                                <td><code>/juce-dev:create "My Synth"</code></td>
+                                <td>Copies template, replaces placeholders, generates .env, inits git. Optional: <code>--visage</code> for GPU UI, <code>--no-github</code> to skip repo creation</td>
+                            </tr>
+                            <tr>
+                                <td>Add Visage GPU UI</td>
+                                <td><code>/juce-dev:setup-visage</code></td>
+                                <td>Adds Metal-accelerated Visage UI to an existing JUCE-Plugin-Starter project. Clones Visage, applies patches, replaces editor files</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- What Gets Generated -->
+        <section>
+            <div class="grid">
+                <div class="col-left">
+                    <h3>What Gets Generated</h3>
+                    <h2>From name<br>to namespace.</h2>
+                    <p style="max-width: 40ch;">All identifiers are derived automatically from the plugin name and developer name you provide.</p>
+                </div>
+                <div class="col-right">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># Input</span>
+Plugin name:    "My Cool Synth"
+Developer name: "Generous Corp"
+
+<span class="code-comment"># Generated</span>
+Class name:       MyCoolSynth
+Project folder:   my-cool-synth
+Namespace:        generouscorp
+Bundle ID:        com.generouscorp.my-cool-synth
+Plugin code:      MYCO
+Manufacturer code: GECO</div>
+                    </div>
+                    <div class="workflow-desc" style="margin-top: 1rem;">
+                        9 placeholders replaced across .cpp, .h, .cmake, .txt, .md, and .env files.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>FAQ</h3>
+                    <h2>Common questions.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What do I need installed before using this?</div>
+                        <div class="faq-answer">
+                            <p><strong>Required:</strong></p>
+                            <p>&bull; <strong>Xcode</strong> with command-line tools<br>
+                            &bull; <strong>CMake</strong> (<code>brew install cmake</code>)<br>
+                            &bull; <strong>Claude Code</strong></p>
+                            <p><strong>Optional:</strong></p>
+                            <p>&bull; <strong>gh CLI</strong> (<code>brew install gh</code>) for GitHub repository creation<br>
+                            &bull; <strong>Apple Developer account</strong> for code signing and distribution</p>
+                            <p>JUCE is fetched automatically via CMake FetchContent and cached at <code>~/.juce_cache/</code>. No manual JUCE installation needed.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Does this modify my template's .env?</div>
+                        <div class="faq-answer">
+                            <p><strong>No.</strong> The template's <code>.env</code> is read-only. Developer settings are loaded from it, but all changes are written only to the new project's <code>.env</code>. Your template stays untouched for the next project you create.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Will .env files get committed to git?</div>
+                        <div class="faq-answer">
+                            <p><strong>No.</strong> The JUCE-Plugin-Starter template includes <code>.env</code> in its <code>.gitignore</code>. Your developer credentials, Apple ID, and API keys are never committed or pushed to GitHub.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What is Visage?</div>
+                        <div class="faq-answer">
+                            <p><a href="https://github.com/VitalAudio/visage">Visage</a> is a Metal-based GPU-accelerated UI framework for audio plugins on macOS. It provides rich widgets (text editors, popup menus, sliders), customizable themes, and 60fps rendering.</p>
+                            <p>When you enable Visage, juce-dev clones the Visage repo, applies compatibility patches (keyboard handling, popup positioning, FPS caps, etc.), and replaces the standard JUCE editor with a Visage-powered one.</p>
+                            <p>The <strong>juce-visage</strong> skill is available in Claude Code for ongoing Visage UI development guidance after project creation.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What are JUCE 4-letter codes?</div>
+                        <div class="faq-answer">
+                            <p>JUCE requires two 4-character codes for plugin identification: a <strong>plugin code</strong> (from your plugin name) and a <strong>manufacturer code</strong> (from your developer name). These are used by DAWs like Logic Pro and Ableton to identify your plugin.</p>
+                            <p>juce-dev generates these automatically using the same algorithm as the init script: for multi-word names it takes the first 2 characters of each word; for single words it picks strategic characters. The codes are always uppercase and exactly 4 characters.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can I skip Apple Developer settings?</div>
+                        <div class="faq-answer">
+                            <p><strong>Yes.</strong> Apple Developer settings (Apple ID, Team ID, certificates, app-specific password) are only needed for code signing and distribution. You can skip all of them and add them later to your project's <code>.env</code> when you're ready to distribute.</p>
+                            <p>You can build, test, and develop your plugin locally without any Apple Developer account.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does this compare to the shell script?</div>
+                        <div class="faq-answer">
+                            <p>The <code>init_plugin_project.sh</code> script asks 15+ questions one at a time in a terminal. If you make a mistake, you start over. It only works interactively.</p>
+                            <p>juce-dev does the same thing but uses Claude Code's <code>AskUserQuestion</code> UI for grouped, visual prompts. If your developer settings are already configured, you can confirm them in one step instead of answering each question again. The underlying operations (rsync, sed, git init, gh repo create) are identical.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026</a>
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/juce-dev" style="text-decoration: none;">GitHub Repository ↗</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyInstall(btn) {
+            const code = document.getElementById('install-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleDetails(el) {
+            const details = el.parentElement.nextElementSibling;
+            details.classList.toggle('open');
+            el.textContent = details.classList.contains('open') ? 'Show less' : 'What happens';
+        }
+
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
+        if (window.location.hash) {
+            const target = document.getElementById(window.location.hash.substring(1));
+            if (target && target.classList.contains('faq-question')) {
+                target.parentElement.classList.add('open');
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

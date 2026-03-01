@@ -1,0 +1,14 @@
+{
+  "name": "juce-dev",
+  "version": "1.0.0",
+  "description": "Create and manage JUCE audio plugin projects from the JUCE-Plugin-Starter template",
+  "author": {
+    "name": "Daniel Raffel",
+    "url": "https://danielraffel.me"
+  },
+  "repository": "https://github.com/danielraffel/generous-corp-marketplace",
+  "license": "MIT",
+  "keywords": ["juce", "audio", "plugin", "vst", "au", "daw", "music"],
+  "commands": "./commands/",
+  "skills": "./skills/"
+}
