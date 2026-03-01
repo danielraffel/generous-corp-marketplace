@@ -43,7 +43,7 @@ Verify the install:
 ls ~/.claude/skills/juce-visage/
 ```
 
-You should see `SKILL.md`, `README.md`, and the `templates/` directory.
+You should see `SKILL.md` and `README.md`.
 
 The skill activates automatically when you work on JUCE+Visage integration tasks. If your project doesn't have a `docs/juce-visage-notes.md` file yet, Claude will offer to create one from the built-in template.
 
