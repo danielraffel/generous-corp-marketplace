@@ -28,34 +28,46 @@ When Claude encounters Visage-related work, it reads both the generic skill and 
 Install from the `generous-corp-marketplace` repo (creates the directory if needed):
 
 ```bash
-cd /path/to/generous-corp-marketplace && git pull && mkdir -p ~/.claude/skills/juce-visage && cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/ && echo "✅ Installed to ~/.claude/skills/juce-visage" && ls ~/.claude/skills/juce-visage/
+cd /path/to/generous-corp-marketplace
+git pull
+mkdir -p ~/.claude/skills/juce-visage
+cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
+ls ~/.claude/skills/juce-visage/
 ```
 
 The skill activates automatically when you work on JUCE+Visage integration tasks. If your project doesn't have a `docs/juce-visage-notes.md` file yet, Claude will offer to create one from the built-in template.
 
 ## Updating the Skill
 
-Run the same install command — it pulls latest and copies the files:
+Run the same install commands — pulls latest and copies the files:
 
 ```bash
-cd /path/to/generous-corp-marketplace && git pull && mkdir -p ~/.claude/skills/juce-visage && cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/ && echo "✅ Updated" && ls ~/.claude/skills/juce-visage/
+cd /path/to/generous-corp-marketplace
+git pull
+cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
+ls ~/.claude/skills/juce-visage/
 ```
 
 ### Sparse checkout (if you don't want the full repo)
 
 ```bash
-git clone --filter=blob:none --sparse https://github.com/danielraffel/generous-corp-marketplace.git /tmp/gcm-sparse
+git clone --filter=blob:none --sparse \
+  https://github.com/danielraffel/generous-corp-marketplace.git \
+  /tmp/gcm-sparse
 cd /tmp/gcm-sparse
 git sparse-checkout set skills/juce-visage
 mkdir -p ~/.claude/skills/juce-visage
 cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
-echo "✅ Installed" && ls ~/.claude/skills/juce-visage/
+ls ~/.claude/skills/juce-visage/
 ```
 
 To update a sparse checkout later:
 
 ```bash
-cd /tmp/gcm-sparse && git pull && cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/ && echo "✅ Updated" && ls ~/.claude/skills/juce-visage/
+cd /tmp/gcm-sparse
+git pull
+cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
+ls ~/.claude/skills/juce-visage/
 ```
 
 ### The generic skill
