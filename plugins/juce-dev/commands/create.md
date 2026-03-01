@@ -412,6 +412,85 @@ git branch -M main
 git push -u origin main
 ```
 
+#### 3.9. DiagnosticKit setup (if enabled)
+
+Skip this step if DiagnosticKit was not selected or if GITHUB_USER is empty.
+
+**3.9a. Create the diagnostic repo:**
+
+The diagnostic repo name is `{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics`. Create it via Bash:
+
+```bash
+gh repo create "{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics" --private \
+  --description "{PROJECT_NAME} - Diagnostic Reports (Private)"
+```
+
+If the repo already exists, skip creation. Update `.env` with the repo name:
+```
+DIAGNOSTIC_GITHUB_REPO={GITHUB_USER}/{PROJECT_FOLDER}-diagnostics
+```
+
+**3.9b. Guide the user through PAT creation:**
+
+The DiagnosticKit app needs a fine-grained Personal Access Token (PAT) to create GitHub issues in the diagnostic repo. This token ships inside the built app — end users don't need GitHub accounts.
+
+Use AskUserQuestion to guide the user:
+
+```
+question: "DiagnosticKit needs a GitHub Personal Access Token (PAT) to submit diagnostic issues. Would you like to set this up now?"
+header: "PAT Setup"
+options:
+  - label: "Set up now (Recommended)"
+    description: "I'll guide you through creating a token — takes about 2 minutes"
+  - label: "Skip for now"
+    description: "You can run ./scripts/setup_diagnostic_repo.sh later"
+```
+
+If "Set up now":
+
+1. Tell the user to open this URL in their browser:
+   `https://github.com/settings/tokens?type=beta`
+
+2. Give them these exact instructions:
+   - Click **"Generate new token"**
+   - **Token name:** `{PROJECT_NAME} Diagnostics`
+   - **Expiration:** 1 year (or custom)
+   - **Repository access:** Only select repositories → select `{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics`
+   - **Permissions:** Issues → Read and Write (this is the ONLY permission needed)
+   - Click **"Generate token"** and **copy it**
+
+3. Use AskUserQuestion to collect the token:
+
+```
+question: "Paste your token here (it starts with github_pat_):"
+header: "Token"
+options:
+  - label: "Skip for now"
+    description: "You can add it later by editing .env or running setup_diagnostic_repo.sh"
+```
+
+The user will select "Other" and paste their token.
+
+4. Validate the token via Bash:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" \
+  -H "Authorization: token {PASTED_TOKEN}" \
+  "https://api.github.com/repos/{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics"
+```
+
+If the response is `200`, the token is valid. Update the project's `.env`:
+```
+DIAGNOSTIC_GITHUB_PAT={PASTED_TOKEN}
+```
+
+If the response is not `200`, tell the user the token is invalid and suggest they check:
+- Token has "Issues: Read and Write" permission
+- Token has access to the `{PROJECT_FOLDER}-diagnostics` repo
+- Token is not expired
+
+Offer to try again or skip.
+
 ---
 
 ### Stage 4: Summary and Next Steps
@@ -452,22 +531,23 @@ cd /path/to/{project-folder}
 ./scripts/build.sh all release       # Build all formats
 ```
 
-If DiagnosticKit was enabled, add this section to the summary:
+If DiagnosticKit was enabled and PAT was skipped or not yet set up, add:
 
 ```
-### DiagnosticKit setup
+### DiagnosticKit — finish setup
 
-DiagnosticKit needs a private GitHub repo and a Personal Access Token (PAT) to submit diagnostic issues.
-
-Run this command to set it up:
+Your diagnostic repo was created but you still need a PAT. Run:
 
 cd /path/to/{project-folder}
 ./scripts/setup_diagnostic_repo.sh
+```
 
-This will:
-1. Create a private `{GITHUB_USER}/{project-folder}-diagnostics` repo
-2. Walk you through creating a fine-grained PAT (Issues: Write permission only)
-3. Save the PAT to your project's .env
+If DiagnosticKit was enabled AND PAT was successfully configured, add:
 
-**Note:** The GITHUB_TOKEN placeholder in .env is for GitHub Releases (different from the diagnostic PAT). The setup script handles this separately.
+```
+### DiagnosticKit — ready
+
+Diagnostic repo: github.com/{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics
+PAT: configured and validated
+The DiagnosticKit app will be built and included in your installers automatically.
 ```
