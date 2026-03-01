@@ -23,7 +23,42 @@ Create a new JUCE audio plugin project from the JUCE-Plugin-Starter template. Th
 
 ## Implementation
 
-Follow these 4 stages in order. Do NOT skip stages or combine prompts across stages.
+Follow these 5 stages in order. Do NOT skip stages or combine prompts across stages.
+
+---
+
+### Stage 0: Check Environment
+
+**macOS only.** Check `uname` — if not Darwin, tell the user this plugin only supports macOS and stop.
+
+Check for required development tools by running these commands via Bash:
+
+| Tool | Check Command | Required? |
+|---|---|---|
+| Xcode CLT | `xcode-select -p` | Yes |
+| Homebrew | `command -v brew` | Yes |
+| CMake | `command -v cmake` | Yes |
+| gh CLI | `command -v gh` | Only if GitHub repo desired |
+
+If **all tools are present**, proceed silently to Stage 1.
+
+If **any required tools are missing**, show:
+```
+question: "Some development tools are missing. Install them now?"
+header: "Setup"
+options:
+  - label: "Install missing tools (Recommended)"
+    description: "Runs the JUCE-Plugin-Starter dependencies script to install: {list of missing tools}"
+  - label: "Skip — I'll install them myself"
+    description: "You'll need these before you can build"
+```
+
+If "Install missing tools":
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/danielraffel/JUCE-Plugin-Starter/main/scripts/dependencies.sh)
+```
+
+After the script runs, re-check that tools are now available. If Homebrew was just installed, the user may need to add it to their PATH — warn them if `command -v brew` still fails after install.
 
 ---
 
@@ -399,9 +434,17 @@ cd /path/to/{project-folder}
 
 ### Next steps
 
+- **Ready to start building?** Use `/chainer` to describe what your plugin should do — e.g., "a stereo delay with pitch-shifted feedback" — and it will implement it for you
 - The `juce-visage` skill is available for Visage UI development guidance (if Visage enabled)
-- Use `/feature-dev` to implement your first feature
 - Edit `.env` to customize build settings
+
+### Useful build commands
+
+cd /path/to/{project-folder}
+./scripts/build.sh au debug          # Build Audio Unit (debug)
+./scripts/build.sh vst3 release      # Build VST3 (release)
+./scripts/build.sh standalone debug  # Build Standalone app
+./scripts/build.sh all release       # Build all formats
 ```
 
 If DiagnosticKit was enabled, remind: "Run `./scripts/setup_diagnostic_repo.sh` to complete DiagnosticKit setup."
