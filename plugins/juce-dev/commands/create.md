@@ -371,6 +371,11 @@ GITHUB_REPO={GITHUB_REPO_NAME}
 ENABLE_DIAGNOSTICS={true|false}
 USE_VISAGE_UI={TRUE|FALSE}
 
+# DiagnosticKit Settings (only if ENABLE_DIAGNOSTICS=true)
+DIAGNOSTIC_GITHUB_REPO={GITHUB_USER}/{PROJECT_FOLDER}-diagnostics
+DIAGNOSTIC_GITHUB_PAT=
+DIAGNOSTIC_SUPPORT_EMAIL={APPLE_ID or empty}
+
 # Build Configuration
 CMAKE_BUILD_TYPE=Debug
 BUILD_DIR=build
@@ -447,4 +452,22 @@ cd /path/to/{project-folder}
 ./scripts/build.sh all release       # Build all formats
 ```
 
-If DiagnosticKit was enabled, remind: "Run `./scripts/setup_diagnostic_repo.sh` to complete DiagnosticKit setup."
+If DiagnosticKit was enabled, add this section to the summary:
+
+```
+### DiagnosticKit setup
+
+DiagnosticKit needs a private GitHub repo and a Personal Access Token (PAT) to submit diagnostic issues.
+
+Run this command to set it up:
+
+cd /path/to/{project-folder}
+./scripts/setup_diagnostic_repo.sh
+
+This will:
+1. Create a private `{GITHUB_USER}/{project-folder}-diagnostics` repo
+2. Walk you through creating a fine-grained PAT (Issues: Write permission only)
+3. Save the PAT to your project's .env
+
+**Note:** The GITHUB_TOKEN placeholder in .env is for GitHub Releases (different from the diagnostic PAT). The setup script handles this separately.
+```
