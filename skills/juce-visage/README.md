@@ -25,30 +25,7 @@ When Claude encounters Visage-related work, it reads both the generic skill and 
 
 ## Installation
 
-Install from the `generous-corp-marketplace` repo (creates the directory if needed):
-
-```bash
-cd /path/to/generous-corp-marketplace
-git pull
-mkdir -p ~/.claude/skills/juce-visage
-cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
-ls ~/.claude/skills/juce-visage/
-```
-
-The skill activates automatically when you work on JUCE+Visage integration tasks. If your project doesn't have a `docs/juce-visage-notes.md` file yet, Claude will offer to create one from the built-in template.
-
-## Updating the Skill
-
-Run the same install commands — pulls latest and copies the files:
-
-```bash
-cd /path/to/generous-corp-marketplace
-git pull
-cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
-ls ~/.claude/skills/juce-visage/
-```
-
-### Sparse checkout (if you don't want the full repo)
+Uses sparse checkout to pull only this skill (not the full repo):
 
 ```bash
 git clone --filter=blob:none --sparse \
@@ -58,17 +35,29 @@ cd /tmp/gcm-sparse
 git sparse-checkout set skills/juce-visage
 mkdir -p ~/.claude/skills/juce-visage
 cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
+```
+
+Verify the install:
+
+```bash
 ls ~/.claude/skills/juce-visage/
 ```
 
-To update a sparse checkout later:
+You should see `SKILL.md`, `README.md`, and the `templates/` directory.
+
+The skill activates automatically when you work on JUCE+Visage integration tasks. If your project doesn't have a `docs/juce-visage-notes.md` file yet, Claude will offer to create one from the built-in template.
+
+## Updating
+
+Pull the latest and copy the files again:
 
 ```bash
 cd /tmp/gcm-sparse
 git pull
 cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
-ls ~/.claude/skills/juce-visage/
 ```
+
+If you deleted the sparse checkout, re-run the installation steps above.
 
 ### The generic skill
 
