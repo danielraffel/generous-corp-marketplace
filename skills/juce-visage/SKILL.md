@@ -9,7 +9,7 @@ This skill covers how to build a JUCE audio plugin (AU/VST3/Standalone) that use
 
 **Scope**: macOS-focused (Metal rendering, `NSView` embedding, `performKeyEquivalent:` fixes). Windows/Linux patterns differ for windowing and key handling but the bridge architecture and Frame patterns apply cross-platform.
 
-**Tested with**: Visage (VitalAudio fork, included directly in repo), JUCE 7/8, Logic Pro, Ableton Live, Reaper.
+**Tested with**: Visage ([VitalAudio/visage](https://github.com/VitalAudio/visage), copied directly into project — not a submodule), JUCE 7/8, Logic Pro, Ableton Live, Reaper. The patches listed in this skill are applied in-project, not upstream. A GitHub fork exists at [danielraffel/visage](https://github.com/danielraffel/visage) but currently mirrors upstream without patches.
 
 ## When to Use This Skill
 
