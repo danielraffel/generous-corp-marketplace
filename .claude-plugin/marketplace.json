@@ -73,6 +73,18 @@
       "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner",
       "license": "MIT",
       "keywords": ["design", "visualization", "prototyping", "dall-e", "gemini", "image-generation"]
+    },
+    {
+      "name": "juce-dev",
+      "source": "./plugins/juce-dev",
+      "description": "Create and manage JUCE audio plugin projects from the JUCE-Plugin-Starter template with optional Visage GPU UI integration",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Raffel"
+      },
+      "repository": "https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/juce-dev",
+      "license": "MIT",
+      "keywords": ["juce", "audio", "plugin", "vst", "au", "daw", "music", "visage"]
     }
   ]
 }
