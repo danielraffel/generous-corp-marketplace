@@ -238,3 +238,8 @@ Common bridge-mode failures and handling:
 - `EDGE CASES:` appears only when warranted.
 - Bridge output is concise by default; metadata is included only when needed or requested.
 - Follow-up loop behavior is defined for open questions.
+
+## Feedback & Issues
+
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=claude-skill-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=claude-skill-feature.yml)

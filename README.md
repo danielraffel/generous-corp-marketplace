@@ -20,10 +20,12 @@ Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md
 - **[orchestrate](plugins/orchestrate)** - Transform any task description into a structured agent team orchestration prompt
 - **[prompt-repeater](plugins/prompt-repeater)** - Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks
 - **[design-partner](plugins/design-partner)** - AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes
+- **[juce-dev](plugins/juce-dev)** - Create and develop JUCE audio plugins with guided project setup, Visage GPU UI integration, and Xcode workflows
 
 ## Skills Available
 
 - **[claude](skills/claude)** - A skill designed for use in a CLI like Codex to route a task to Anthropic Claude (for "consult Claude" workflows) and returns the result.
+- **[juce-visage](skills/juce-visage)** - Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS
 
 ## Installation
 
@@ -60,6 +62,11 @@ Orchestrate:
 Design Partner:
 ```
 /plugin install design-partner@generous-corp-marketplace
+```
+
+JUCE Dev:
+```
+/plugin install juce-dev@generous-corp-marketplace
 ```
 
 Then restart Claude Code.
@@ -113,6 +120,7 @@ Usage in Claude Code:
 - [Orchestrate Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/orchestrate/)
 - [Prompt Repeater Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/prompt-repeater/)
 - [Design Partner Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/)
+- [JUCE Dev Homepage](https://www.generouscorp.com/generous-corp-marketplace/plugins/juce-dev/)
 - [Generous Corp](https://www.generouscorp.com/projects.html)
 
 ## License

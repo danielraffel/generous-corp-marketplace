@@ -129,3 +129,8 @@ When working on Visage UI code, read both the skill and this file.
 | macOS native look | Native Standalone Appearance |
 | Common mistakes | Common Mistakes Reference |
 | Required patches | Visage Patches Checklist |
+
+## Feedback & Issues
+
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-visage-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-visage-feature.yml)

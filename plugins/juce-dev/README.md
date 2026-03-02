@@ -81,3 +81,8 @@ The plugin replicates the `init_plugin_project.sh` workflow but with a better UX
 | No validation feedback | Shows derived values before proceeding |
 
 All project creation steps (rsync, sed replacements, git init, gh repo create) run via Bash — no MCP server needed.
+
+## Feedback & Issues
+
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-dev-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-dev-feature.yml)

@@ -230,6 +230,7 @@ MIT
 
 Leviathan, Y., Kalman, M., & Matias, Y. (2024). Prompt Repetition Improves Non-Reasoning LLMs. arXiv:2512.14982. https://arxiv.org/abs/2512.14982
 
-## Support
+## Feedback & Issues
 
-For issues or questions, please open an issue on the GitHub repository.
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=prompt-repeater-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=prompt-repeater-feature.yml)

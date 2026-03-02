@@ -1,0 +1,45 @@
+name: "Design Partner: Bug Report"
+description: Report a bug in the Design Partner plugin
+labels: ["bug", "design-partner"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run command '...'
+        2. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Relevant environment details.
+      placeholder: |
+        - OS: macOS 15.x
+        - Claude Code version: x.x.x
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or log output.
+    validations:
+      required: false

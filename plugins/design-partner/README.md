@@ -450,12 +450,16 @@ A: An interactive HTML gallery opens automatically after each generation. It sho
 
 MIT License - see [LICENSE](LICENSE) for details.
 
+## Feedback & Issues
+
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=design-partner-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=design-partner-feature.yml)
+
 ## Links
 
 - [GitHub Repository](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/design-partner)
 - [Plugin Documentation](https://www.generouscorp.com/generous-corp-marketplace/plugins/design-partner/)
 - [Claude Code Docs](https://code.claude.com/docs)
-- [Report Issues](https://github.com/danielraffel/generous-corp-marketplace/issues)
 
 ---
 

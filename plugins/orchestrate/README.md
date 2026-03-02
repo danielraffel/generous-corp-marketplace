@@ -271,3 +271,8 @@ orchestrate/
 │       └── research.md       # Expected output for research prompts
 └── README.md
 ```
+
+## Feedback & Issues
+
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=orchestrate-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=orchestrate-feature.yml)

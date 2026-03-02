@@ -547,6 +547,11 @@ MIT License - see LICENSE file for details
 
 Built by [Daniel Raffel](https://github.com/danielraffel) for the Claude Code community.
 
+## Feedback & Issues
+
+- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=worktree-manager-bug.yml)
+- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=worktree-manager-feature.yml)
+
 ## Links
 
 - [GitHub Repository](https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/worktree-manager)
