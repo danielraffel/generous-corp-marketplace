@@ -9,7 +9,7 @@ This skill covers how to build a JUCE audio plugin (AU/VST3/Standalone) that use
 
 **Scope**: macOS-focused (Metal rendering, `NSView` embedding, `performKeyEquivalent:` fixes). Windows/Linux patterns differ for windowing and key handling but the bridge architecture and Frame patterns apply cross-platform.
 
-**Tested with**: Visage ([VitalAudio/visage](https://github.com/VitalAudio/visage), copied directly into project — not a submodule), JUCE 7/8, Logic Pro, Ableton Live, Reaper. The patches listed in this skill are applied in-project, not upstream. A GitHub fork exists at [danielraffel/visage](https://github.com/danielraffel/visage) but currently mirrors upstream without patches.
+**Tested with**: Visage (via [danielraffel/visage](https://github.com/danielraffel/visage) fork, copied directly into project — not a submodule), JUCE 7/8, Logic Pro, Ableton Live, Reaper. The fork carries the patches listed in this skill. Projects copy from the fork so patches are included automatically. To update Visage, sync the fork with [upstream](https://github.com/VitalAudio/visage), check for patch conflicts, then copy into your project's `external/visage/`.
 
 ## When to Use This Skill
 
@@ -1246,16 +1246,51 @@ Update the per-project file with:
 
 ## Visage Patches Checklist
 
-When updating Visage from upstream, re-apply these patches. Patches marked **required** are needed for correct DAW plugin behavior; **recommended** patches improve UX but may not apply to all projects.
+Patches 1-4 are maintained in the [danielraffel/visage](https://github.com/danielraffel/visage) fork. Patches 5-6 are project-specific and applied in-project only.
+
+When updating Visage from upstream, patches marked **required** are needed for correct DAW plugin behavior; **recommended** patches improve UX but may not apply to all projects.
+
+**In fork** (applied automatically when copying from `danielraffel/visage`):
 
 1. **`performKeyEquivalent:`** (windowing_macos.mm) — **Required for plugins with text fields.** Without this, Cmd+A/C/V/X/Z go to DAW menu instead of TextEditor.
 2. **Cmd+Q propagation** (windowing_macos.mm) — **Required for standalone apps and secondary windows.** `[[self nextResponder] keyDown:event]` for unhandled Cmd+key. Without this, Cmd+Q silently dies in the Visage view.
 3. **MTKView 60 FPS cap** (windowing_macos.mm) — **Recommended.** Prevents excessive GPU usage on ProMotion displays. Skip if you want adaptive frame rates.
 4. **Popup menu overflow positioning** (popup_menu.cpp) — **Recommended.** Fixes above-position calculation for menus triggered from lower rows. May be fixed in future upstream.
+
+**Project-specific** (apply manually if needed):
+
 5. **Single-line Up/Down arrows** (text_editor.cpp) — **Optional.** Maps Up→start, Down→end in single-line TextEditors. Standard text field UX but not universal.
 6. **setAlwaysOnTop guard** (application_window.cpp) — **Required for plugin mode.** Without this, plugin window may go behind DAW. Only call `setAlwaysOnTop()` when `always_on_top_` is true.
 
 Test thoroughly after updates, especially popup menus and text editing in plugin hosts (Logic Pro, Ableton).
+
+### Updating Visage from Upstream
+
+To pull the latest from VitalAudio and check if patches survived:
+
+```bash
+# 1. Sync the fork with upstream
+cd /tmp/visage-fork  # or wherever you cloned danielraffel/visage
+git fetch upstream
+git merge upstream/main
+
+# 2. Check if patches are still present (any that got merged upstream
+#    will merge cleanly; conflicts mean upstream changed the same area)
+grep -n "preferredFramesPerSecond = 60" visage_windowing/macos/windowing_macos.mm
+grep -n "nextResponder.*keyDown" visage_windowing/macos/windowing_macos.mm
+grep -n "performKeyEquivalent" visage_windowing/macos/windowing_macos.mm
+grep -n "window_bounds.y().*- h" visage_ui/popup_menu.cpp
+
+# 3. If all 4 greps match, patches survived. Push and copy to project:
+git push origin main
+cp -R /tmp/visage-fork/* ~/Code/YourProject/external/visage/
+
+# 4. If a grep doesn't match, either:
+#    - The patch was merged upstream (great — remove from checklist)
+#    - There was a conflict (resolve it, re-apply the patch)
+```
+
+If a patch is missing after merge, check the upstream changelog — if they fixed the same issue differently, the patch is no longer needed. Update this checklist accordingly.
 
 ## File Reference
 
