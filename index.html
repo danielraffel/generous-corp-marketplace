@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generous Corp Marketplace</title>
+    <meta name="description" content="Official marketplace for Claude Code plugins and Agent Skills you can use with OpenAI Codex and Claude Code.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Generous Corp Marketplace">
+    <meta property="og:description" content="Official marketplace for Claude Code plugins and Agent Skills you can use with OpenAI Codex and Claude Code.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Generous Corp Marketplace">
+    <meta name="twitter:description" content="Official marketplace for Claude Code plugins and Agent Skills you can use with OpenAI Codex and Claude Code.">
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111111;
+            --gray: #888888;
+            --light-gray: #f4f4f4;
+            --accent: #667eea;
+            --code-bg: #1c1c1c;
+            --code-text: #e0e0e0;
+            --paragraph-text: #333333;
+            --muted-strong: #444444;
+            --copy-btn-bg: #333333;
+            --copy-btn-bg-hover: #444444;
+            --copy-btn-text: #aaaaaa;
+            --surface-bg: #ffffff;
+            --surface-border: #dddddd;
+            --subtle-bg: #fafafa;
+            --inverse-text: #ffffff;
+            color-scheme: light dark;
+            --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+            --spacing-unit: 2rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d1117;
+                --text: #e6edf3;
+                --gray: #9aa4b2;
+                --light-gray: #2b3442;
+                --code-bg: #161b22;
+                --code-text: #d7dee7;
+                --paragraph-text: #c3ccd8;
+                --muted-strong: #b5bfcc;
+                --copy-btn-bg: #2d3748;
+                --copy-btn-bg-hover: #3b4658;
+                --copy-btn-text: #c3ccd8;
+                --surface-bg: #161b22;
+                --surface-border: #30363d;
+                --subtle-bg: #111827;
+                --inverse-text: #ffffff;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+        }
+
+        h3 {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+        }
+
+        p {
+            font-size: 1.25rem;
+            max-width: 34ch;
+            color: var(--paragraph-text);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        section {
+            padding: calc(var(--spacing-unit) * 4) 0;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: calc(var(--spacing-unit) * 6);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-unit);
+        }
+
+        .col-left { grid-column: 1 / 6; }
+        .col-right { grid-column: 7 / 13; }
+        .col-full { grid-column: 1 / 13; }
+
+        @media (max-width: 768px) {
+            .col-left, .col-right { grid-column: 1 / 13; }
+            h1 { font-size: 3rem; }
+            section { padding: calc(var(--spacing-unit) * 2) 0; }
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid var(--text);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0 var(--spacing-unit) 0;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        /* Card grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: var(--surface-bg);
+            transition: border-color 0.2s, background 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        .card:hover {
+            border-color: var(--accent);
+            background: var(--subtle-bg);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+        .card-type {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+        .code-comment { color: #6a6a6a; }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: var(--copy-btn-bg);
+            color: var(--copy-btn-text);
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--copy-btn-bg-hover); color: var(--inverse-text); }
+        .copy-btn.copied { background: var(--accent); color: var(--inverse-text); }
+
+        /* Install subsections */
+        .install-subsection {
+            margin-top: 2.5rem;
+        }
+        .install-subsection h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .install-subsection p {
+            font-size: 1rem;
+            max-width: 60ch;
+            color: var(--paragraph-text);
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            padding: var(--spacing-unit) 0;
+            border-top: 4px solid var(--text);
+            margin-top: var(--spacing-unit);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+
+        <!-- Hero -->
+        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+            <a href="https://www.generouscorp.com/projects.html" class="tag">Generous Corp</a>
+            <nav class="nav-links">
+                <a href="#plugins-available">Plugins</a>
+                <a href="#skills-available">Skills</a>
+                <a href="#installation">Installation</a>
+            </nav>
+            <h1>Marketplace.</h1>
+            <div class="grid">
+                <div class="col-left">
+                    <p>Official marketplace for <strong>Claude Code plugins</strong> and <strong>Agent Skills</strong> you can use with <strong>OpenAI Codex</strong> and <strong>Claude Code</strong>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plugins Available -->
+        <section id="plugins-available">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Plugins Available</h3>
+                    <h2>Claude Code plugins.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="card-grid">
+                        <a href="plugins/worktree-manager/" class="card">
+                            <span class="card-type">Plugin</span>
+                            <div class="card-title">Worktree Manager</div>
+                            <div class="card-desc">Effortless git worktrees for parallel development with automatic environment setup</div>
+                        </a>
+                        <a href="plugins/chainer/" class="card">
+                            <span class="card-type">Plugin</span>
+                            <div class="card-title">Chainer</div>
+                            <div class="card-desc">Universal plugin orchestration for Claude Code</div>
+                        </a>
+                        <a href="plugins/orchestrate/" class="card">
+                            <span class="card-type">Plugin</span>
+                            <div class="card-title">Orchestrate</div>
+                            <div class="card-desc">Transform any task description into a structured agent team orchestration prompt</div>
+                        </a>
+                        <a href="plugins/prompt-repeater/" class="card">
+                            <span class="card-type">Plugin</span>
+                            <div class="card-title">Prompt Repeater</div>
+                            <div class="card-desc">Apply Google Research's prompt repetition technique to improve LLM performance on non-reasoning tasks</div>
+                        </a>
+                        <a href="plugins/design-partner/" class="card">
+                            <span class="card-type">Plugin</span>
+                            <div class="card-title">Design Partner</div>
+                            <div class="card-desc">AI-powered design thinking partner that helps explore ideas, generate visuals, and create prototypes</div>
+                        </a>
+                        <a href="plugins/juce-dev/" class="card">
+                            <span class="card-type">Plugin</span>
+                            <div class="card-title">JUCE Dev</div>
+                            <div class="card-desc">Create and develop JUCE audio plugins with guided project setup, Visage GPU UI integration, and Xcode workflows</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Available -->
+        <section id="skills-available">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Skills Available</h3>
+                    <h2>Agent skills.</h2>
+                </div>
+                <div class="col-full">
+                    <div class="card-grid">
+                        <a href="skills/claude/" class="card">
+                            <span class="card-type">Skill</span>
+                            <div class="card-title">Claude</div>
+                            <div class="card-desc">A skill designed for use in a CLI like Codex to route a task to Anthropic Claude and return the result</div>
+                        </a>
+                        <a href="skills/juce-visage/" class="card">
+                            <span class="card-type">Skill</span>
+                            <div class="card-title">JUCE Visage</div>
+                            <div class="card-desc">Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Installation</h3>
+                    <h2>Get started.</h2>
+                </div>
+
+                <!-- Claude Code Plugins -->
+                <div class="col-full">
+                    <div class="install-subsection">
+                        <h4>Claude Code: Add the Marketplace + Install Plugins</h4>
+                        <p>In Claude Code, run:</p>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-comment"># Add the marketplace</span>
+/plugin marketplace add danielraffel/generous-corp-marketplace
+
+<span class="code-comment"># Install plugins (pick the ones you want)</span>
+/plugin install worktree-manager@generous-corp-marketplace
+/plugin install chainer@generous-corp-marketplace
+/plugin install prompt-repeater@generous-corp-marketplace
+/plugin install orchestrate@generous-corp-marketplace
+/plugin install design-partner@generous-corp-marketplace
+/plugin install juce-dev@generous-corp-marketplace
+
+<span class="code-comment"># Restart Claude Code to load plugins</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OpenAI Codex Skills -->
+                <div class="col-full">
+                    <div class="install-subsection">
+                        <h4>OpenAI Codex: Install Skills</h4>
+                        <p>Codex scans for skills in repo or user locations under <code style="background: var(--light-gray); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">.agents/skills</code>. Install user-wide via symlink:</p>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block">git clone https://github.com/danielraffel/generous-corp-marketplace
+cd generous-corp-marketplace
+
+mkdir -p ~/.agents/skills
+ln -s "$(pwd)/skills/claude" ~/.agents/skills/claude</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Claude Code Skills -->
+                <div class="col-full">
+                    <div class="install-subsection">
+                        <h4>Claude Code: Install Skills</h4>
+                        <p>Claude Code loads skills from <code style="background: var(--light-gray); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">~/.claude/skills/</code> or <code style="background: var(--light-gray); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">.claude/skills/</code>. Install via symlink:</p>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block">git clone https://github.com/danielraffel/generous-corp-marketplace
+cd generous-corp-marketplace
+
+mkdir -p ~/.claude/skills
+ln -s "$(pwd)/skills/claude" ~/.claude/skills/claude</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="container">
+        <div class="grid">
+            <div class="col-left">
+                <a href="https://danielraffel.me" style="text-decoration: none;">Daniel Raffel</a> &copy; 2026
+            </div>
+            <div class="col-right" style="text-align: right;">
+                <a href="https://github.com/danielraffel/generous-corp-marketplace" style="text-decoration: none;">GitHub Repository &#8599;</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
