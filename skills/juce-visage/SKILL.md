@@ -65,6 +65,11 @@ This skill provides generic patterns. Each project should maintain a **`docs/juc
 - [ ] iOS bridge mouse guard (JuceVisageBridge.h/cpp) — `#if !JUCE_IOS` around mouse overrides (iOS only)
 - [ ] iOS modifier mapping (JuceVisageBridge.cpp) — `#if JUCE_MAC || JUCE_IOS` for Cmd key (iOS only)
 
+## JUCE Integration Patterns Applied
+
+- [ ] `setSize()` after `setUsingNativeTitleBar(true)` — Re-assert editor size after switching to native title bar (macOS standalone). Without this, the editor inflates by ~28px height and ~2px width, causing empty space in the Visage rendering.
+- [ ] Overlay/modal bounds clamping — All overlays, modals, and settings panels clamp their dimensions to `width()`/`height()` of the host frame. Never use hardcoded panel sizes that could exceed the frame bounds, or the panel position goes negative and content is clipped.
+
 ## Destruction Sequence
 
 <!-- Document your plugin editor destructor ordering here -->
@@ -272,6 +277,15 @@ public:
         // Do NOT set child bounds here — they will be set in layoutChildren()
         // (DPI may still be 1.0 at this point; correct DPI arrives later via addChild propagation)
 
+        // Native title bar for standalone mode.
+        // CRITICAL: setUsingNativeTitleBar() removes JUCE's drawn border (27px top + 1px sides)
+        // but the window stays the same native size, inflating the editor by ~28px.
+        // Re-assert setSize() immediately after to force correct dimensions.
+        if (auto* window = findParentComponentOfClass<juce::DocumentWindow>()) {
+            window->setUsingNativeTitleBar(true);
+            setSize(800, 600); // Must re-assert after title bar switch
+        }
+
         bridge = std::make_unique<JuceVisageBridge>();
         addAndMakeVisible(*bridge);
         bridge->setRootFrame(rootFrame.get());
@@ -435,13 +449,15 @@ A JUCE+Visage standalone app can look native on macOS with proper configuration.
 
 ### Native Title Bar
 
-Use `setUsingNativeTitleBar(true)` on all `DocumentWindow` subclasses to get the standard macOS traffic-light buttons and title:
+Use `setUsingNativeTitleBar(true)` on all `DocumentWindow` subclasses to get the standard macOS traffic-light buttons and title.
+
+**Critical**: When calling `setUsingNativeTitleBar(true)` after the window is already shown (common in plugin editors using deferred init via `Timer`), JUCE removes its drawn title bar border (27px top + 1px sides on macOS) but the **native window size stays unchanged**. The content area expands to fill the full window, inflating the editor by ~28px height and ~2px width. **Always call `setSize()` again immediately after** to force correct dimensions:
 
 ```cpp
-// Main standalone window
-if (audioProcessor.wrapperType == juce::AudioProcessor::wrapperType_Standalone) {
-    if (auto* window = findParentComponentOfClass<juce::DocumentWindow>())
-        window->setUsingNativeTitleBar(true);
+// Main standalone window — MUST re-assert size after title bar switch
+if (auto* window = findParentComponentOfClass<juce::DocumentWindow>()) {
+    window->setUsingNativeTitleBar(true);
+    setSize(desiredWidth, desiredHeight); // Force correct content dimensions
 }
 
 // Secondary windows (waveform editor, virtual keyboard, etc.)
@@ -452,6 +468,8 @@ MySecondaryWindow() : DocumentWindow("Title", bg, allButtons) {
 ```
 
 This replaces the default JUCE-styled title bar with the native macOS one, making secondary windows look like proper macOS windows rather than custom-drawn JUCE windows.
+
+**Why this matters for Visage**: The Visage MTKView is sized to the bridge's local bounds, which match the editor's size. If the editor is inflated to 582x358 instead of 580x330, the Visage rendering fills that larger area, creating visible empty space at the window edges (typically ~28px at the bottom). The `setSize()` call after `setUsingNativeTitleBar(true)` resizes the native window to exactly fit the requested content dimensions with zero JUCE border.
 
 ### Custom macOS Menu Bar
 
@@ -526,6 +544,57 @@ Don't try to override JUCE's `StandaloneFilterWindow` — it's an internal class
 - Use JUCE's `AudioDeviceSelectorComponent` for device selection UI
 - In standalone mode, get the `AudioDeviceManager` from `StandalonePluginHolder::getInstance()`, not from a local instance
 - Skip Bluetooth MIDI device enumeration on macOS — it can crash due to system-level issues
+
+### Keyboard Shortcuts (Standalone)
+
+JUCE's `setMacMainMenu()` with `extraAppleMenuItems` does NOT support displaying keyboard shortcut hints (like "Cmd+,") next to menu items. JUCE rebuilds the native `NSMenu` from `PopupMenu` data every time the menu opens, which means any post-hoc modifications to `NSMenuItem` key equivalents are wiped.
+
+**Pattern**: Use `juce::KeyListener` on the top-level component to handle keyboard shortcuts directly. This is the same pattern used by production JUCE+Visage apps (e.g., PlunderTube uses it for Cmd+K):
+
+```cpp
+class MyPluginEditor : public juce::AudioProcessorEditor,
+                       public juce::Timer,
+                       public juce::KeyListener {
+public:
+    bool keyPressed(const juce::KeyPress& key, juce::Component*) override {
+        // Cmd+, opens settings (macOS convention)
+        if (key == juce::KeyPress(',', juce::ModifierKeys::commandModifier, 0)) {
+            toggleSettings();
+            return true;
+        }
+        // ESC closes settings panel / modal
+        if (key == juce::KeyPress::escapeKey) {
+            if (settingsPanel_ && settingsPanel_->isVisible()) {
+                settingsPanel_->hide();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void createVisageUI() {
+        // ... create UI ...
+
+        // Register as KeyListener on top-level component (catches keys from any focused child)
+        if (auto* topLevel = getTopLevelComponent())
+            topLevel->addKeyListener(this);
+    }
+
+    ~MyPluginEditor() override {
+        if (auto* topLevel = getTopLevelComponent())
+            topLevel->removeKeyListener(this);
+        // ... rest of destructor ...
+    }
+};
+```
+
+**Expected behaviors for standalone apps**:
+- **Cmd+,** opens/toggles Settings panel (macOS convention, add to app menu as "Settings..." item)
+- **ESC** closes the currently visible settings panel or modal overlay
+- **Cmd+Q** quits the app (handled by JUCE/system automatically if Cmd+Q propagation patch is applied)
+- The shortcut does NOT appear in the menu text — this is acceptable; the keyboard shortcut still works
+
+**For AU/VST3 plugins**: ESC to close settings/modals works via the same `KeyListener` pattern. Cmd+, may conflict with DAW shortcuts — consider making it standalone-only via `#if JucePlugin_Build_Standalone`.
 
 ## iOS/iPadOS Integration
 
@@ -1182,6 +1251,23 @@ VisageModalDialog::show(std::move(content), triggerFrame);
 
 **Content sizing**: Override `getDesiredWidth()`/`getDesiredHeight()` on your content frame (preferred), or use `dynamic_cast` detection in `calculateContentBounds()` (works but doesn't scale). For custom dialog types, define a virtual `getDesiredSize()` method.
 
+**Critical — Clamp overlay/modal dimensions to parent frame bounds**: Visage clips drawing at the frame boundary. If a modal or overlay panel uses hardcoded dimensions that exceed the host frame's `width()` or `height()`, the panel's computed position goes negative and content is clipped at the edges. This is especially common in plugin UIs where the editor size is compact (e.g., 330px height) but modals are designed for larger windows. Always clamp:
+
+```cpp
+// WRONG: hardcoded dimensions can exceed frame bounds
+float panelW = 540.0f;
+float panelH = 360.0f;  // May exceed frame height!
+float panelY = (height() - panelH) / 2.0f;  // Goes NEGATIVE if panelH > height()
+
+// CORRECT: clamp to fit, with minimum margin
+float panelW = std::min(540.0f, width() - 10.0f);
+float panelH = std::min(360.0f, height() - 10.0f);
+float panelX = std::max(5.0f, (width() - panelW) / 2.0f);
+float panelY = std::max(5.0f, (height() - panelH) / 2.0f);
+```
+
+This applies to any overlay drawn within a frame's `draw()` method: settings panels, modals, popup menus, help screens. If the content needs more space than available, consider adding scroll support via `visage::ScrollableFrame`.
+
 **Gotchas**:
 - Copy the event handler before `addChild()`, not after
 - Don't call `requestKeyboardFocus()` before the modal is in the hierarchy
@@ -1379,6 +1465,11 @@ Update the per-project file with:
 | Use hover states on iOS | No visible feedback — iOS has no hover (except Apple Pencil) | Skip hover visuals; use press/active states only |
 | Small touch targets on iOS | Unusable on mobile — fingers need 44pt+ | Minimum 44pt height for interactive elements |
 | Use `performKeyEquivalent:` pattern on iOS | Compile error — method doesn't exist on UIKit | Guard with `#if !JUCE_IOS` or omit entirely for iOS builds |
+| Call `setUsingNativeTitleBar(true)` without re-asserting `setSize()` | Editor inflates by ~28px height, ~2px width — empty space at bottom/sides | Always call `setSize(w, h)` immediately after `setUsingNativeTitleBar(true)` |
+| Hardcoded modal/overlay dimensions exceeding frame bounds | Panel position goes negative, content clipped at top/sides — title bars and close buttons cut off | Always clamp: `panelH = std::min(desired, height() - margin)` and `panelY = std::max(margin, ...)` |
+| Change `GIT_TAG` in CMakeLists.txt without clearing FetchContent cache | JUCE stays at old version — stale source reused from shared `FETCHCONTENT_BASE_DIR` | Delete `~/.juce_cache/juce-src`, `juce-build`, `juce-subbuild`, then regenerate |
+| CMakeLists.txt reads `$ENV{JUCE_TAG}` but `.env` not sourced before `cmake` | `JUCE_TAG` is empty, falls back to hardcoded default (often outdated) | Always keep `CMakeLists.txt` fallback default up to date; or source `.env` before `cmake` |
+| Use JUCE < 8.0.12 with iOS 26+ | App crashes on launch — `AudioQueueNewOutput` fails with error -50, JUCE assertion in `juce_Audio_ios.cpp` | Update to JUCE 8.0.12+ which skips AudioQueue probe on iOS 26 |
 
 ## Visage Patches Checklist
 
@@ -2443,6 +2534,32 @@ target_link_libraries(MyTarget PRIVATE MyEmbeddedAssets)
 ```
 
 This generates a static library with `EmbeddedFile` constants you can use with `Font` and `Canvas::svg()`.
+
+### JUCE Version Management with FetchContent
+
+When JUCE is fetched via `FetchContent` with a shared cache directory (`FETCHCONTENT_BASE_DIR`), **changing the `GIT_TAG` in CMakeLists.txt does NOT automatically re-fetch JUCE**. CMake sees the existing source directory and reuses it, even if the tag has changed.
+
+**The problem**: If your project uses `FETCHCONTENT_BASE_DIR` to share JUCE across projects (common pattern to avoid re-downloading), upgrading JUCE requires manual cache clearing:
+
+```cmake
+# CMakeLists.txt pattern that causes stale cache:
+set(FETCHCONTENT_BASE_DIR "$ENV{HOME}/.juce_cache")
+FetchContent_Declare(JUCE
+    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+    GIT_TAG 8.0.12    # Changed from 8.0.8 — but CMake won't re-fetch!
+    GIT_SHALLOW ON
+)
+```
+
+**To update JUCE version**:
+1. Update the `GIT_TAG` in `CMakeLists.txt` (and `.env` if applicable)
+2. Delete the cached JUCE source: `rm -rf ~/.juce_cache/juce-src ~/.juce_cache/juce-build ~/.juce_cache/juce-subbuild`
+3. Delete your build directory: `rm -rf build-ios` (or `build/`)
+4. Regenerate: `cmake -B build-ios -G Xcode -DCMAKE_SYSTEM_NAME=iOS`
+
+**Critical**: If `JUCE_TAG` is read from `$ENV{JUCE_TAG}` (e.g., from `.env`), ensure the environment variable is sourced before running CMake. If running `cmake` directly (not through a build script that sources `.env`), the env var will be empty and CMake falls back to the hardcoded default. **Always keep the fallback default in `CMakeLists.txt` up to date** with your intended JUCE version.
+
+**iOS 26+ requires JUCE 8.0.12+**: JUCE 8.0.8–8.0.11 crash on iOS 26 due to `AudioQueueNewOutput` failing with error -50 in `getSampleRateFromAudioQueue()`. JUCE 8.0.12 skips the AudioQueue probe on iOS 26 and uses `AVAudioSession.sampleRate` directly. It also replaces the deprecated `AVAudioSessionCategoryOptionAllowBluetooth` with `AVAudioSessionCategoryOptionAllowBluetoothHFP` on iOS 26+.
 
 ### iOS CMake Configuration
 

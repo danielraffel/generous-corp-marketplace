@@ -74,7 +74,21 @@ options:
    - If `USE_VISAGE_UI` line exists, change its value to `TRUE`
    - If it doesn't exist, add `USE_VISAGE_UI=TRUE`
 
-### Step 5: Summary
+### Step 5: Verify Native Title Bar Pattern
+
+If the generated `Source/PluginEditor.cpp` calls `setUsingNativeTitleBar(true)` (for standalone native appearance), ensure it is immediately followed by `setSize(desiredWidth, desiredHeight)`.
+
+**Why**: `setUsingNativeTitleBar(true)` removes JUCE's drawn title bar border (27px top + 1px sides on macOS) but the native window stays the same size. The content area expands, inflating the editor by ~28px height. Without re-asserting `setSize()`, the Visage rendering fills the inflated area, creating visible empty space at the window edges.
+
+```cpp
+// In createVisageUI() — CORRECT pattern
+if (auto* window = findParentComponentOfClass<juce::DocumentWindow>()) {
+    window->setUsingNativeTitleBar(true);
+    setSize(desiredWidth, desiredHeight); // MUST re-assert after title bar switch
+}
+```
+
+### Step 6: Summary
 
 Tell the user:
 
