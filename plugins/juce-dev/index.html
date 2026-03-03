@@ -444,10 +444,10 @@
                 <a href="#commands">Commands</a>
                 <a href="#faq">FAQ</a>
             </nav>
-            <h1>Make audio plugins<br>for macOS.</h1>
+            <h1>Make audio plugins<br>for macOS &amp; iOS.</h1>
             <div class="grid">
                 <div class="col-left">
-                    <p><b>juce-dev</b> sets up everything you need to build a macOS audio plugin — synth, effect, instrument, whatever you want. Name it, answer a few questions, and you've got a project that builds in Xcode and runs in Logic, Ableton, or standalone.</p>
+                    <p><b>juce-dev</b> sets up everything you need to build an audio plugin — synth, effect, instrument, whatever you want. Name it, answer a few questions, and you've got a project that builds in Xcode. Add GPU-rendered UI with Visage, add an iOS target, and Claude knows how to help with each — a bundled <a href="#juce-visage-skill">juce-visage skill</a> activates automatically when you're working on Visage UI.</p>
                 </div>
                 <div class="col-right">
                     <div class="code-block-wrapper">
@@ -481,6 +481,7 @@
                 <div class="col-right">
                     <p>Starting a new audio plugin usually means wiring up build systems, configuring code signing, setting up project identifiers, and writing boilerplate. It's tedious before you write a single line of audio code.</p>
                     <p><strong>juce-dev handles all of that.</strong> Give it a name, confirm your developer settings, pick your options, and you get a project that compiles immediately. If it's your first time, it checks your tools and walks you through setup.</p>
+                    <p><strong>Context-aware assistance:</strong> If you add Visage GPU UI to your project, a bundled <a href="#juce-visage-skill">juce-visage skill</a> automatically provides Claude with deep knowledge of Metal view embedding, event bridging, keyboard handling in DAW hosts, and more. No Visage? The skill stays out of the way — it only activates when relevant.</p>
                     <p>Want to go further? Use <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> to describe what your plugin should do and let Claude build it for you.</p>
                 </div>
             </div>
@@ -499,6 +500,8 @@
                         <li>Works in Logic Pro, Ableton Live, and other macOS DAWs</li>
                         <li>Code signing and notarization config ready for distribution</li>
                         <li>Optional GPU-rendered UI with <a href="https://github.com/VitalAudio/visage">Visage</a> (Metal-accelerated)</li>
+                        <li>Optional iOS/iPadOS app target with auto-detected UI mode</li>
+                        <li>Bundled <a href="#juce-visage-skill">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
