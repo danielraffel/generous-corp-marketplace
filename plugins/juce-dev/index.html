@@ -547,37 +547,90 @@
         <section id="commands">
             <div class="grid">
                 <div class="col-full">
-                    <h3>Commands</h3>
-                    <h2>Four commands.</h2>
-                    <p style="max-width: 60ch; margin-bottom: 2rem;">Create a project, add GPU UI or iOS support, build and ship — all from Claude Code.</p>
+                    <h3>Command Reference</h3>
+                    <h2>Quick lookup.</h2>
+                    <p style="max-width: 60ch; margin-bottom: 2rem;">Four commands cover the full lifecycle. Each does one thing — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
                     <table class="cmd-table">
                         <thead>
                             <tr>
                                 <th>What you want</th>
                                 <th>Command</th>
+                                <th>You provide</th>
                                 <th>What happens</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Build your plugin</td>
-                                <td><code>/juce-dev:build standalone</code></td>
-                                <td>Builds, tests, signs, or publishes. Auto-detects CMake changes. Targets: <code>all</code> <code>au</code> <code>vst3</code> <code>standalone</code>. Actions: <code>local</code> <code>test</code> <code>sign</code> <code>notarize</code> <code>pkg</code> <code>publish</code> <code>unsigned</code> <code>uninstall</code>. Use <code>--help</code> for full reference</td>
-                            </tr>
-                            <tr>
                                 <td>Create a new plugin</td>
                                 <td><code>/juce-dev:create "My Synth"</code></td>
-                                <td>Sets up a complete audio plugin project ready to build in Xcode. Optional: <code>--visage</code> for GPU-rendered UI, <code>--no-github</code> to skip repo creation</td>
+                                <td>plugin name (<code>"My Synth"</code>)</td>
+                                <td>Walks through developer settings, creates a complete project ready to build in Xcode</td>
                             </tr>
                             <tr>
-                                <td>Add GPU UI</td>
+                                <td>Create with GPU UI</td>
+                                <td><code>/juce-dev:create "My Synth" --visage</code></td>
+                                <td>plugin name + <code>--visage</code></td>
+                                <td>Same as above, plus clones Visage framework, adds Metal-rendered editor and bridge. The <a href="#juce-visage-skill">juce-visage skill</a> activates automatically</td>
+                            </tr>
+                            <tr>
+                                <td>Create without GitHub</td>
+                                <td><code>/juce-dev:create "My Synth" --no-github</code></td>
+                                <td>plugin name + <code>--no-github</code></td>
+                                <td>Local git only — skips GitHub repo creation</td>
+                            </tr>
+                            <tr>
+                                <td>Add GPU UI to existing project</td>
                                 <td><code>/juce-dev:setup-visage</code></td>
-                                <td>Adds Metal-accelerated Visage UI to an existing project. Run this from inside a project you already created</td>
+                                <td>nothing (run from project root)</td>
+                                <td>Adds Visage Metal UI to a project created without it. Clones framework, copies bridge, updates CMake</td>
                             </tr>
                             <tr>
                                 <td>Add iOS target</td>
                                 <td><code>/juce-dev:setup-ios</code></td>
-                                <td>Adds an iOS/iPadOS app target. Auto-detects Visage and creates matching UI (GPU or standard JUCE)</td>
+                                <td>nothing (run from project root)</td>
+                                <td>Adds iOS/iPadOS app target. Auto-detects Visage and creates matching UI (GPU or standard JUCE)</td>
+                            </tr>
+                            <tr>
+                                <td>Build standalone</td>
+                                <td><code>/juce-dev:build standalone</code></td>
+                                <td>target (<code>standalone</code>)</td>
+                                <td>Builds and launches the standalone app. Auto-detects if CMake regeneration is needed</td>
+                            </tr>
+                            <tr>
+                                <td>Build Audio Unit</td>
+                                <td><code>/juce-dev:build au</code></td>
+                                <td>target (<code>au</code>)</td>
+                                <td>Builds AU plugin and copies to <code>~/Library/Audio/Plug-Ins/Components/</code></td>
+                            </tr>
+                            <tr>
+                                <td>Build all formats</td>
+                                <td><code>/juce-dev:build all</code></td>
+                                <td>target (<code>all</code>)</td>
+                                <td>Builds AU + VST3 + Standalone in one pass</td>
+                            </tr>
+                            <tr>
+                                <td>Build and test</td>
+                                <td><code>/juce-dev:build all test</code></td>
+                                <td>target + action (<code>test</code>)</td>
+                                <td>Builds all formats, then validates with PluginVal</td>
+                            </tr>
+                            <tr>
+                                <td>Sign and notarize</td>
+                                <td><code>/juce-dev:build all notarize</code></td>
+                                <td>target + action (<code>notarize</code>)</td>
+                                <td>Builds, code-signs, and notarizes with Apple (requires developer account in <code>.env</code>)</td>
+                            </tr>
+                            <tr>
+                                <td>Publish release</td>
+                                <td><code>/juce-dev:build publish</code></td>
+                                <td>action (<code>publish</code>)</td>
+                                <td>Full pipeline: build, sign, notarize, create installer, publish to GitHub Releases</td>
+                            </tr>
+                            <tr>
+                                <td>Quick test installer</td>
+                                <td><code>/juce-dev:build unsigned</code></td>
+                                <td>action (<code>unsigned</code>)</td>
+                                <td>Creates an unsigned .pkg installer for local testing — no signing required</td>
                             </tr>
                         </tbody>
                     </table>
