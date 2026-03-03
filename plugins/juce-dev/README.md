@@ -115,5 +115,9 @@ All project creation steps (rsync, sed replacements, git init, gh repo create) r
 
 ## Feedback & Issues
 
-- [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-dev-bug.yml)
-- [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-dev-feature.yml)
+- JUCE Dev (Claude Code plugin)
+  - [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-dev-bug.yml)
+  - [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-dev-feature.yml)
+- juce-visage (Codex skill)
+  - [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-visage-codex-bug.yml)
+  - [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-visage-codex-feature.yml)

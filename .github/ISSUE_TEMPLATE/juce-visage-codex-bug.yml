@@ -1,6 +1,6 @@
-name: "JUCE Visage (Claude Skill): Bug Report"
-description: Report a bug in the Claude juce-visage skill
-labels: ["bug", "juce-visage"]
+name: "JUCE Visage (Codex Skill): Bug Report"
+description: Report a bug in the Codex juce-visage skill
+labels: ["bug", "juce-visage", "codex-skill"]
 body:
   - type: textarea
     id: description
@@ -15,8 +15,9 @@ body:
       label: Steps to Reproduce
       description: Steps to reproduce the behavior.
       placeholder: |
-        1. Follow skill guidance for '...'
-        2. See error
+        1. Ask Codex to do '...'
+        2. Codex follows juce-visage guidance
+        3. See incorrect behavior
     validations:
       required: true
   - type: textarea
@@ -33,7 +34,8 @@ body:
       description: Relevant environment details.
       placeholder: |
         - OS: macOS 15.x
-        - Claude Code version: x.x.x
+        - Codex environment/version: x.x.x
+        - Model used: gpt-5 / gpt-5-codex
         - Xcode version: x.x
         - JUCE version: x.x.x
         - Visage version: x.x.x

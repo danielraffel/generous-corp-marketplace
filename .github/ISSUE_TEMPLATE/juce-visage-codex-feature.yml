@@ -1,6 +1,6 @@
-name: "JUCE Visage (Claude Skill): Feature Request"
-description: Suggest a feature for the Claude juce-visage skill
-labels: ["enhancement", "juce-visage"]
+name: "JUCE Visage (Codex Skill): Feature Request"
+description: Suggest a feature for the Codex juce-visage skill
+labels: ["enhancement", "juce-visage", "codex-skill"]
 body:
   - type: textarea
     id: description
