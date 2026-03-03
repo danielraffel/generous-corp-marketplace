@@ -30,9 +30,39 @@
             --accent: #667eea;
             --code-bg: #1c1c1c;
             --code-text: #e0e0e0;
+            --paragraph-text: #333333;
+            --muted-strong: #444444;
+            --copy-btn-bg: #333333;
+            --copy-btn-bg-hover: #444444;
+            --copy-btn-text: #aaaaaa;
+            --surface-bg: #ffffff;
+            --surface-border: #dddddd;
+            --subtle-bg: #fafafa;
+            --inverse-text: #ffffff;
+            color-scheme: light dark;
             --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
             --spacing-unit: 2rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d1117;
+                --text: #e6edf3;
+                --gray: #9aa4b2;
+                --light-gray: #2b3442;
+                --code-bg: #161b22;
+                --code-text: #d7dee7;
+                --paragraph-text: #c3ccd8;
+                --muted-strong: #b5bfcc;
+                --copy-btn-bg: #2d3748;
+                --copy-btn-bg-hover: #3b4658;
+                --copy-btn-text: #c3ccd8;
+                --surface-bg: #161b22;
+                --surface-border: #30363d;
+                --subtle-bg: #111827;
+                --inverse-text: #ffffff;
+            }
         }
 
         * {
@@ -78,7 +108,7 @@
         p {
             font-size: 1.25rem;
             max-width: 34ch;
-            color: #333;
+            color: var(--paragraph-text);
             margin-bottom: var(--spacing-unit);
         }
 
@@ -207,7 +237,7 @@
         }
 
         .code-comment { color: #6a6a6a; }
-        .code-command { color: #fff; font-weight: bold; }
+        .code-command { color: var(--inverse-text); font-weight: bold; }
         .code-prompt { color: var(--accent); user-select: none; }
 
         .btn {
@@ -223,7 +253,7 @@
 
         .btn:hover {
             background: var(--accent);
-            color: #fff;
+            color: var(--inverse-text);
         }
 
         /* Footer */
@@ -243,8 +273,8 @@
             position: absolute;
             top: 0.75rem;
             right: 0.75rem;
-            background: #333;
-            color: #aaa;
+            background: var(--copy-btn-bg);
+            color: var(--copy-btn-text);
             border: none;
             padding: 0.4rem 0.8rem;
             border-radius: 4px;
@@ -253,8 +283,8 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .copy-btn:hover { background: #444; color: #fff; }
-        .copy-btn.copied { background: var(--accent); color: #fff; }
+        .copy-btn:hover { background: var(--copy-btn-bg-hover); color: var(--inverse-text); }
+        .copy-btn.copied { background: var(--accent); color: var(--inverse-text); }
 
         /* Stats cards */
         .stat-card {
@@ -307,7 +337,7 @@
             padding-bottom: 1.5rem;
             font-size: 1rem;
             line-height: 1.7;
-            color: #444;
+            color: var(--muted-strong);
         }
         .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
         .faq-answer p:last-child { margin-bottom: 0; }

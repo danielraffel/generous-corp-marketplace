@@ -30,9 +30,39 @@
             --accent: #667eea;
             --code-bg: #1c1c1c;
             --code-text: #e0e0e0;
+            --paragraph-text: #333333;
+            --muted-strong: #444444;
+            --copy-btn-bg: #333333;
+            --copy-btn-bg-hover: #444444;
+            --copy-btn-text: #aaaaaa;
+            --surface-bg: #ffffff;
+            --surface-border: #dddddd;
+            --subtle-bg: #fafafa;
+            --inverse-text: #ffffff;
+            color-scheme: light dark;
             --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
             --spacing-unit: 2rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d1117;
+                --text: #e6edf3;
+                --gray: #9aa4b2;
+                --light-gray: #2b3442;
+                --code-bg: #161b22;
+                --code-text: #d7dee7;
+                --paragraph-text: #c3ccd8;
+                --muted-strong: #b5bfcc;
+                --copy-btn-bg: #2d3748;
+                --copy-btn-bg-hover: #3b4658;
+                --copy-btn-text: #c3ccd8;
+                --surface-bg: #161b22;
+                --surface-border: #30363d;
+                --subtle-bg: #111827;
+                --inverse-text: #ffffff;
+            }
         }
 
         * {
@@ -78,7 +108,7 @@
         p {
             font-size: 1.25rem;
             max-width: 34ch;
-            color: #333;
+            color: var(--paragraph-text);
             margin-bottom: var(--spacing-unit);
         }
 
@@ -200,7 +230,7 @@
         }
 
         .code-comment { color: #6a6a6a; }
-        .code-command { color: #fff; font-weight: bold; }
+        .code-command { color: var(--inverse-text); font-weight: bold; }
         .code-prompt { color: var(--accent); user-select: none; }
 
         .btn {
@@ -216,7 +246,7 @@
 
         .btn:hover {
             background: var(--accent);
-            color: #fff;
+            color: var(--inverse-text);
         }
 
         /* Footer */
@@ -236,8 +266,8 @@
             position: absolute;
             top: 0.75rem;
             right: 0.75rem;
-            background: #333;
-            color: #aaa;
+            background: var(--copy-btn-bg);
+            color: var(--copy-btn-text);
             border: none;
             padding: 0.4rem 0.8rem;
             border-radius: 4px;
@@ -246,8 +276,8 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .copy-btn:hover { background: #444; color: #fff; }
-        .copy-btn.copied { background: var(--accent); color: #fff; }
+        .copy-btn:hover { background: var(--copy-btn-bg-hover); color: var(--inverse-text); }
+        .copy-btn.copied { background: var(--accent); color: var(--inverse-text); }
 
         /* Chain examples */
         .chain-card {
@@ -326,7 +356,7 @@
             padding-bottom: 1.5rem;
             font-size: 1rem;
             line-height: 1.7;
-            color: #444;
+            color: var(--muted-strong);
         }
         .faq-answer p { max-width: none; font-size: 1rem; margin-bottom: 1rem; }
         .faq-answer p:last-child { margin-bottom: 0; }
@@ -366,7 +396,7 @@
                     </div>
                     <div class="details">
                         <strong>Chainer will respond with a confirmation:</strong>
-                        <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; font-family: var(--font-main);">
+                        <div style="background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 4px; padding: 1rem; margin: 0.75rem 0; font-family: var(--font-main);">
                             <div style="margin-bottom: 0.75rem;">Here's what I'll do:</div>
                             <div style="margin-bottom: 0.5rem;">1. <code>/feature-dev</code> will analyze your codebase and create a plan for adding OAuth</div>
                             <div style="margin-bottom: 0.75rem;">2. <code>/ralph-loop</code> will implement the plan automatically (up to 50 passes)</div>
@@ -461,7 +491,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
                         </div>
                         <div class="details">
-                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                            <div style="background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
                                 <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
                                 <div style="margin-bottom: 0.5rem;">1. <code>/feature-dev</code> will analyze your codebase and create a plan for user authentication</div>
                                 <div>2. <code>/ralph-loop</code> will implement the plan (up to 50 passes)</div>
@@ -481,7 +511,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
                         </div>
                         <div class="details">
-                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                            <div style="background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
                                 <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
                                 <div style="margin-bottom: 0.5rem;">1. <code>/feature-dev</code> will analyze your codebase and create an API design</div>
                                 <div style="margin-bottom: 0.5rem; padding-left: 1rem; color: var(--gray);">→ Saves plan to <code>specs/</code> in your project</div>
@@ -502,7 +532,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
                         </div>
                         <div class="details">
-                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                            <div style="background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
                                 <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
                                 <div>1. <code>/ralph-loop</code> will implement <code>specs/api.md</code> (up to 50 passes)</div>
                             </div>
@@ -521,7 +551,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">Learn more</span>
                         </div>
                         <div class="details">
-                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
+                            <div style="background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 4px; padding: 1rem; margin: 0.5rem 0;">
                                 <div style="margin-bottom: 0.75rem;"><strong>Here's what I'll do:</strong></div>
                                 <div style="margin-bottom: 0.5rem;">1. <code>/worktree-manager:start</code> creates <code>~/worktrees/payments/</code> on a new branch</div>
                                 <div style="margin-bottom: 0.5rem;">2. <code>/feature-dev</code> creates an implementation plan</div>
@@ -559,15 +589,15 @@ Please answer these questions...</div>
 
                 <div class="col-right">
                     <h4 style="font-size: 1rem; margin-bottom: 1rem; font-weight: 600;">After: Interactive UI</h4>
-                    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; font-size: 0.85rem;">
+                    <div style="background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 8px; padding: 1.25rem; font-size: 0.85rem;">
                         <div style="margin-bottom: 1.25rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">Invader behavior</div>
                             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--surface-border); border-radius: 4px; cursor: pointer;">
                                     <input type="radio" name="invaders" checked style="accent-color: var(--accent);">
                                     <span>Formation with swooping attacks</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--surface-border); border-radius: 4px;">
                                     <input type="radio" name="invaders" style="accent-color: var(--accent);">
                                     <span>Side-to-side movement</span>
                                 </label>
