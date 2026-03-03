@@ -617,6 +617,24 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-full">
+                    <div class="workflow-card">
+                        <div class="workflow-title">macOS + iOS with GPU UI</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:create "My Synth" --visage
+<span class="code-comment"># then, from the project directory:</span>
+<span class="code-prompt">/</span>juce-dev:setup-ios</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Create a plugin with Metal UI, then add an iOS target — two commands.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            First command creates a macOS plugin with Visage GPU-rendered UI (Metal, 60fps). Second adds an iOS/iPadOS app target that auto-detects Visage and creates a matching Metal UI with native touch handling. Both macOS and iOS share the same Visage codebase.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
