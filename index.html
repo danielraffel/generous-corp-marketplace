@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generous Corp Marketplace</title>
-    <meta name="description" content="Official marketplace for Claude Code plugins and Agent Skills you can use with OpenAI Codex and Claude Code.">
+    <title>Generous Corp — Tools for AI Coding</title>
+    <meta name="description" content="Plugins and agent skills for Claude Code and OpenAI Codex. Tools that extend what AI coding assistants can do.">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Generous Corp Marketplace">
-    <meta property="og:description" content="Official marketplace for Claude Code plugins and Agent Skills you can use with OpenAI Codex and Claude Code.">
+    <meta property="og:title" content="Generous Corp — Tools for AI Coding">
+    <meta property="og:description" content="Plugins and agent skills for Claude Code and OpenAI Codex. Tools that extend what AI coding assistants can do.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.generouscorp.com/generous-corp-marketplace/">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Generous Corp Marketplace">
-    <meta name="twitter:description" content="Official marketplace for Claude Code plugins and Agent Skills you can use with OpenAI Codex and Claude Code.">
+    <meta name="twitter:title" content="Generous Corp — Tools for AI Coding">
+    <meta name="twitter:description" content="Plugins and agent skills for Claude Code and OpenAI Codex. Tools that extend what AI coding assistants can do.">
 
     <style>
         :root {
@@ -24,17 +24,10 @@
             --gray: #888888;
             --light-gray: #f4f4f4;
             --accent: #667eea;
-            --code-bg: #1c1c1c;
-            --code-text: #e0e0e0;
             --paragraph-text: #333333;
-            --muted-strong: #444444;
-            --copy-btn-bg: #333333;
-            --copy-btn-bg-hover: #444444;
-            --copy-btn-text: #aaaaaa;
             --surface-bg: #ffffff;
             --surface-border: #dddddd;
             --subtle-bg: #fafafa;
-            --inverse-text: #ffffff;
             color-scheme: light dark;
             --font-main: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
             --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
@@ -47,18 +40,11 @@
                 --text: #e6edf3;
                 --gray: #9aa4b2;
                 --light-gray: #2b3442;
-                --code-bg: #161b22;
-                --code-text: #d7dee7;
                 --paragraph-text: #c3ccd8;
-                --muted-strong: #b5bfcc;
-                --copy-btn-bg: #2d3748;
-                --copy-btn-bg-hover: #3b4658;
-                --copy-btn-text: #c3ccd8;
                 --surface-bg: #161b22;
                 --surface-border: #30363d;
                 --subtle-bg: #111827;
-                --inverse-text: #ffffff;
-            }
+                }
         }
 
         * {
@@ -230,54 +216,14 @@
             margin-bottom: 0.75rem;
         }
 
-        /* Code blocks */
-        .code-block {
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 2rem;
+        /* Coming soon */
+        .coming-soon {
+            border: 1px dashed var(--surface-border);
             border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            overflow-x: auto;
-            line-height: 1.7;
-            margin-top: 1rem;
-            white-space: pre-wrap;
-        }
-        .code-comment { color: #6a6a6a; }
-        .code-block-wrapper {
-            position: relative;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            background: var(--copy-btn-bg);
-            color: var(--copy-btn-text);
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .copy-btn:hover { background: var(--copy-btn-bg-hover); color: var(--inverse-text); }
-        .copy-btn.copied { background: var(--accent); color: var(--inverse-text); }
-
-        /* Install subsections */
-        .install-subsection {
-            margin-top: 2.5rem;
-        }
-        .install-subsection h4 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .install-subsection p {
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray);
             font-size: 1rem;
-            max-width: 60ch;
-            color: var(--paragraph-text);
-            margin-bottom: 0.5rem;
         }
 
         footer {
@@ -297,24 +243,24 @@
         <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
             <a href="https://www.generouscorp.com/projects.html" class="tag">Generous Corp</a>
             <nav class="nav-links">
-                <a href="#plugins-available">Plugins</a>
-                <a href="#skills-available">Skills</a>
-                <a href="#installation">Installation</a>
+                <a href="#plugins">Plugins</a>
+                <a href="#claude-code-skills">Claude Code Skills</a>
+                <a href="#codex-skills">Codex Skills</a>
             </nav>
-            <h1>Marketplace.</h1>
+            <h1>Tools for<br>AI coding.</h1>
             <div class="grid">
                 <div class="col-left">
-                    <p>Official marketplace for <strong>Claude Code plugins</strong> and <strong>Agent Skills</strong> you can use with <strong>OpenAI Codex</strong> and <strong>Claude Code</strong>.</p>
+                    <p>Plugins and agent skills that extend what <strong>Claude Code</strong> and <strong>OpenAI Codex</strong> can do.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Plugins Available -->
-        <section id="plugins-available">
+        <!-- Plugins -->
+        <section id="plugins">
             <div class="grid">
                 <div class="col-full">
-                    <h3>Plugins Available</h3>
-                    <h2>Claude Code plugins.</h2>
+                    <h3>Claude Code Plugins</h3>
+                    <h2>Plugins.</h2>
                 </div>
                 <div class="col-full">
                     <div class="card-grid">
@@ -353,22 +299,22 @@
             </div>
         </section>
 
-        <!-- Skills Available -->
-        <section id="skills-available">
+        <!-- Claude Code Skills -->
+        <section id="claude-code-skills">
             <div class="grid">
                 <div class="col-full">
-                    <h3>Skills Available</h3>
-                    <h2>Agent skills.</h2>
+                    <h3>Claude Code Skills</h3>
+                    <h2>Skills.</h2>
                 </div>
                 <div class="col-full">
                     <div class="card-grid">
                         <a href="skills/claude/" class="card">
-                            <span class="card-type">Skill</span>
+                            <span class="card-type">Claude Code Skill</span>
                             <div class="card-title">Claude</div>
-                            <div class="card-desc">A skill designed for use in a CLI like Codex to route a task to Anthropic Claude and return the result</div>
+                            <div class="card-desc">Route a task to Anthropic Claude from another CLI and return the result</div>
                         </a>
                         <a href="skills/juce-visage/" class="card">
-                            <span class="card-type">Skill</span>
+                            <span class="card-type">Claude Code Skill</span>
                             <div class="card-title">JUCE Visage</div>
                             <div class="card-desc">Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS</div>
                         </a>
@@ -377,69 +323,16 @@
             </div>
         </section>
 
-        <!-- Installation -->
-        <section id="installation">
+        <!-- Codex Skills -->
+        <section id="codex-skills">
             <div class="grid">
                 <div class="col-full">
-                    <h3>Installation</h3>
-                    <h2>Get started.</h2>
+                    <h3>OpenAI Codex Skills</h3>
+                    <h2>Codex skills.</h2>
                 </div>
-
-                <!-- Claude Code Plugins -->
                 <div class="col-full">
-                    <div class="install-subsection">
-                        <h4>Claude Code: Add the Marketplace + Install Plugins</h4>
-                        <p>In Claude Code, run:</p>
-                        <div class="code-block-wrapper">
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-comment"># Add the marketplace</span>
-/plugin marketplace add danielraffel/generous-corp-marketplace
-
-<span class="code-comment"># Install plugins (pick the ones you want)</span>
-/plugin install worktree-manager@generous-corp-marketplace
-/plugin install chainer@generous-corp-marketplace
-/plugin install prompt-repeater@generous-corp-marketplace
-/plugin install orchestrate@generous-corp-marketplace
-/plugin install design-partner@generous-corp-marketplace
-/plugin install juce-dev@generous-corp-marketplace
-
-<span class="code-comment"># Restart Claude Code to load plugins</span></div>
-                        </div>
-                    </div>
+                    <div class="coming-soon">Coming soon</div>
                 </div>
-
-                <!-- OpenAI Codex Skills -->
-                <div class="col-full">
-                    <div class="install-subsection">
-                        <h4>OpenAI Codex: Install Skills</h4>
-                        <p>Codex scans for skills in repo or user locations under <code style="background: var(--light-gray); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">.agents/skills</code>. Install user-wide via symlink:</p>
-                        <div class="code-block-wrapper">
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block">git clone https://github.com/danielraffel/generous-corp-marketplace
-cd generous-corp-marketplace
-
-mkdir -p ~/.agents/skills
-ln -s "$(pwd)/skills/claude" ~/.agents/skills/claude</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Claude Code Skills -->
-                <div class="col-full">
-                    <div class="install-subsection">
-                        <h4>Claude Code: Install Skills</h4>
-                        <p>Claude Code loads skills from <code style="background: var(--light-gray); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">~/.claude/skills/</code> or <code style="background: var(--light-gray); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">.claude/skills/</code>. Install via symlink:</p>
-                        <div class="code-block-wrapper">
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block">git clone https://github.com/danielraffel/generous-corp-marketplace
-cd generous-corp-marketplace
-
-mkdir -p ~/.claude/skills
-ln -s "$(pwd)/skills/claude" ~/.claude/skills/claude</div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </section>
 
@@ -456,18 +349,5 @@ ln -s "$(pwd)/skills/claude" ~/.claude/skills/claude</div>
         </div>
     </footer>
 
-    <script>
-        function copyCode(btn) {
-            const code = btn.nextElementSibling.innerText;
-            navigator.clipboard.writeText(code).then(() => {
-                btn.textContent = 'Copied!';
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.textContent = 'Copy';
-                    btn.classList.remove('copied');
-                }, 2000);
-            });
-        }
-    </script>
 </body>
 </html>
