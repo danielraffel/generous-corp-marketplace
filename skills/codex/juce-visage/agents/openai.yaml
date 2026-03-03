@@ -1,0 +1,4 @@
+interface:
+  display_name: "JUCE Visage"
+  short_description: "Guide JUCE+Visage UI integration on macOS/iOS"
+  default_prompt: "Use $juce-visage to implement or debug JUCE + Visage UI integration, including event bridging, focus handling, and DAW keyboard behavior."

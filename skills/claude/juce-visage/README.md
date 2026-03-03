@@ -32,9 +32,9 @@ git clone --filter=blob:none --sparse \
   https://github.com/danielraffel/generous-corp-marketplace.git \
   /tmp/gcm-sparse
 cd /tmp/gcm-sparse
-git sparse-checkout set skills/juce-visage
+git sparse-checkout set skills/claude/juce-visage
 mkdir -p ~/.claude/skills/juce-visage
-cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
+cp -r skills/claude/juce-visage/* ~/.claude/skills/juce-visage/
 ```
 
 Verify the install:
@@ -54,7 +54,7 @@ Pull the latest and copy the files again:
 ```bash
 cd /tmp/gcm-sparse
 git pull
-cp -r skills/juce-visage/* ~/.claude/skills/juce-visage/
+cp -r skills/claude/juce-visage/* ~/.claude/skills/juce-visage/
 ```
 
 If you deleted the sparse checkout, re-run the installation steps above.

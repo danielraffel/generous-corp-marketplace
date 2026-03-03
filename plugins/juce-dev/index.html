@@ -448,7 +448,8 @@
             <h1>Make audio plugins<br>for macOS &amp; iOS.</h1>
             <div class="grid">
                 <div class="col-left">
-                    <p><b>juce-dev</b> sets up everything you need to build an audio plugin — synth, effect, instrument, whatever you want. Name it, answer a few questions, and you've got a project that builds in Xcode. Add GPU-rendered UI with Visage, add an iOS target, and Claude knows how to help with each — a bundled <a href="#juce-visage-skill">juce-visage skill</a> activates automatically when you're working on Visage UI.</p>
+                    <p><b>juce-dev</b> sets up everything you need to build an audio plugin — synth, effect, instrument, whatever you want. Name it, answer a few questions, and you've got a project that builds in Xcode. Add GPU-rendered UI with Visage, add an iOS target, and Claude knows how to help with each — a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> activates automatically when you're working on Visage UI.</p>
+                    <p style="font-size: 1rem; color: var(--gray); margin-top: -0.5rem;">Using Codex? See the <a href="#codex-users">Codex FAQ</a> and the <a href="../../skills/codex/juce-visage/">Codex juce-visage skill</a>.</p>
                 </div>
                 <div class="col-right">
                     <div class="code-block-wrapper">
@@ -482,7 +483,7 @@
                 <div class="col-right">
                     <p>Starting a new audio plugin usually means wiring up build systems, configuring code signing, setting up project identifiers, and writing boilerplate. It's tedious before you write a single line of audio code.</p>
                     <p><strong>juce-dev handles all of that.</strong> Give it a name, confirm your developer settings, pick your options, and you get a project that compiles immediately. If it's your first time, it checks your tools and walks you through setup.</p>
-                    <p><strong>Context-aware assistance:</strong> If you add Visage GPU UI to your project, a bundled <a href="#juce-visage-skill">juce-visage skill</a> automatically provides Claude with deep knowledge of Metal view embedding, event bridging, keyboard handling in DAW hosts, and more. No Visage? The skill stays out of the way — it only activates when relevant.</p>
+                    <p><strong>Context-aware assistance:</strong> If you add Visage GPU UI to your project, a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> automatically provides Claude with deep knowledge of Metal view embedding, event bridging, keyboard handling in DAW hosts, and more. No Visage? The skill stays out of the way — it only activates when relevant.</p>
                     <p>Want to go further? Use <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> to describe what your plugin should do and let Claude build it for you.</p>
                 </div>
             </div>
@@ -502,7 +503,7 @@
                         <li>Code signing and notarization config ready for distribution</li>
                         <li>Optional GPU-rendered UI with <a href="https://github.com/VitalAudio/visage">Visage</a> (Metal-accelerated)</li>
                         <li>Optional iOS/iPadOS app target with auto-detected UI mode</li>
-                        <li>Bundled <a href="#juce-visage-skill">juce-visage skill</a> — activates only when working on Visage UI</li>
+                        <li>Bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
@@ -581,7 +582,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Everything from create, plus: clones the Visage framework, applies patches, adds a Metal-rendered editor template with event bridging. The bundled <a href="#juce-visage-skill">juce-visage skill</a> activates automatically to help with Visage development.
+                            Everything from create, plus: clones the Visage framework, applies patches, adds a Metal-rendered editor template with event bridging. The bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> activates automatically to help with Visage development.
                         </div>
                     </div>
                 </div>
@@ -780,11 +781,20 @@ GitHub repo:       My-Cool-Synth</div>
                         </div>
                     </div>
                     <div class="faq-item">
-                        <div class="faq-question" onclick="toggleFaq(this)" id="juce-visage-skill">What is Visage?</div>
+                        <div class="faq-question" onclick="toggleFaq(this)" id="juce-visage-skill">What is Visage, and how does the bundled skill work?</div>
                         <div class="faq-answer">
                             <p><a href="https://github.com/VitalAudio/visage">Visage</a> is a GPU-accelerated UI framework for audio plugins on macOS. Instead of the standard JUCE graphics, Visage renders your plugin's interface using Metal at 60fps — smooth knobs, sliders, and animations with no CPU overhead.</p>
                             <p>It's optional. If you enable it, juce-dev sets up the framework, applies compatibility patches, and gives you a Visage-powered editor template to start from.</p>
-                            <p><strong>Bundled skill:</strong> This plugin includes a <a href="https://www.generouscorp.com/generous-corp-marketplace/skills/juce-visage/">juce-visage skill</a> that automatically activates when you're working on Visage UI code. It provides guidance on Metal view embedding, event bridging, keyboard handling in DAW hosts, popups, modals, iOS touch events, and the full Visage API. You don't need to do anything to enable it — if you're working on Visage UI, Claude will use it automatically.</p>
+                            <p><strong>Bundled skill behavior:</strong> This plugin includes a <a href="https://www.generouscorp.com/generous-corp-marketplace/skills/claude/juce-visage/">juce-visage skill</a> that is available after the plugin is installed. It works independently from command execution, so you don't need to run a separate command just to "turn it on." When you're working on Visage UI code, Claude uses that skill automatically for guidance (Metal view embedding, event bridging, DAW keyboard handling, popups/modals, iOS touch handling, and the Visage API).</p>
+                            <p>If your JUCE project does <strong>not</strong> include Visage, the skill stays out of the way and won't push Visage-specific patterns. Add Visage first (for example via <code>/juce-dev:create ... --visage</code> or <code>/juce-dev:setup-visage</code>) to make that guidance relevant.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)" id="codex-users">What if I use Codex instead of Claude Code?</div>
+                        <div class="faq-answer">
+                            <p>You can use Codex with the <a href="https://www.generouscorp.com/generous-corp-marketplace/skills/codex/juce-visage/">Codex juce-visage skill</a>. It provides Visage-focused implementation guidance (Metal embedding, JUCE↔Visage event bridging, DAW keyboard behavior, popups/modals/dropdowns, iOS touch handling, and debugging patterns).</p>
+                            <p><strong>What it does not replace:</strong> the Codex skill is guidance-only. It does not provide the command workflow this plugin provides (no <code>/juce-dev:create</code>, no automated dependency checks/setup, no automatic Visage clone+patch flow, and no project bootstrapping/repo setup commands).</p>
+                            <p><strong>Recommended workflow:</strong> scaffold first using this plugin (in Claude Code) or your <a href="https://github.com/danielraffel/JUCE-Plugin-Starter/tree/main">JUCE-Plugin-Starter</a>, then use Codex + <code>$juce-visage</code> for day-to-day Visage implementation and troubleshooting. If Visage is not added to the project, the skill stays out of the way.</p>
                         </div>
                     </div>
                     <div class="faq-item">
@@ -815,7 +825,7 @@ GitHub repo:       My-Cool-Synth</div>
                             <p>&bull; <strong>Build script</strong> with multiple actions: <code>build.sh au debug</code>, <code>build.sh all publish</code>, <code>build.sh unsigned</code> (fast installer testing), <code>build.sh vst3 test</code> (PluginVal integration)<br>
                             &bull; <strong>Code signing + notarization</strong> configured from .env — no manual Xcode setup<br>
                             &bull; <strong>Automatic versioning</strong> that increments on every build with proper AU version integers<br>
-                            &bull; <strong>Visage integration</strong> with pre-applied patches for keyboard handling, popup positioning, FPS caps — plus a bundled <a href="#juce-visage-skill">juce-visage skill</a> that helps Claude navigate the tricky parts (Metal view embedding, event bridging, DAW keyboard conflicts, iOS touch handling)<br>
+                            &bull; <strong>Visage integration</strong> with pre-applied patches for keyboard handling, popup positioning, FPS caps — plus a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> that helps Claude navigate the tricky parts (Metal view embedding, event bridging, DAW keyboard conflicts, iOS touch handling)<br>
                             &bull; <strong>GitHub release publishing</strong> with auto-download landing pages<br>
                             &bull; <strong>Shared JUCE cache</strong> at <code>~/.juce_cache/</code> so you don't re-download JUCE for each project</p>
                         </div>

@@ -6,6 +6,8 @@ Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md
 
 - [Plugins Available](#plugins-available)
 - [Skills Available](#skills-available)
+  - [Codex Skills](#codex-skills)
+  - [Claude Code Skills](#claude-code-skills)
 - [Installation](#installation)
   - [Claude Code: Add the Marketplace + Install Plugins](#claude-code-add-the-marketplace--install-plugins)
   - [OpenAI Codex: Install Skills](#openai-codex-install-skills)
@@ -24,8 +26,14 @@ Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md
 
 ## Skills Available
 
-- **[claude](skills/claude)** - A skill designed for use in a CLI like Codex to route a task to Anthropic Claude (for "consult Claude" workflows) and returns the result.
-- **[juce-visage](skills/juce-visage)** - Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS
+### Codex Skills
+
+- **[claude](skills/codex/claude)** - Route a task to Anthropic Claude from Codex and return the response.
+- **[juce-visage](skills/codex/juce-visage)** - Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS and iOS/iPadOS.
+
+### Claude Code Skills
+
+- **[juce-visage](skills/claude/juce-visage)** - Claude Code version of the JUCE+Visage integration skill (also bundled with the `juce-dev` plugin).
 
 ## Installation
 
@@ -79,17 +87,18 @@ Codex scans for skills in repo or user locations under .agents/skills. Recommend
  - Per-repo (share with a team): <repo>/.agents/skills/<skill-name>/
  - User-wide: ~/.agents/skills/<skill-name>/
 
-Example: install this repo’s claude skill user-wide via symlink:
+Example: install this repo's Codex skills user-wide via symlink:
 ```
 git clone https://github.com/danielraffel/generous-corp-marketplace
 cd generous-corp-marketplace
 
 mkdir -p ~/.agents/skills
-ln -s "$(pwd)/skills/claude" ~/.agents/skills/claude
+ln -s "$(pwd)/skills/codex/claude" ~/.agents/skills/claude
+ln -s "$(pwd)/skills/codex/juce-visage" ~/.agents/skills/juce-visage
 ```
 
 Usage in Codex:
- - Run /skills (or type $claude) to select a skill, or invoke it directly when relevant.
+ - Run `/skills` (or type `$claude` / `$juce-visage`) to select or invoke a skill.
 
 ---
 
@@ -99,17 +108,17 @@ Claude Code loads skills from:
  - Personal: ~/.claude/skills/<skill-name>/SKILL.md
  - Project: .claude/skills/<skill-name>/SKILL.md
 
-Example: symlink the same claude skill into your personal Claude skills folder:
+Example: symlink the Claude Code `juce-visage` skill into your personal Claude skills folder:
 ```
 git clone https://github.com/danielraffel/generous-corp-marketplace
 cd generous-corp-marketplace
 
 mkdir -p ~/.claude/skills
-ln -s "$(pwd)/skills/claude" ~/.claude/skills/claude
+ln -s "$(pwd)/skills/claude/juce-visage" ~/.claude/skills/juce-visage
 ```
 
 Usage in Claude Code:
- - Invoke directly with /claude ... (or let it trigger based on its description).
+ - Use it when working on JUCE+Visage integration, or install `juce-dev` to get the same skill bundled automatically.
 
 ---
 

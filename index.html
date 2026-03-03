@@ -174,6 +174,17 @@
             color: var(--text);
         }
 
+        /* Hero */
+        .hero {
+            padding-top: calc(var(--spacing-unit) * 3.5);
+        }
+        .hero h1 {
+            max-width: 20ch;
+        }
+        .hero p {
+            max-width: 56ch;
+        }
+
         /* Card grid */
         .card-grid {
             display: grid;
@@ -240,14 +251,14 @@
     <main class="container">
 
         <!-- Hero -->
-        <section style="padding-top: calc(var(--spacing-unit) * 3.5);">
+        <section class="hero">
             <a href="https://www.generouscorp.com/projects.html" class="tag">Generous Corp</a>
             <nav class="nav-links">
                 <a href="#plugins">Claude Code Plugins</a>
                 <a href="#claude-code-skills">Claude Code Skills</a>
                 <a href="#codex-skills">Codex Skills</a>
             </nav>
-            <h1>Tools for<br>AI coding.</h1>
+            <h1>Tools for AI coding.</h1>
             <p>Plugins and agent skills that extend what <strong>Claude Code</strong> and <strong>OpenAI Codex</strong> can do.</p>
         </section>
 
@@ -304,12 +315,7 @@
                 </div>
                 <div class="col-full">
                     <div class="card-grid">
-                        <a href="skills/claude/" class="card">
-                            <span class="card-type">Claude Code Skill</span>
-                            <div class="card-title">Claude</div>
-                            <div class="card-desc">Route a task to Anthropic Claude from another CLI and return the result</div>
-                        </a>
-                        <a href="skills/juce-visage/" class="card">
+                        <a href="skills/claude/juce-visage/" class="card">
                             <span class="card-type">Claude Code Skill</span>
                             <div class="card-title">JUCE Visage</div>
                             <div class="card-desc">Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS</div>
@@ -327,7 +333,18 @@
                     <h2>Skills.</h2>
                 </div>
                 <div class="col-full">
-                    <div class="coming-soon">Coming soon</div>
+                    <div class="card-grid">
+                        <a href="skills/codex/claude/" class="card">
+                            <span class="card-type">Codex Skill</span>
+                            <div class="card-title">Claude</div>
+                            <div class="card-desc">Route a task to Anthropic Claude from Codex and return the result</div>
+                        </a>
+                        <a href="skills/codex/juce-visage/" class="card">
+                            <span class="card-type">Codex Skill</span>
+                            <div class="card-title">JUCE Visage</div>
+                            <div class="card-desc">Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins</div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
