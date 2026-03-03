@@ -627,11 +627,11 @@
 <span class="code-prompt">/</span>juce-dev:setup-ios</div>
                         </div>
                         <div class="workflow-desc">
-                            Create a plugin with Metal UI, then add an iOS target — two commands.
+                            Create a plugin with Metal UI, then add an iOS target. iOS is always a separate step after create.
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            First command creates a macOS plugin with Visage GPU-rendered UI (Metal, 60fps). Second adds an iOS/iPadOS app target that auto-detects Visage and creates a matching Metal UI with native touch handling. Both macOS and iOS share the same Visage codebase.
+                            First command creates a macOS plugin with Visage GPU-rendered UI (Metal, 60fps). Then <code>setup-ios</code> adds an iOS/iPadOS app target — it auto-detects Visage and creates a matching Metal UI with native touch handling. Both platforms share the same codebase. There's no <code>--ios</code> flag on create because the iOS target needs the project to exist first.
                         </div>
                     </div>
                 </div>
@@ -664,12 +664,13 @@
 <span class="code-prompt">/</span>juce-dev:create "My Synth" --visage --no-github
 
 
-<span class="code-comment"># ── Configure ───────────────────────────────────────</span>
+<span class="code-comment"># ── Configure (run from project root) ───────────────</span>
 
 <span class="code-comment"># Add Visage GPU UI to an existing project</span>
 <span class="code-prompt">/</span>juce-dev:setup-visage
 
 <span class="code-comment"># Add iOS/iPadOS app target (auto-detects Visage)</span>
+<span class="code-comment"># iOS is always added after create — not a create flag</span>
 <span class="code-prompt">/</span>juce-dev:setup-ios
 
 
@@ -703,7 +704,13 @@
 <span class="code-prompt">/</span>juce-dev:build all notarize
 
 <span class="code-comment"># Full pipeline: build → sign → notarize → installer → GitHub Release</span>
-<span class="code-prompt">/</span>juce-dev:build publish</div>
+<span class="code-prompt">/</span>juce-dev:build publish
+
+
+<span class="code-comment"># ── Help ────────────────────────────────────────────</span>
+
+<span class="code-comment"># Show full build reference (targets, actions, options)</span>
+<span class="code-prompt">/</span>juce-dev:build --help</div>
                     </div>
                 </div>
             </div>
