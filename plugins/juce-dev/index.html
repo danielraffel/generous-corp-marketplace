@@ -442,6 +442,7 @@
                 <a href="#what-you-get">What you get</a>
                 <a href="#installation">Installation</a>
                 <a href="#commands">Commands</a>
+                <a href="#reference">Reference</a>
                 <a href="#faq">FAQ</a>
             </nav>
             <h1>Make audio plugins<br>for macOS &amp; iOS.</h1>
@@ -547,93 +548,145 @@
         <section id="commands">
             <div class="grid">
                 <div class="col-full">
-                    <h3>Command Reference</h3>
-                    <h2>Quick lookup.</h2>
-                    <p style="max-width: 60ch; margin-bottom: 2rem;">Four commands cover the full lifecycle. Each does one thing — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
-                    <table class="cmd-table">
-                        <thead>
-                            <tr>
-                                <th>What you want</th>
-                                <th>Command</th>
-                                <th>You provide</th>
-                                <th>What happens</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Create a new plugin</td>
-                                <td><code>/juce-dev:create "My Synth"</code></td>
-                                <td>plugin name (<code>"My Synth"</code>)</td>
-                                <td>Walks through developer settings, creates a complete project ready to build in Xcode</td>
-                            </tr>
-                            <tr>
-                                <td>Create with GPU UI</td>
-                                <td><code>/juce-dev:create "My Synth" --visage</code></td>
-                                <td>plugin name + <code>--visage</code></td>
-                                <td>Same as above, plus clones Visage framework, adds Metal-rendered editor and bridge. The <a href="#juce-visage-skill">juce-visage skill</a> activates automatically</td>
-                            </tr>
-                            <tr>
-                                <td>Create without GitHub</td>
-                                <td><code>/juce-dev:create "My Synth" --no-github</code></td>
-                                <td>plugin name + <code>--no-github</code></td>
-                                <td>Local git only — skips GitHub repo creation</td>
-                            </tr>
-                            <tr>
-                                <td>Add GPU UI to existing project</td>
-                                <td><code>/juce-dev:setup-visage</code></td>
-                                <td>nothing (run from project root)</td>
-                                <td>Adds Visage Metal UI to a project created without it. Clones framework, copies bridge, updates CMake</td>
-                            </tr>
-                            <tr>
-                                <td>Add iOS target</td>
-                                <td><code>/juce-dev:setup-ios</code></td>
-                                <td>nothing (run from project root)</td>
-                                <td>Adds iOS/iPadOS app target. Auto-detects Visage and creates matching UI (GPU or standard JUCE)</td>
-                            </tr>
-                            <tr>
-                                <td>Build standalone</td>
-                                <td><code>/juce-dev:build standalone</code></td>
-                                <td>target (<code>standalone</code>)</td>
-                                <td>Builds and launches the standalone app. Auto-detects if CMake regeneration is needed</td>
-                            </tr>
-                            <tr>
-                                <td>Build Audio Unit</td>
-                                <td><code>/juce-dev:build au</code></td>
-                                <td>target (<code>au</code>)</td>
-                                <td>Builds AU plugin and copies to <code>~/Library/Audio/Plug-Ins/Components/</code></td>
-                            </tr>
-                            <tr>
-                                <td>Build all formats</td>
-                                <td><code>/juce-dev:build all</code></td>
-                                <td>target (<code>all</code>)</td>
-                                <td>Builds AU + VST3 + Standalone in one pass</td>
-                            </tr>
-                            <tr>
-                                <td>Build and test</td>
-                                <td><code>/juce-dev:build all test</code></td>
-                                <td>target + action (<code>test</code>)</td>
-                                <td>Builds all formats, then validates with PluginVal</td>
-                            </tr>
-                            <tr>
-                                <td>Sign and notarize</td>
-                                <td><code>/juce-dev:build all notarize</code></td>
-                                <td>target + action (<code>notarize</code>)</td>
-                                <td>Builds, code-signs, and notarizes with Apple (requires developer account in <code>.env</code>)</td>
-                            </tr>
-                            <tr>
-                                <td>Publish release</td>
-                                <td><code>/juce-dev:build publish</code></td>
-                                <td>action (<code>publish</code>)</td>
-                                <td>Full pipeline: build, sign, notarize, create installer, publish to GitHub Releases</td>
-                            </tr>
-                            <tr>
-                                <td>Quick test installer</td>
-                                <td><code>/juce-dev:build unsigned</code></td>
-                                <td>action (<code>unsigned</code>)</td>
-                                <td>Creates an unsigned .pkg installer for local testing — no signing required</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h3>Commands</h3>
+                    <h2>Four commands.<br>Full lifecycle.</h2>
+                    <p style="max-width: 60ch;">Create, configure, build, ship. Each does one thing well — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
+                </div>
+
+                <div class="col-left">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Create a plugin</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:create "Shimmer Delay"</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Name it, answer a few questions, open in Xcode.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Walks through developer settings, creates a complete JUCE project with AU + VST3 + Standalone targets, initializes git, optionally creates a GitHub repo. Ready to build immediately.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Create with GPU UI</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:create "My Synth" --visage</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Same project, plus Metal-rendered UI at 60fps.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Everything from create, plus: clones the Visage framework, applies patches, adds a Metal-rendered editor template with event bridging. The bundled <a href="#juce-visage-skill">juce-visage skill</a> activates automatically to help with Visage development.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Build &amp; launch</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:build standalone</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Build any target and run it.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Auto-detects if CMake regeneration is needed, builds the standalone app, and launches it. Replace <code>standalone</code> with <code>au</code>, <code>vst3</code>, or <code>all</code> for other formats.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Ship to users</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:build publish</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Build, sign, notarize, package, release.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Full pipeline: builds all formats, code-signs with your Apple developer identity, notarizes with Apple, creates a .pkg installer, and publishes to GitHub Releases with a download page.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Command Reference -->
+        <section id="reference">
+            <div class="grid">
+                <div class="col-full">
+                    <h3>Reference</h3>
+                    <h2>All the options.</h2>
+                    <p style="max-width: 60ch;">Every argument shown with an example. Most have smart defaults — you only need what's relevant to you.</p>
+                </div>
+                <div class="col-full">
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <div class="code-block"><span class="code-comment"># ── Create ──────────────────────────────────────────</span>
+
+<span class="code-comment"># New plugin project (walks through setup)</span>
+<span class="code-prompt">/</span>juce-dev:create "Shimmer Delay"
+
+<span class="code-comment"># With GPU-rendered Visage UI (Metal, 60fps)</span>
+<span class="code-prompt">/</span>juce-dev:create "My Synth" --visage
+
+<span class="code-comment"># Local only — skip GitHub repo creation</span>
+<span class="code-prompt">/</span>juce-dev:create "My Synth" --no-github
+
+<span class="code-comment"># Both flags work together</span>
+<span class="code-prompt">/</span>juce-dev:create "My Synth" --visage --no-github
+
+
+<span class="code-comment"># ── Configure ───────────────────────────────────────</span>
+
+<span class="code-comment"># Add Visage GPU UI to an existing project</span>
+<span class="code-prompt">/</span>juce-dev:setup-visage
+
+<span class="code-comment"># Add iOS/iPadOS app target (auto-detects Visage)</span>
+<span class="code-prompt">/</span>juce-dev:setup-ios
+
+
+<span class="code-comment"># ── Build ───────────────────────────────────────────</span>
+
+<span class="code-comment"># Build and launch standalone app</span>
+<span class="code-prompt">/</span>juce-dev:build standalone
+
+<span class="code-comment"># Build Audio Unit (installs to ~/Library/Audio/Plug-Ins/)</span>
+<span class="code-prompt">/</span>juce-dev:build au
+
+<span class="code-comment"># Build VST3</span>
+<span class="code-prompt">/</span>juce-dev:build vst3
+
+<span class="code-comment"># Build everything at once</span>
+<span class="code-prompt">/</span>juce-dev:build all
+
+
+<span class="code-comment"># ── Test ────────────────────────────────────────────</span>
+
+<span class="code-comment"># Build all formats + validate with PluginVal</span>
+<span class="code-prompt">/</span>juce-dev:build all test
+
+<span class="code-comment"># Quick unsigned installer for local testing</span>
+<span class="code-prompt">/</span>juce-dev:build unsigned
+
+
+<span class="code-comment"># ── Ship ────────────────────────────────────────────</span>
+
+<span class="code-comment"># Code-sign and notarize with Apple</span>
+<span class="code-prompt">/</span>juce-dev:build all notarize
+
+<span class="code-comment"># Full pipeline: build → sign → notarize → installer → GitHub Release</span>
+<span class="code-prompt">/</span>juce-dev:build publish</div>
+                    </div>
                 </div>
             </div>
         </section>
