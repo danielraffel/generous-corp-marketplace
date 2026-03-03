@@ -646,10 +646,11 @@ GitHub repo:       My-Cool-Synth</div>
                         </div>
                     </div>
                     <div class="faq-item">
-                        <div class="faq-question" onclick="toggleFaq(this)">What is Visage?</div>
+                        <div class="faq-question" onclick="toggleFaq(this)" id="juce-visage-skill">What is Visage?</div>
                         <div class="faq-answer">
                             <p><a href="https://github.com/VitalAudio/visage">Visage</a> is a GPU-accelerated UI framework for audio plugins on macOS. Instead of the standard JUCE graphics, Visage renders your plugin's interface using Metal at 60fps — smooth knobs, sliders, and animations with no CPU overhead.</p>
                             <p>It's optional. If you enable it, juce-dev sets up the framework, applies compatibility patches, and gives you a Visage-powered editor template to start from.</p>
+                            <p><strong>Bundled skill:</strong> This plugin includes a <a href="https://www.generouscorp.com/generous-corp-marketplace/skills/juce-visage/">juce-visage skill</a> that automatically activates when you're working on Visage UI code. It provides guidance on Metal view embedding, event bridging, keyboard handling in DAW hosts, popups, modals, iOS touch events, and the full Visage API. You don't need to do anything to enable it — if you're working on Visage UI, Claude will use it automatically.</p>
                         </div>
                     </div>
                     <div class="faq-item">
