@@ -449,7 +449,7 @@
             <div class="grid">
                 <div class="col-left">
                     <p><b>juce-dev</b> sets up everything you need to build an audio plugin — synth, effect, instrument, whatever you want. Name it, answer a few questions, and you've got a project that builds in Xcode. Add GPU-rendered UI with Visage, add an iOS target, and Claude knows how to help with each — a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> activates automatically when you're working on Visage UI.</p>
-                    <p style="font-size: 1rem; color: var(--gray); margin-top: -0.5rem;">Using Codex? See the <a href="#codex-users">Codex FAQ</a> and the <a href="../../skills/codex/juce-visage/">Codex juce-visage skill</a>.</p>
+                    <p style="font-size: 1rem; color: var(--gray); margin-top: -0.5rem;">Using Codex? See the <a href="#codex-users" id="codex-faq-link">Codex FAQ</a> and the <a href="../../skills/codex/juce-visage/">Codex juce-visage skill</a>.</p>
                 </div>
                 <div class="col-right">
                     <div class="code-block-wrapper">
@@ -918,13 +918,28 @@ GitHub repo:       My-Cool-Synth</div>
             el.parentElement.classList.toggle('open');
         }
 
-        if (window.location.hash) {
+        function openFaqFromHash() {
+            if (!window.location.hash) return;
+
             const target = document.getElementById(window.location.hash.substring(1));
             if (target && target.classList.contains('faq-question')) {
                 target.parentElement.classList.add('open');
                 target.scrollIntoView({ behavior: 'smooth' });
             }
         }
+
+        const codexFaqLink = document.getElementById('codex-faq-link');
+        if (codexFaqLink) {
+            codexFaqLink.addEventListener('click', () => {
+                const target = document.getElementById('codex-users');
+                if (target && target.classList.contains('faq-question')) {
+                    target.parentElement.classList.add('open');
+                }
+            });
+        }
+
+        window.addEventListener('hashchange', openFaqFromHash);
+        openFaqFromHash();
     </script>
 </body>
 </html>
