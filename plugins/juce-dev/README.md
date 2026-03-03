@@ -1,8 +1,8 @@
 # juce-dev
 
-**Create JUCE audio plugin projects from the JUCE-Plugin-Starter template**
+**Create, build, and ship JUCE audio plugin projects**
 
-A Claude Code plugin that replaces the interactive `init_plugin_project.sh` script with a streamlined command-driven workflow. Uses `AskUserQuestion` for a better UX than sequential shell prompts.
+A Claude Code plugin for the full JUCE plugin development lifecycle — from project scaffolding to building, testing, signing, and publishing. Wraps the JUCE-Plugin-Starter template and `scripts/build.sh` with smart CMake regeneration detection.
 
 ## Installation
 
@@ -35,6 +35,28 @@ Type `/juce-dev:create` to confirm the command is available.
 
 ## Commands
 
+### `/juce-dev:build [target...] [action] [--help]`
+
+Build, test, sign, or publish your JUCE plugin. Automatically detects whether CMake regeneration is needed.
+
+```
+/juce-dev:build                    # Build all formats locally
+/juce-dev:build standalone         # Build and launch standalone app
+/juce-dev:build au vst3            # Build AU + VST3
+/juce-dev:build all test           # Build all and run PluginVal tests
+/juce-dev:build publish            # Full release to GitHub
+/juce-dev:build pkg                # Signed installer, no GitHub release
+/juce-dev:build unsigned           # Unsigned installer (fast testing)
+/juce-dev:build uninstall          # Remove all installed plugins
+/juce-dev:build --help             # Show full reference
+```
+
+| Targets | Actions | Options |
+|---------|---------|---------|
+| `all` `au` `vst3` `standalone` | `local` `test` `sign` `notarize` `pkg` `publish` `unsigned` `uninstall` | `--regenerate-page` `--help` |
+
+**Smart regeneration:** Checks if `CMakeLists.txt`, `.env`, or source files changed. If not, skips CMake regeneration for faster builds. Falls back to full regeneration if the build fails.
+
 ### `/juce-dev:create <plugin-name> [--visage] [--no-github]`
 
 Create a new JUCE plugin project from the starter template.
@@ -61,6 +83,15 @@ Add Visage GPU UI to an existing JUCE-Plugin-Starter project.
 ```
 cd my-plugin-project
 /juce-dev:setup-visage
+```
+
+### `/juce-dev:setup-ios`
+
+Add an iOS/iPadOS app target to an existing project. Auto-detects Visage and creates the appropriate app files.
+
+```
+cd my-plugin-project
+/juce-dev:setup-ios
 ```
 
 ## Integration with Other Plugins

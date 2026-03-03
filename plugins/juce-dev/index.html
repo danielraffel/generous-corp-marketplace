@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>juce-dev | Plugin for Claude Code</title>
-    <meta name="description" content="A Claude Code plugin that sets up macOS audio plugin projects — synths, effects, instruments — ready to build, code-sign, and distribute.">
+    <meta name="description" content="A Claude Code plugin for the full JUCE audio plugin lifecycle — create, build, test, sign, and publish macOS and iOS audio plugins.">
 
     <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
     <meta property="og:title" content="juce-dev">
@@ -515,8 +515,8 @@
             <div class="grid">
                 <div class="col-full">
                     <h3>Commands</h3>
-                    <h2>Two commands.</h2>
-                    <p style="max-width: 60ch; margin-bottom: 2rem;">Create a new project, or add GPU-rendered UI to an existing one.</p>
+                    <h2>Four commands.</h2>
+                    <p style="max-width: 60ch; margin-bottom: 2rem;">Create a project, add GPU UI or iOS support, build and ship — all from Claude Code.</p>
                     <table class="cmd-table">
                         <thead>
                             <tr>
@@ -527,14 +527,24 @@
                         </thead>
                         <tbody>
                             <tr>
+                                <td>Build your plugin</td>
+                                <td><code>/juce-dev:build standalone</code></td>
+                                <td>Builds, tests, signs, or publishes. Auto-detects CMake changes. Targets: <code>all</code> <code>au</code> <code>vst3</code> <code>standalone</code>. Actions: <code>local</code> <code>test</code> <code>sign</code> <code>notarize</code> <code>pkg</code> <code>publish</code> <code>unsigned</code> <code>uninstall</code>. Use <code>--help</code> for full reference</td>
+                            </tr>
+                            <tr>
                                 <td>Create a new plugin</td>
                                 <td><code>/juce-dev:create "My Synth"</code></td>
                                 <td>Sets up a complete audio plugin project ready to build in Xcode. Optional: <code>--visage</code> for GPU-rendered UI, <code>--no-github</code> to skip repo creation</td>
                             </tr>
                             <tr>
-                                <td>Add GPU UI later</td>
+                                <td>Add GPU UI</td>
                                 <td><code>/juce-dev:setup-visage</code></td>
                                 <td>Adds Metal-accelerated Visage UI to an existing project. Run this from inside a project you already created</td>
+                            </tr>
+                            <tr>
+                                <td>Add iOS target</td>
+                                <td><code>/juce-dev:setup-ios</code></td>
+                                <td>Adds an iOS/iPadOS app target. Auto-detects Visage and creates matching UI (GPU or standard JUCE)</td>
                             </tr>
                         </tbody>
                     </table>
@@ -648,20 +658,23 @@ GitHub repo:       My-Cool-Synth</div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">What build commands are available?</div>
                         <div class="faq-answer">
-                            <p>Each project includes a <code>build.sh</code> script that handles everything from local builds to distribution:</p>
+                            <p>Use <code>/juce-dev:build</code> from Claude Code, or run <code>build.sh</code> directly. Both support the same targets and actions:</p>
                             <p><strong>Local development:</strong><br>
-                            &bull; <code>./scripts/build.sh au debug</code> — Build Audio Unit<br>
-                            &bull; <code>./scripts/build.sh vst3 debug</code> — Build VST3<br>
-                            &bull; <code>./scripts/build.sh standalone debug</code> — Build Standalone app<br>
-                            &bull; <code>./scripts/build.sh all debug</code> — Build everything</p>
+                            &bull; <code>/juce-dev:build standalone</code> — Build and launch standalone app<br>
+                            &bull; <code>/juce-dev:build au</code> — Build Audio Unit<br>
+                            &bull; <code>/juce-dev:build vst3</code> — Build VST3<br>
+                            &bull; <code>/juce-dev:build au vst3</code> — Build multiple targets at once</p>
                             <p><strong>Testing:</strong><br>
-                            &bull; <code>./scripts/build.sh au test</code> — Build and validate with PluginVal<br>
-                            &bull; <code>./scripts/build.sh unsigned</code> — Create an unsigned installer for quick testing</p>
+                            &bull; <code>/juce-dev:build all test</code> — Build and validate with PluginVal<br>
+                            &bull; <code>/juce-dev:build unsigned</code> — Create an unsigned installer for quick testing</p>
                             <p><strong>Distribution:</strong><br>
-                            &bull; <code>./scripts/build.sh all sign</code> — Build and code-sign<br>
-                            &bull; <code>./scripts/build.sh all notarize</code> — Build, sign, and notarize with Apple<br>
-                            &bull; <code>./scripts/build.sh publish</code> — Full pipeline: build, sign, notarize, and publish to GitHub Releases</p>
-                            <p>Or use <code>./scripts/generate_and_open_xcode.sh</code> to open the project in Xcode for GUI-based development.</p>
+                            &bull; <code>/juce-dev:build all sign</code> — Build and code-sign<br>
+                            &bull; <code>/juce-dev:build all notarize</code> — Build, sign, and notarize with Apple<br>
+                            &bull; <code>/juce-dev:build publish</code> — Full pipeline: build, sign, notarize, and publish to GitHub Releases<br>
+                            &bull; <code>/juce-dev:build pkg</code> — Signed installer without GitHub release<br>
+                            &bull; <code>/juce-dev:build uninstall</code> — Remove all installed plugin components</p>
+                            <p><strong>Smart builds:</strong> The <code>/juce-dev:build</code> command auto-detects whether CMake regeneration is needed. If nothing changed in CMakeLists.txt or .env, it skips regeneration for faster builds.</p>
+                            <p>Use <code>/juce-dev:build --help</code> for the full reference, or <code>./scripts/generate_and_open_xcode.sh</code> to open the project in Xcode.</p>
                         </div>
                     </div>
                     <div class="faq-item">
