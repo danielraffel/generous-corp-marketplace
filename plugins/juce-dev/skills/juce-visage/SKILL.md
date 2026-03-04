@@ -55,7 +55,8 @@ This skill provides generic patterns. Each project should maintain a **`docs/juc
 
 ## Visage Patches Applied
 
-- [ ] `performKeyEquivalent:` (windowing_macos.mm) — Cmd+A/C/V/X/Z for TextEditor in plugins (macOS only)
+- [ ] `performKeyEquivalent:` (windowing_macos.mm) — Two-tier: text editing + plugin Cmd+key shortcuts (macOS only)
+- [ ] Keyboard focus initialization (bridge + editor) — `setAcceptsKeystrokes(true)` + `setKeyboardFocusOnFrame()` for Cmd+key shortcuts
 - [ ] Cmd+Q propagation (windowing_macos.mm) — `[[self nextResponder] keyDown:event]` (macOS only)
 - [ ] MTKView 60 FPS cap (windowing_macos.mm) — Prevent excessive GPU on ProMotion displays (macOS only)
 - [ ] Popup menu overflow positioning (popup_menu.cpp) — Above-position fix (cross-platform)
@@ -885,11 +886,13 @@ Propagate this setting to all child frames in the hierarchy. In standalone mode,
 
 These patches to Visage's `windowing_macos.mm` are required for correct behavior in AU/VST3 hosts on macOS. They are **not applicable to iOS** — iOS has no `performKeyEquivalent:`, no DAW plugin hosts, and no secondary windows. The `setAlwaysOnTop` guard (patch 6) applies cross-platform.
 
-### Fix 1: performKeyEquivalent: for Text Editing Shortcuts
+### Fix 1: performKeyEquivalent: for Cmd+Key Shortcuts
 
-**Problem**: In plugin hosts, macOS routes `Cmd+A/C/V/X/Z` through `performKeyEquivalent:` before `keyDown:`. The DAW's Edit menu intercepts these, so plugin text fields can't copy/paste.
+**Problem**: In plugin hosts, macOS routes `Cmd+key` through `performKeyEquivalent:` before `keyDown:`. The DAW's Edit menu intercepts text editing shortcuts (Cmd+A/C/V/X/Z), and other Cmd+key combos (like plugin-specific shortcuts Cmd+I, Cmd+R) never reach the plugin at all.
 
-**Fix**: Override `performKeyEquivalent:` on `VisageAppView` to intercept these when a TextEditor is active:
+**Fix**: Override `performKeyEquivalent:` on `VisageAppView` with a two-tier strategy:
+1. **Always intercept** text editing shortcuts (Cmd+A/C/V/X/Z) when a TextEditor is active
+2. **Try all other** Cmd+key combos through `handleKeyDown()` — if the plugin handles it, consume; otherwise let the host have it
 
 ```objc
 // In VisageAppView (MTKView subclass) — windowing_macos.mm
@@ -898,27 +901,38 @@ These patches to Visage's `windowing_macos.mm` are required for correct behavior
         return [super performKeyEquivalent:event];
 
     NSUInteger flags = [event modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask;
-    bool justCmd = (flags & NSEventModifierFlagCommand) &&
-                   !(flags & NSEventModifierFlagControl) &&
-                   !(flags & NSEventModifierFlagOption);
+    bool hasCmd = (flags & NSEventModifierFlagCommand) &&
+                  !(flags & NSEventModifierFlagControl) &&
+                  !(flags & NSEventModifierFlagOption);
 
-    if (justCmd && self.visage_window->hasActiveTextEntry()) {
+    if (hasCmd) {
         NSString* chars = [event charactersIgnoringModifiers];
         if ([chars length] == 1) {
             unichar ch = [[chars lowercaseString] characterAtIndex:0];
-            if (ch == 'a' || ch == 'c' || ch == 'v' || ch == 'x' || ch == 'z') {
+
+            // Tier 1: Always intercept text editing shortcuts when text is active
+            if (self.visage_window->hasActiveTextEntry() &&
+                (ch == 'a' || ch == 'c' || ch == 'v' || ch == 'x' || ch == 'z')) {
                 visage::KeyCode key_code = visage::translateKeyCode([event keyCode]);
                 int modifiers = [self keyboardModifiers:event];
                 self.visage_window->handleKeyDown(key_code, modifiers, [event isARepeat]);
                 return YES; // Swallow — prevent DAW from seeing this
             }
+
+            // Tier 2: Try all other Cmd+key through Visage's handler
+            visage::KeyCode key_code = visage::translateKeyCode([event keyCode]);
+            int modifiers = [self keyboardModifiers:event];
+            if (self.visage_window->handleKeyDown(key_code, modifiers, [event isARepeat]))
+                return YES;  // Plugin handled this shortcut — consume it
         }
     }
-    return [super performKeyEquivalent:event];
+    return [super performKeyEquivalent:event]; // Not handled — let host have it
 }
 ```
 
-The `hasActiveTextEntry()` guard is critical — without it, `Cmd+Z` would be stolen from the DAW even when no text field is active, breaking DAW undo.
+**Why two tiers?** Text editing shortcuts (Tier 1) are always consumed when a TextEditor is active — we don't want the DAW's Edit menu stealing Cmd+C from a text field. Plugin shortcuts (Tier 2) are tried but NOT forced — if `handleKeyDown()` returns false, the event falls through to the host normally (preserving DAW shortcuts like Cmd+Z undo).
+
+**Prerequisite**: Tier 2 only works if `keyboard_focused_frame_` is set and `acceptsKeystrokes` is true on the target frame. See "Keyboard Focus Initialization" below.
 
 ### Fix 2: Cmd+Q/W Propagation to Host
 
@@ -940,6 +954,35 @@ The `hasActiveTextEntry()` guard is critical — without it, `Cmd+Z` would be st
     }
 }
 ```
+
+### Fix 2b: Keyboard Focus Initialization for Plugin Shortcuts
+
+**Problem**: `handleKeyDown()` in Visage's `WindowEventHandler` silently returns `false` when `keyboard_focused_frame_` is null — which is the default. Combined with `acceptsKeystrokes()` defaulting to `false` on `Frame`, this means **plugin-level Cmd+key shortcuts (like Cmd+I, Cmd+R) don't work at all** until something explicitly sets keyboard focus (e.g., opening a TextEditor).
+
+**Symptom**: Plugin shortcuts only work after the user first interacts with a text field or other focus-requesting component.
+
+**Root cause chain**:
+1. `WindowEventHandler::keyboard_focused_frame_` starts as `nullptr`
+2. `handleKeyDown()` calls `keyboard_focused_frame_->handleKeyDown()` — returns false when null
+3. Even if focus is set, `Frame::acceptsKeystrokes()` defaults to `false`, causing the frame to be skipped during key traversal
+4. `setFocusedChild()` in the bridge only fires when a child frame (like TextEditor) calls `requestKeyboardFocus()`
+
+**Fix** (two parts — both required):
+
+In your plugin editor, after creating the root frame:
+```cpp
+rootFrame->setAcceptsKeystrokes(true);  // Enable key event handling on root
+```
+
+In your bridge, after the embedded window is created:
+```cpp
+// Set initial keyboard focus so Cmd+key shortcuts work immediately
+if (rootFrame && visageWindow) {
+    visageWindow->setKeyboardFocusOnFrame(rootFrame);
+}
+```
+
+**Gotcha**: Only set initial focus on the main plugin window, not on secondary windows (e.g., waveform editors, settings dialogs) that manage their own focus lifecycle.
 
 ### Fix 3: Popup Menu Overflow Positioning
 
@@ -1450,7 +1493,9 @@ Update the per-project file with:
 | Map Cmd to `kModifierMacCtrl` | Clipboard shortcuts silently fail | Map Cmd to `kModifierCmd` on macOS |
 | Call `grabKeyboardFocus()` without `setWantsKeyboardFocus(true)` | Focus grab silently ignored | Always set `true` first |
 | Call `[super keyDown:]` for unhandled Cmd+key | Cmd+Q doesn't quit the app | Use `[[self nextResponder] keyDown:event]` |
-| Skip `performKeyEquivalent:` override | Cmd+C/V/A/X/Z go to DAW menu, not text field | Override and check `hasActiveTextEntry()` |
+| Skip `performKeyEquivalent:` override | Cmd+C/V/A/X/Z go to DAW menu, not text field; plugin Cmd+key shortcuts never fire | Override with two-tier approach: text editing + plugin shortcuts |
+| Don't initialize `keyboard_focused_frame_` | Plugin Cmd+key shortcuts silently ignored until user opens a TextEditor | Call `setKeyboardFocusOnFrame(rootFrame)` after window creation |
+| Don't set `acceptsKeystrokes(true)` on root frame | Root frame skipped during key traversal — `handleKeyDown()` returns false | Set `rootFrame->setAcceptsKeystrokes(true)` after creation |
 | Add modal to hierarchy before setting event handler | Focus callbacks fail | Copy parent's event handler before `addChild()` |
 | Call `setBounds()` before `init()` | Crash in layout computation | Always `init()` first (or let `addChild()` do it) |
 | Pass native pixels to `show()` and logical to `setBounds()` | Half-size or double-size view | Use `Dimension::logicalPixels()` for `show()` and logical for `setBounds()` |
@@ -1475,13 +1520,14 @@ Update the per-project file with:
 
 When updating Visage from upstream, re-apply these patches. Patches marked **required** are needed for correct DAW plugin behavior; **recommended** patches improve UX but may not apply to all projects.
 
-1. **`performKeyEquivalent:`** (windowing_macos.mm) — **Required for plugins with text fields.** Without this, Cmd+A/C/V/X/Z go to DAW menu instead of TextEditor.
-2. **Cmd+Q propagation** (windowing_macos.mm) — **Required for standalone apps and secondary windows.** `[[self nextResponder] keyDown:event]` for unhandled Cmd+key. Without this, Cmd+Q silently dies in the Visage view.
-3. **MTKView 60 FPS cap** (windowing_macos.mm) — **Recommended.** Prevents excessive GPU usage on ProMotion displays. Skip if you want adaptive frame rates.
-4. **Popup menu overflow positioning** (popup_menu.cpp) — **Recommended.** Fixes above-position calculation for menus triggered from lower rows. May be fixed in future upstream.
-5. **Single-line Up/Down arrows** (text_editor.cpp) — **Optional.** Maps Up→start, Down→end in single-line TextEditors. Standard text field UX but not universal.
-6. **setAlwaysOnTop guard** (application_window.cpp) — **Required for plugin mode.** Without this, plugin window may go behind DAW. Only call `setAlwaysOnTop()` when `always_on_top_` is true.
-7. **DPI scale native bounds recalculation** (frame.h) — **Required for HiDPI displays.** `setDpiScale()` updates `dpi_scale_` but does NOT recalculate `native_bounds_`. If `setBounds()` was called before the correct DPI propagated (common in plugin mode where DPI arrives via `addChild` from the window), `native_bounds_` stays computed at dpi=1.0. Child frames render at ~50% size. Fix: patch `setDpiScale()` to recalculate `native_bounds_` when DPI changes:
+1. **`performKeyEquivalent:`** (windowing_macos.mm) — **Required for plugins.** Two-tier: intercepts text editing shortcuts (Cmd+A/C/V/X/Z) when TextEditor is active, AND tries all other Cmd+key through `handleKeyDown()` for plugin shortcuts. Without this, text editing and plugin shortcuts don't work in DAW hosts.
+2. **Keyboard focus initialization** (bridge + plugin editor) — **Required for plugin Cmd+key shortcuts.** Set `rootFrame->setAcceptsKeystrokes(true)` and call `setKeyboardFocusOnFrame(rootFrame)` after window creation. Without this, Cmd+key shortcuts only work after user opens a TextEditor.
+3. **Cmd+Q propagation** (windowing_macos.mm) — **Required for standalone apps and secondary windows.** `[[self nextResponder] keyDown:event]` for unhandled Cmd+key. Without this, Cmd+Q silently dies in the Visage view.
+4. **MTKView 60 FPS cap** (windowing_macos.mm) — **Recommended.** Prevents excessive GPU usage on ProMotion displays. Skip if you want adaptive frame rates.
+5. **Popup menu overflow positioning** (popup_menu.cpp) — **Recommended.** Fixes above-position calculation for menus triggered from lower rows. May be fixed in future upstream.
+6. **Single-line Up/Down arrows** (text_editor.cpp) — **Optional.** Maps Up→start, Down→end in single-line TextEditors. Standard text field UX but not universal.
+7. **setAlwaysOnTop guard** (application_window.cpp) — **Required for plugin mode.** Without this, plugin window may go behind DAW. Only call `setAlwaysOnTop()` when `always_on_top_` is true.
+8. **DPI scale native bounds recalculation** (frame.h) — **Required for HiDPI displays.** `setDpiScale()` updates `dpi_scale_` but does NOT recalculate `native_bounds_`. If `setBounds()` was called before the correct DPI propagated (common in plugin mode where DPI arrives via `addChild` from the window), `native_bounds_` stays computed at dpi=1.0. Child frames render at ~50% size. Fix: patch `setDpiScale()` to recalculate `native_bounds_` when DPI changes:
 
 ```cpp
 void setDpiScale(float dpi_scale) {
