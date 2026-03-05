@@ -955,7 +955,66 @@ These patches to Visage's `windowing_macos.mm` are required for correct behavior
 }
 ```
 
-### Fix 2b: Keyboard Focus Initialization for Plugin Shortcuts
+### Fix 2b: Routing Unhandled Keys from Visage to JUCE
+
+**Problem**: Non-Cmd keys (ESC, Return, Tab, etc.) that Visage doesn't handle are silently consumed by `[super keyDown:]` on macOS. They never reach JUCE's `Component::keyPressed()`. This means JUCE-level keyboard shortcuts (ESC to cancel, Return to confirm, etc.) don't work in the main plugin editor where Visage's NSView is first responder.
+
+**Why Cmd+keys are different**: Cmd+keys go through `performKeyEquivalent:` which has a `[super performKeyEquivalent:]` fallthrough that DOES reach JUCE. Non-Cmd keys go through `keyDown:` where `[super keyDown:]` is a dead end.
+
+**Fix**: Add a callback on `Window` that fires when `handleKeyDown()` returns false. Register it from the JUCE bridge to convert and dispatch to JUCE's component hierarchy.
+
+```cpp
+// In windowing.h — add to Window class (public)
+std::function<void(KeyCode, int, bool)> on_unhandled_key_down;
+```
+
+```objc
+// In windowing_macos.mm — keyDown: handler
+if (!self.visage_window->handleKeyDown(key_code, modifiers, [event isARepeat])) {
+    // Notify JUCE about unhandled keys via callback
+    if (self.visage_window->on_unhandled_key_down)
+        self.visage_window->on_unhandled_key_down(key_code, modifiers, [event isARepeat]);
+
+    if (command) {
+        [[self nextResponder] keyDown:event]; // Cmd+keys: responder chain
+    } else {
+        [super keyDown:event]; // Non-Cmd: normal NSView behavior
+    }
+}
+```
+
+```cpp
+// In your JUCE bridge, after window creation:
+if (auto* win = visageWindow->window()) {
+    win->on_unhandled_key_down = [this](visage::KeyCode keyCode, int modifiers, bool repeat) {
+        if (repeat) return;
+
+        // Convert Visage key → JUCE KeyPress
+        int rawMods = 0;
+        if (modifiers & visage::kModifierShift)   rawMods |= juce::ModifierKeys::shiftModifier;
+        if (modifiers & visage::kModifierCmd)     rawMods |= juce::ModifierKeys::commandModifier;
+        if (modifiers & visage::kModifierAlt)     rawMods |= juce::ModifierKeys::altModifier;
+        if (modifiers & visage::kModifierMacCtrl) rawMods |= juce::ModifierKeys::ctrlModifier;
+
+        int juceKeyCode = 0;
+        if (keyCode == visage::KeyCode::Escape)      juceKeyCode = juce::KeyPress::escapeKey;
+        else if (keyCode == visage::KeyCode::Return)  juceKeyCode = juce::KeyPress::returnKey;
+        else if (keyCode == visage::KeyCode::Space)   juceKeyCode = juce::KeyPress::spaceKey;
+        else if (keyCode == visage::KeyCode::Tab)     juceKeyCode = juce::KeyPress::tabKey;
+        // ... map other keys as needed
+
+        juce::KeyPress juceKey(juceKeyCode, juce::ModifierKeys(rawMods), 0);
+        if (auto* parent = getParentComponent())
+            parent->keyPressed(juceKey);
+    };
+}
+```
+
+**Why not NSEvent monitor?** `[NSEvent addLocalMonitorForEventsMatchingMask:]` works but causes `ViewBridge` crashes in AU sandboxed hosts. The callback approach is AU-safe — no `[NSApp sendEvent:]`, no CGEvent, no accessibility permissions.
+
+**Why not `[[self nextResponder] keyDown:]` for all keys?** Forwarding non-Cmd keys up the responder chain from Visage's NSView doesn't reliably reach JUCE's Component::keyPressed(). The responder chain goes to the JUCEView but JUCE's internal dispatch requires the component to have JUCE keyboard focus, which the embedded Visage view disrupts. The callback bypasses this entirely.
+
+### Fix 2c: Keyboard Focus Initialization for Plugin Shortcuts
 
 **Problem**: `handleKeyDown()` in Visage's `WindowEventHandler` silently returns `false` when `keyboard_focused_frame_` is null — which is the default. Combined with `acceptsKeystrokes()` defaulting to `false` on `Frame`, this means **plugin-level Cmd+key shortcuts (like Cmd+I, Cmd+R) don't work at all** until something explicitly sets keyboard focus (e.g., opening a TextEditor).
 
