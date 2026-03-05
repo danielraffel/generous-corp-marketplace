@@ -384,6 +384,42 @@ Modals and popups can be dismissed asynchronously (click outside, ESC key). Use 
 - **`shared_ptr<atomic<T*>>` weak-pointer pattern**: For deferred callbacks (e.g., `callAfterDelay(15, ...)` for focus re-registration), use a shared atomic pointer so the callback can detect if the modal was destroyed.
 - **Active registry with mutex**: Track active modals in a thread-safe set (`activeModals_`). Check membership before operating on a modal reference.
 
+### Modal Keyboard Handling in Secondary JUCE Windows
+
+When a Visage modal dialog opens inside a secondary JUCE `DocumentWindow` (e.g., a waveform editor), ESC may not work until the user clicks inside the window. This happens because:
+
+1. JUCE's `toFront(true)` during window creation makes the JUCE view the macOS first responder
+2. ESC goes through `keyDown:` which only reaches the first responder — if that's the JUCE view, not the Visage MTKView, the modal never sees ESC
+3. The JUCE `KeyListener` may return `false` hoping Visage will handle ESC, but Visage never gets it
+
+**Fix** (two-pronged approach):
+
+1. **JUCE KeyListener closes modals directly** instead of passing through:
+```cpp
+// In your KeyListener::keyPressed override
+if (key == juce::KeyPress::escapeKey) {
+    if (VisageModalDialog::hasActiveModal()) {
+        if (auto* modal = VisageModalDialog::getActiveModal())
+            modal->close();
+        return true; // Don't return false — Visage won't get it
+    }
+    // ... handle other ESC cases
+}
+```
+
+2. **Register `on_unhandled_key_down` callback** on the secondary window's Visage window so ESC also works when the Visage NSView IS first responder but the modal isn't in the key traversal path:
+```cpp
+if (auto* win = visageWindow->window()) {
+    win->on_unhandled_key_down = [this](visage::KeyCode keyCode, int mods, bool repeat) {
+        if (repeat) return;
+        if (keyCode == visage::KeyCode::Escape)
+            keyPressed(juce::KeyPress(juce::KeyPress::escapeKey), this);
+    };
+}
+```
+
+**Key insight**: In secondary JUCE windows with embedded Visage, there are two completely separate keyboard paths (JUCE `KeyListener` and Visage `keyDown:`). Modal dismiss logic must work through BOTH paths since you can't control which view is macOS first responder.
+
 ### Dropdown Cleanup
 
 Dropdown combo boxes need careful lifecycle management:
