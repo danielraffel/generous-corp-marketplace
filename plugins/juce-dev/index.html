@@ -796,7 +796,9 @@ GitHub repo:       My-Cool-Synth</div>
                             <p><strong>What it does not replace:</strong> the Codex skill is guidance-only. It does not provide the command workflow this plugin provides (no <code>/juce-dev:create</code>, no automated dependency checks/setup, no automatic Visage clone+patch flow, and no project bootstrapping/repo setup commands).</p>
                             <p><strong>Recommended workflow:</strong> scaffold first using this plugin (in Claude Code) or the <a href="https://github.com/danielraffel/JUCE-Plugin-Starter/tree/main">JUCE-Plugin-Starter</a>, then use Codex + <code>juce-visage</code> for day-to-day Visage implementation and troubleshooting. If Visage is not added to the project, the skill stays out of the way.</p>
                             <p><strong>Install the Codex skill:</strong></p>
-<pre style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5;"><code>mkdir -p ~/.codex/skills
+                            <div class="code-block-wrapper">
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                <div class="code-block" style="white-space: pre; line-height: 1.6;">mkdir -p ~/.codex/skills
 cd ~/.codex/skills
 
 git clone --no-checkout --depth 1 --filter=blob:none --sparse \
@@ -809,7 +811,8 @@ git checkout
 mv skills/codex/juce-visage ~/.codex/skills/
 
 cd ~/.codex/skills
-rm -rf tmp-juce-visage</code></pre>
+rm -rf tmp-juce-visage</div>
+                            </div>
                             <p style="margin-top: 0.5rem; color: var(--gray); font-size: 0.9rem;">This uses a sparse checkout to pull just the skill folder without downloading the entire repository.</p>
                         </div>
                     </div>
