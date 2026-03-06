@@ -80,7 +80,32 @@ After the script runs, re-check that tools are now available. If Homebrew was ju
    ```
    If "Clone from GitHub": run `git clone https://github.com/danielraffel/JUCE-Plugin-Starter.git ~/Code/JUCE-Plugin-Starter`
 
-3. Read the template's `.env` file and classify each developer setting as **configured** or **placeholder**.
+3. **Check JUCE version.** Read `JUCE_TAG` from the template's `.env`. Then check the latest JUCE release:
+
+   ```bash
+   LATEST_JUCE=$(gh api repos/juce-framework/JUCE/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
+   ```
+
+   If `gh` is available and `LATEST_JUCE` is newer than `JUCE_TAG`, ask:
+   ```
+   question: "Your template uses JUCE {JUCE_TAG}, but {LATEST_JUCE} is available. What would you like to do?"
+   header: "JUCE Version"
+   options:
+     - label: "Update template to {LATEST_JUCE} (Recommended)"
+       description: "Updates the template .env so this and all future projects use {LATEST_JUCE}"
+     - label: "Use {LATEST_JUCE} for this project only"
+       description: "New project gets {LATEST_JUCE}, template stays at {JUCE_TAG}"
+     - label: "Keep {JUCE_TAG}"
+       description: "Use the current version — don't change anything"
+   ```
+
+   If "Update template": update `JUCE_TAG` in the template's `.env` and `.env.example` via sed. Also remind the user to clear `~/.juce_cache/juce-src` if they have existing builds (CMake FetchContent won't re-fetch automatically).
+
+   If "This project only": store the chosen version to write into the new project's `.env` in Stage 3.5.
+
+   If `gh` is not available or the check fails, skip silently and use the template's current `JUCE_TAG`.
+
+4. Read the template's `.env` file and classify each developer setting as **configured** or **placeholder**.
 
    **Placeholder detection rules** — a value is a placeholder if:
    - `DEVELOPER_NAME` equals `"Your Name"`
@@ -183,7 +208,20 @@ When editing from Path A, each question shows the current value as the first opt
 
 #### 2c. Optional features
 
-Check `$ARGUMENTS` for `--visage` flag. Then ask:
+Check `$ARGUMENTS` for `--visage` flag.
+
+**If `--visage` flag is present**: Visage is already selected. Only ask about additional features:
+```
+question: "Visage GPU UI is enabled (via --visage). Any additional features?"
+header: "Features"
+options:
+  - label: "Add DiagnosticKit"
+    description: "User diagnostic reporting with automatic GitHub issue creation"
+  - label: "No additional features"
+    description: "Just Visage — proceed with project creation"
+```
+
+**If `--visage` flag is NOT present**: Ask about all features:
 ```
 question: "Which optional features do you want to enable?"
 header: "Features"
@@ -197,7 +235,7 @@ options:
     description: "Start with the basic JUCE plugin template"
 ```
 
-If `--visage` was in arguments, pre-inform the user that Visage was requested via flag and still show the question (they can add DiagnosticKit too).
+**CRITICAL**: When Visage is enabled (via flag or user selection), Stage 3.4 MUST run. The Visage editor templates replace the standard JUCE PluginEditor files, and `setup_visage.sh` clones the Visage library into `external/visage/`. Without this step, `USE_VISAGE_UI=TRUE` is set in `.env` but the project won't compile — the Visage headers and source will be missing.
 
 #### 2d. GitHub repository
 
@@ -249,13 +287,12 @@ CLASS_NAME=$(echo "$PLUGIN_NAME" | sed 's/[^a-zA-Z0-9]//g')
 # PROJECT_NAME: Same as CLASS_NAME
 PROJECT_NAME="$CLASS_NAME"
 
-# PROJECT_FOLDER: Lowercase with hyphens replacing non-alphanumeric
-# "My Cool Synth" → "my-cool-synth"
-PROJECT_FOLDER=$(echo "$PLUGIN_NAME" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+# PROJECT_FOLDER: Preserves original capitalization, non-alphanumeric replaced with hyphens
+# "My Cool Synth" → "My-Cool-Synth", "HelioTone" → "HelioTone"
+PROJECT_FOLDER=$(echo "$PLUGIN_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
 
-# GITHUB_REPO_NAME: Same as PROJECT_FOLDER but preserves original case
-# "My Cool Synth" → "My-Cool-Synth", "Griddy" → "Griddy"
-GITHUB_REPO_NAME=$(echo "$PLUGIN_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+# GITHUB_REPO_NAME: Same as PROJECT_FOLDER (preserves capitalization)
+GITHUB_REPO_NAME="$PROJECT_FOLDER"
 
 # NAMESPACE: Developer name lowercased, alphanumeric only
 # "Generous Corp" → "generouscorp"

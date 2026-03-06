@@ -100,7 +100,7 @@ These are loaded from the template's `.env` when creating new projects:
 | `DEFAULT_CONFIG` | `Debug` | Build configuration |
 | `COPY_AFTER_BUILD` | `TRUE` | Auto-install plugins to system folders |
 | `JUCE_REPO` | GitHub JUCE URL | JUCE source repository |
-| `JUCE_TAG` | `8.0.10` | JUCE version tag |
+| `JUCE_TAG` | `8.0.12` | JUCE version tag (checked against latest GitHub release during project creation) |
 
 ## Build System
 
