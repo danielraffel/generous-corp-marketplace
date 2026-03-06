@@ -98,8 +98,9 @@ Do NOT proceed to the build steps. Just display the help and return.
 
 1. Detect the platform: run `uname -s` (or check `$env:OS` on Windows).
    - **macOS**: `scripts/build.sh` must exist
+   - **Linux**: `scripts/build.sh` must exist
    - **Windows**: `scripts/build.ps1` must exist
-   - Both: `.env` and `CMakeLists.txt` must exist
+   - All: `.env` and `CMakeLists.txt` must exist
 
 2. If any are missing, tell the user: "This command must be run from a JUCE-Plugin-Starter project root."
 
@@ -173,18 +174,29 @@ Construct the build command based on platform:
 ./scripts/build.sh {targets} {action} {options}
 ```
 
+**Linux:**
+```bash
+./scripts/build.sh {targets} {action} {options}
+```
+
 **Windows (PowerShell):**
 ```powershell
 .\scripts\build.ps1 {targets} {action}
 ```
 
-Note: On Windows, AU and AUv3 targets are not available. If the user requests them, warn that they are macOS-only formats.
+Note: On Windows and Linux, AU and AUv3 targets are not available. If the user requests them, warn that they are macOS-only formats. On Linux, `sign`, `notarize`, and `pkg` actions are not supported — the script creates tar.gz packages instead.
 
 Examples (macOS):
 - No args → `./scripts/build.sh`
 - `standalone` → `./scripts/build.sh standalone`
 - `au vst3 test` → `./scripts/build.sh au vst3 test`
 - `publish --regenerate-page` → `./scripts/build.sh all publish --regenerate-page`
+
+Examples (Linux):
+- No args → `./scripts/build.sh`
+- `standalone` → `./scripts/build.sh standalone`
+- `vst3 clap test` → `./scripts/build.sh vst3 clap test`
+- `all unsigned` → `./scripts/build.sh all unsigned` (creates tar.gz)
 
 Examples (Windows):
 - No args → `.\scripts\build.ps1`

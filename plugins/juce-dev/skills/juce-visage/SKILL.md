@@ -11,6 +11,8 @@ This skill covers how to build a JUCE audio plugin (AU/VST3/Standalone) or iOS/i
 
 **Windows support**: Not yet implemented. Visage supports DirectX rendering via BGFX, but the JuceVisageBridge for Windows (Win32 HWND embedding, DirectX backend) has not been built yet. This is tracked in the cross-platform plan as item 2.3.
 
+**Linux support**: Not yet implemented. Visage supports Vulkan rendering via BGFX, but the JuceVisageBridge for Linux (X11 window embedding, Vulkan backend) has not been built yet. This is tracked in the cross-platform plan as item 3.2.
+
 **Tested with**: Visage (VitalAudio fork, included directly in repo), JUCE 7/8, Logic Pro, Ableton Live, Reaper.
 
 ## When to Use This Skill

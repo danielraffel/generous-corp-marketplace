@@ -13,6 +13,7 @@ JUCE-Plugin-Starter is a cross-platform template for creating audio plugin proje
 **Supported platforms:**
 - **macOS**: AU, AUv3, VST3, CLAP, Standalone (Xcode or Ninja)
 - **Windows**: VST3, CLAP, Standalone (MSVC + Ninja)
+- **Linux**: VST3, CLAP, Standalone (Clang + Ninja)
 
 ## Template Structure
 
@@ -105,7 +106,7 @@ These are loaded from the template's `.env` when creating new projects:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `BUILD_FORMATS` | `"AU AUv3 VST3 CLAP Standalone"` | Plugin formats to build (macOS); `"VST3 CLAP Standalone"` on Windows |
+| `BUILD_FORMATS` | `"AU AUv3 VST3 CLAP Standalone"` | Plugin formats to build (macOS); `"VST3 CLAP Standalone"` on Windows/Linux |
 | `DEFAULT_CONFIG` | `Debug` | Build configuration |
 | `COPY_AFTER_BUILD` | `TRUE` | Auto-install plugins to system folders |
 | `JUCE_REPO` | GitHub JUCE URL | JUCE source repository |
@@ -152,6 +153,18 @@ FetchContent_MakeAvailable(JUCE clap-juce-extensions)
 ./scripts/sign_and_package_plugin.sh
 ```
 
+**Linux:**
+```bash
+# Requires: Clang (or GCC), CMake, Ninja, JUCE apt dependencies
+# Install deps: sudo apt install cmake ninja-build clang libasound2-dev libx11-dev libxinerama-dev libxext-dev libxrandr-dev libxcursor-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev libcurl4-openssl-dev pkg-config
+
+./scripts/build.sh                   # Build all formats (VST3, CLAP, Standalone)
+./scripts/build.sh vst3              # Build VST3 only
+./scripts/build.sh standalone        # Build Standalone only
+./scripts/build.sh all test          # Build and run Catch2 + PluginVal tests
+./scripts/build.sh all unsigned      # Build and create tar.gz package
+```
+
 **Windows (PowerShell):**
 ```powershell
 # Requires: MSVC (VS2022), CMake, Ninja in PATH
@@ -186,12 +199,13 @@ tests/
 - C++ standard: C++17
 - **macOS**: Minimum macOS 15.0, Xcode or Ninja generator, AU+AUv3+VST3+CLAP+Standalone formats
 - **Windows**: MSVC + Ninja generator, VST3+CLAP+Standalone formats (AU/AUv3 excluded automatically)
+- **Linux**: Clang + Ninja generator, VST3+CLAP+Standalone formats (AU/AUv3 excluded automatically)
 - AU version integer: `(major << 16) | (minor << 8) | patch`
 - Post-build scripts update Info.plist for AU and VST3 targets (macOS only)
 - VST3 helper tool code signing is disabled to avoid build errors (macOS only)
 - Catch2 v3 for unit testing (Tests target)
 - JUCE cache shared at `~/.juce_cache/` (uses `USERPROFILE` on Windows, `HOME` on macOS)
-- Platform-conditional: `if(APPLE)` for macOS-specific config, `elseif(MSVC)` for Windows
+- Platform-conditional: `if(APPLE)` for macOS, `elseif(MSVC)` for Windows, `elseif(UNIX AND NOT APPLE)` for Linux
 
 ### Visage Conditional Integration
 

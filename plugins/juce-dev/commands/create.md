@@ -97,6 +97,41 @@ Note: After installing, PATH may need refreshing. Suggest the user open a new te
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 ```
 
+**Linux:**
+
+Check for required development tools:
+
+| Tool | Check Command | Required? |
+|---|---|---|
+| CMake | `command -v cmake` | Yes |
+| Ninja | `command -v ninja` | Yes |
+| Clang | `command -v clang++` | Yes (or g++) |
+| Git | `command -v git` | Yes |
+| gh CLI | `command -v gh` | Only if GitHub repo desired |
+| pkg-config | `command -v pkg-config` | Yes |
+
+If **any required tools are missing**, show:
+```
+question: "Some development tools are missing. Install them now?"
+header: "Setup"
+options:
+  - label: "Install missing tools (Recommended)"
+    description: "Runs apt to install: {list of missing tools} plus JUCE dependencies"
+  - label: "Skip — I'll install them myself"
+    description: "You'll need these before you can build"
+```
+
+If "Install missing tools":
+```bash
+sudo apt-get update
+sudo apt-get install -y cmake ninja-build clang git pkg-config libasound2-dev libx11-dev libxinerama-dev libxext-dev libxrandr-dev libxcursor-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev libcurl4-openssl-dev
+```
+
+Or run the dependencies script:
+```bash
+bash scripts/dependencies.sh
+```
+
 If **all tools are present**, proceed silently to Stage 1.
 
 ---
