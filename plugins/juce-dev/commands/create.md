@@ -29,9 +29,11 @@ Follow these 5 stages in order. Do NOT skip stages or combine prompts across sta
 
 ### Stage 0: Check Environment
 
-**macOS only.** Check `uname` — if not Darwin, tell the user this plugin only supports macOS and stop.
+Detect the platform by running `uname -s` (returns "Darwin" on macOS, "MINGW*"/"MSYS*"/"CYGWIN*" on Git Bash for Windows, or check `$env:OS` in PowerShell).
 
-Check for required development tools by running these commands via Bash:
+**macOS:**
+
+Check for required development tools:
 
 | Tool | Check Command | Required? |
 |---|---|---|
@@ -39,8 +41,6 @@ Check for required development tools by running these commands via Bash:
 | Homebrew | `command -v brew` | Yes |
 | CMake | `command -v cmake` | Yes |
 | gh CLI | `command -v gh` | Only if GitHub repo desired |
-
-If **all tools are present**, proceed silently to Stage 1.
 
 If **any required tools are missing**, show:
 ```
@@ -58,7 +58,46 @@ If "Install missing tools":
 bash <(curl -fsSL https://raw.githubusercontent.com/danielraffel/JUCE-Plugin-Starter/main/scripts/dependencies.sh)
 ```
 
-After the script runs, re-check that tools are now available. If Homebrew was just installed, the user may need to add it to their PATH — warn them if `command -v brew` still fails after install.
+After the script runs, re-check that tools are now available. If Homebrew was just installed, the user may need to add it to their PATH.
+
+**Windows:**
+
+Check for required development tools:
+
+| Tool | Check Command | Required? |
+|---|---|---|
+| Visual Studio / Build Tools | Check for `cl.exe` in VS paths or `vswhere.exe` | Yes |
+| CMake | `where cmake` or `Get-Command cmake` | Yes |
+| Ninja | `where ninja` or `Get-Command ninja` | Yes |
+| Git | `where git` or `Get-Command git` | Yes |
+| gh CLI | `where gh` | Only if GitHub repo desired |
+
+If **any required tools are missing**, show:
+```
+question: "Some development tools are missing. Install them via winget?"
+header: "Setup"
+options:
+  - label: "Install missing tools (Recommended)"
+    description: "Uses winget to install: {list of missing tools}"
+  - label: "Skip — I'll install them myself"
+    description: "You'll need these before you can build"
+```
+
+If "Install missing tools", install via winget:
+```powershell
+winget install --id Git.Git -e --accept-package-agreements --accept-source-agreements
+winget install --id Kitware.CMake -e --accept-package-agreements --accept-source-agreements
+winget install --id Ninja-build.Ninja -e --accept-package-agreements --accept-source-agreements
+# For Visual Studio Build Tools (if no VS installation exists):
+winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-package-agreements --accept-source-agreements --override "--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+```
+
+Note: After installing, PATH may need refreshing. Suggest the user open a new terminal or run:
+```powershell
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+```
+
+If **all tools are present**, proceed silently to Stage 1.
 
 ---
 

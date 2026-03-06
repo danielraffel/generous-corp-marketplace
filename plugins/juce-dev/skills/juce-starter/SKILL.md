@@ -8,7 +8,11 @@ version: 1.0.0
 
 ## Overview
 
-JUCE-Plugin-Starter is a template for creating macOS audio plugin projects (AU, AUv3, VST3, CLAP, Standalone). It provides a CMake-based build system, automatic versioning, code signing, and optional Visage GPU UI integration.
+JUCE-Plugin-Starter is a cross-platform template for creating audio plugin projects (AU, AUv3, VST3, CLAP, Standalone). It provides a CMake-based build system, automatic versioning, code signing, and optional Visage GPU UI integration.
+
+**Supported platforms:**
+- **macOS**: AU, AUv3, VST3, CLAP, Standalone (Xcode or Ninja)
+- **Windows**: VST3, CLAP, Standalone (MSVC + Ninja)
 
 ## Template Structure
 
@@ -101,7 +105,7 @@ These are loaded from the template's `.env` when creating new projects:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `BUILD_FORMATS` | `"AU AUv3 VST3 CLAP Standalone"` | Plugin formats to build |
+| `BUILD_FORMATS` | `"AU AUv3 VST3 CLAP Standalone"` | Plugin formats to build (macOS); `"VST3 CLAP Standalone"` on Windows |
 | `DEFAULT_CONFIG` | `Debug` | Build configuration |
 | `COPY_AFTER_BUILD` | `TRUE` | Auto-install plugins to system folders |
 | `JUCE_REPO` | GitHub JUCE URL | JUCE source repository |
@@ -132,6 +136,7 @@ FetchContent_MakeAvailable(JUCE clap-juce-extensions)
 
 ### Build Commands
 
+**macOS:**
 ```bash
 # Generate Xcode project and build
 ./scripts/generate_and_open_xcode.sh
@@ -145,6 +150,20 @@ FetchContent_MakeAvailable(JUCE clap-juce-extensions)
 
 # Package for distribution (signs + notarizes)
 ./scripts/sign_and_package_plugin.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+# Requires: MSVC (VS2022), CMake, Ninja in PATH
+# Load VS dev environment first:
+# Import-Module "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+# Enter-VsDevShell -VsInstallPath "C:\Program Files\Microsoft Visual Studio\2022\Community" -SkipAutomaticLocation
+
+.\scripts\build.ps1                  # Build all formats (VST3, CLAP, Standalone)
+.\scripts\build.ps1 vst3             # Build VST3 only
+.\scripts\build.ps1 standalone       # Build Standalone only
+.\scripts\build.ps1 all test         # Build and run tests
+.\scripts\build.ps1 all publish      # Build and create Inno Setup installer
 ```
 
 ### Testing
@@ -164,12 +183,15 @@ tests/
 
 ### CMake Configuration
 
-- Minimum macOS: 15.0 (configurable via `OSX_DEPLOYMENT_TARGET`)
 - C++ standard: C++17
+- **macOS**: Minimum macOS 15.0, Xcode or Ninja generator, AU+AUv3+VST3+CLAP+Standalone formats
+- **Windows**: MSVC + Ninja generator, VST3+CLAP+Standalone formats (AU/AUv3 excluded automatically)
 - AU version integer: `(major << 16) | (minor << 8) | patch`
-- Post-build scripts update Info.plist for AU and VST3 targets
-- VST3 helper tool code signing is disabled to avoid build errors
+- Post-build scripts update Info.plist for AU and VST3 targets (macOS only)
+- VST3 helper tool code signing is disabled to avoid build errors (macOS only)
 - Catch2 v3 for unit testing (Tests target)
+- JUCE cache shared at `~/.juce_cache/` (uses `USERPROFILE` on Windows, `HOME` on macOS)
+- Platform-conditional: `if(APPLE)` for macOS-specific config, `elseif(MSVC)` for Windows
 
 ### Visage Conditional Integration
 

@@ -96,10 +96,10 @@ Do NOT proceed to the build steps. Just display the help and return.
 
 ### Step 1: Verify Project
 
-1. Check that the current working directory is a JUCE-Plugin-Starter project:
-   - `scripts/build.sh` must exist
-   - `.env` must exist
-   - `CMakeLists.txt` must exist
+1. Detect the platform: run `uname -s` (or check `$env:OS` on Windows).
+   - **macOS**: `scripts/build.sh` must exist
+   - **Windows**: `scripts/build.ps1` must exist
+   - Both: `.env` and `CMakeLists.txt` must exist
 
 2. If any are missing, tell the user: "This command must be run from a JUCE-Plugin-Starter project root."
 
@@ -166,17 +166,30 @@ Check whether CMake regeneration is needed by examining recent changes:
 
 ### Step 5: Run Build
 
-Construct the build command from parsed arguments:
+Construct the build command based on platform:
 
+**macOS:**
 ```bash
 ./scripts/build.sh {targets} {action} {options}
 ```
 
-Examples:
+**Windows (PowerShell):**
+```powershell
+.\scripts\build.ps1 {targets} {action}
+```
+
+Note: On Windows, AU and AUv3 targets are not available. If the user requests them, warn that they are macOS-only formats.
+
+Examples (macOS):
 - No args → `./scripts/build.sh`
 - `standalone` → `./scripts/build.sh standalone`
 - `au vst3 test` → `./scripts/build.sh au vst3 test`
 - `publish --regenerate-page` → `./scripts/build.sh all publish --regenerate-page`
+
+Examples (Windows):
+- No args → `.\scripts\build.ps1`
+- `standalone` → `.\scripts\build.ps1 standalone`
+- `vst3 clap test` → `.\scripts\build.ps1 vst3 clap test`
 
 Run the command and stream output. The script handles everything: version bumping, building, testing, signing, etc.
 

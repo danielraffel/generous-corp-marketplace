@@ -9,6 +9,8 @@ This skill covers how to build a JUCE audio plugin (AU/VST3/Standalone) or iOS/i
 
 **Scope**: macOS and iOS/iPadOS (Metal rendering, `NSView`/`UIView` embedding, event bridging). On macOS, the bridge forwards mouse events from JUCE to Visage. On iOS, Visage's `VisageMetalView` handles touch events natively — the bridge skips mouse forwarding entirely.
 
+**Windows support**: Not yet implemented. Visage supports DirectX rendering via BGFX, but the JuceVisageBridge for Windows (Win32 HWND embedding, DirectX backend) has not been built yet. This is tracked in the cross-platform plan as item 2.3.
+
 **Tested with**: Visage (VitalAudio fork, included directly in repo), JUCE 7/8, Logic Pro, Ableton Live, Reaper.
 
 ## When to Use This Skill
