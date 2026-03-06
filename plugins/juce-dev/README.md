@@ -2,7 +2,7 @@
 
 **Create, build, and ship cross-platform JUCE audio plugin projects**
 
-A Claude Code plugin for the full JUCE plugin development lifecycle — from project scaffolding to building, testing, signing, and publishing. Supports **macOS** and **Windows**. Wraps the JUCE-Plugin-Starter template with smart CMake regeneration detection and platform-aware build scripts.
+A Claude Code plugin for the full JUCE plugin development lifecycle — from project scaffolding to building, testing, signing, and publishing. Supports **macOS**, **Linux**, and **Windows**. Wraps the JUCE-Plugin-Starter template with smart CMake regeneration detection and platform-aware build scripts.
 
 ## Installation
 
@@ -34,13 +34,17 @@ Type `/juce-dev:create` to confirm the command is available.
 - **Ninja** (`brew install ninja`)
 - **gh CLI** (`brew install gh`) — for GitHub repo creation
 
+**Linux (Ubuntu/Debian):**
+- **Clang** (or GCC), **CMake**, **Ninja** (`sudo apt install clang cmake ninja-build`)
+- JUCE dependencies: `libasound2-dev libx11-dev libxinerama-dev libxext-dev libxrandr-dev libxcursor-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev libcurl4-openssl-dev pkg-config`
+
 **Windows:**
 - **Visual Studio 2022** (Community or Build Tools) with C++ workload
 - **CMake** (`winget install Kitware.CMake`)
 - **Ninja** (`winget install Ninja-build.Ninja`)
 - **Git** (`winget install Git.Git`)
 
-**Both:** JUCE-Plugin-Starter template cloned locally (or the command will clone it for you)
+**All platforms:** JUCE-Plugin-Starter template cloned locally (or the command will clone it for you)
 
 ## Commands
 
@@ -64,7 +68,7 @@ Build, test, sign, or publish your JUCE plugin. Automatically detects whether CM
 |---------|---------|---------|
 | `all` `au` `auv3` `vst3` `clap` `standalone` | `local` `test` `sign` `notarize` `pkg` `publish` `unsigned` `uninstall` | `--regenerate-page` `--help` |
 
-> **Windows:** Only `vst3`, `clap`, and `standalone` targets are available. The command auto-detects the platform and uses `build.ps1` instead of `build.sh`.
+> **Windows/Linux:** Only `vst3`, `clap`, and `standalone` targets are available (AU/AUv3 are macOS-only). The command auto-detects the platform — uses `build.ps1` on Windows, `build.sh` on macOS and Linux. On Linux, packaging creates tar.gz instead of PKG/Inno Setup.
 
 **Smart regeneration:** Checks if `CMakeLists.txt`, `.env`, or source files changed. If not, skips CMake regeneration for faster builds. Falls back to full regeneration if the build fails.
 
