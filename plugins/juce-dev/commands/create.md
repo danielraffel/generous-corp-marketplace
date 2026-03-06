@@ -64,8 +64,8 @@ After the script runs, re-check that tools are now available. If Homebrew was ju
 
 ### Stage 1: Locate JUCE-Plugin-Starter Template
 
-1. Search for the template in these locations (in order):
-   - `~/Code/JUCE-Plugin-Starter`
+1. Search for the template in these locations (in order). **Note:** `$HOME` and `~` may not resolve in the Bash tool — use the user's resolved home directory path instead (e.g., `/Users/username/Code/...`).
+   - `~/Code/JUCE-Plugin-Starter` (resolve `~` to the actual home path)
    - Sibling directory of the current working directory (e.g., `../JUCE-Plugin-Starter`)
 
 2. **If not found**, use AskUserQuestion:
@@ -149,15 +149,28 @@ Read the template's `.env` and show the user what was found. Two paths:
 
 **Path A: Template .env has real (non-placeholder) developer settings**
 
-Show the configured values and ask:
+Before asking, print a summary of all 7 settings so the user can review them:
+
 ```
-question: "Found these developer settings in the template .env. Use them for this project?"
+**Developer settings from template .env:**
+- Developer: {DEVELOPER_NAME}
+- Apple ID: {APPLE_ID}
+- Team ID: {TEAM_ID}
+- App cert: {APP_CERT}
+- Installer cert: {INSTALLER_CERT}
+- App password: {first 4 chars}...  (configured)
+- GitHub: {GITHUB_USER}
+```
+
+Then ask:
+```
+question: "Use these developer settings for this project?"
 header: "Developer"
 options:
   - label: "Yes, use these (Recommended)"
-    description: "{DEVELOPER_NAME} | {APPLE_ID} | GitHub: {GITHUB_USER}"
+    description: "All 7 settings shown above will be copied to the new project's .env"
   - label: "Edit settings"
-    description: "Walk through each setting and adjust as needed"
+    description: "Walk through each setting individually to keep or change"
 ```
 
 If "Yes, use these" → use all values as-is for the new project, skip to 2c.
@@ -210,15 +223,15 @@ When editing from Path A, each question shows the current value as the first opt
 
 Check `$ARGUMENTS` for `--visage` flag.
 
-**If `--visage` flag is present**: Visage is already selected. Only ask about additional features:
+**If `--visage` flag is present**: Visage is already selected. Ask about DiagnosticKit only:
 ```
-question: "Visage GPU UI is enabled (via --visage). Any additional features?"
+question: "Visage GPU UI is enabled (via --visage). Enable DiagnosticKit too?"
 header: "Features"
 options:
-  - label: "Add DiagnosticKit"
-    description: "User diagnostic reporting with automatic GitHub issue creation"
-  - label: "No additional features"
-    description: "Just Visage — proceed with project creation"
+  - label: "Visage only"
+    description: "Metal-accelerated GPU rendering — proceed with project creation"
+  - label: "Visage + DiagnosticKit"
+    description: "Also add user diagnostic reporting with automatic GitHub issue creation"
 ```
 
 **If `--visage` flag is NOT present**: Ask about all features:
@@ -274,6 +287,8 @@ If "Start over", go back to Stage 2a.
 ### Stage 3: Execute Project Creation
 
 Run these steps via Bash. Report progress to the user between steps.
+
+**IMPORTANT**: `$HOME` and `~` may not be available in the Bash tool's shell environment. Always use the fully resolved absolute path (e.g., `/Users/danielraffel/Code/...`) instead of `~/Code/...` or `$HOME/Code/...`. Determine the user's home directory from the template path found in Stage 1.
 
 #### 3.1. Generate derived values
 
@@ -355,19 +370,57 @@ find . -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cmake" -o -name "*.tx
   {} \; 2>/dev/null || true
 ```
 
+#### 3.3b. Replace README.md
+
+The template's README describes the JUCE-Plugin-Starter template itself — not useful for a new project. Replace it with a minimal project-specific README using the Write tool:
+
+```markdown
+# {PLUGIN_NAME}
+
+A JUCE audio plugin (AU/VST3/Standalone) for macOS.
+
+## Build
+
+```
+./scripts/generate_and_open_xcode.sh
+```
+
+## Links
+
+- Built with [JUCE-Plugin-Starter](https://github.com/danielraffel/JUCE-Plugin-Starter)
+```
+
+Keep it short — the user will flesh it out as their project develops.
+
 #### 3.4. Visage setup (if enabled)
 
+Run the template's `setup_visage.sh` script. This script handles everything:
+- Clones the Visage fork (with iOS support and plugin fixes) into `external/visage/`
+- Copies the JuceVisageBridge files into `Source/Visage/`
+- Appends Visage CMake configuration to `CMakeLists.txt` (if not already present)
+- Sets `USE_VISAGE_UI=TRUE` in `.env`
+
 ```bash
-# Copy Visage editor templates over standard ones
-cp templates/visage/PluginEditor.h Source/PluginEditor.h
-cp templates/visage/PluginEditor.cpp Source/PluginEditor.cpp
-
-# Replace CLASS_NAME_PLACEHOLDER in the Visage templates
-sed -i '' "s/CLASS_NAME_PLACEHOLDER/$CLASS_NAME/g" Source/PluginEditor.h Source/PluginEditor.cpp
-
-# Clone Visage and apply patches
+cd "$TARGET_DIR"
 ./scripts/setup_visage.sh
 ```
+
+Also copy the Visage-aware PluginEditor templates (replaces the standard JUCE editor):
+
+```bash
+cp templates/visage/PluginEditor.h Source/PluginEditor.h
+cp templates/visage/PluginEditor.cpp Source/PluginEditor.cpp
+sed -i '' "s/CLASS_NAME_PLACEHOLDER/$CLASS_NAME/g" Source/PluginEditor.h Source/PluginEditor.cpp
+```
+
+Verify the setup succeeded:
+```bash
+test -f external/visage/CMakeLists.txt && echo "Visage OK" || echo "ERROR: Visage clone failed"
+test -f Source/Visage/JuceVisageBridge.h && echo "Bridge OK" || echo "WARNING: Bridge files missing"
+grep -q "external/visage" CMakeLists.txt && echo "CMake OK" || echo "WARNING: CMake not updated"
+```
+
+If `setup_visage.sh` does not exist in the template, tell the user their JUCE-Plugin-Starter template needs updating — Visage support was added to the template's main branch and they should `git pull origin main` in their template directory.
 
 #### 3.5. Generate .env
 
@@ -426,7 +479,7 @@ BUILD_DIR=build
 
 # JUCE Configuration
 JUCE_REPO=https://github.com/juce-framework/JUCE.git
-JUCE_BRANCH=master
+JUCE_TAG={JUCE_TAG from template or override from Stage 1}
 ```
 
 Leave API keys as placeholder values (`ghp_xxxxxxxxxxxxxxxxxxxx`, etc.).
@@ -441,18 +494,19 @@ find scripts/ -name "*.py" -exec chmod +x {} \;
 #### 3.7. Initialize git
 
 ```bash
-git init
+git init -b main
 git add .
 git commit -m "Initial commit: {PLUGIN_NAME} plugin from JUCE-Plugin-Starter template"
 ```
 
+Use `git init -b main` to initialize with `main` as the default branch (not `master`).
+
 #### 3.8. Create GitHub repo (if requested)
 
 ```bash
-# Private or public based on user choice
-gh repo create "$GITHUB_REPO_NAME" --private  # or --public
-git remote add origin "https://github.com/$GITHUB_USER/$GITHUB_REPO_NAME.git"
-git branch -M main
+# Create repo and push (--source=. adds remote + pushes current branch)
+# The git init in 3.7 already created "main" as the default branch
+gh repo create "$GITHUB_REPO_NAME" --private --source=.  # or --public
 git push -u origin main
 ```
 
@@ -498,22 +552,24 @@ If "Set up now":
 2. Give them these exact instructions:
    - Click **"Generate new token"**
    - **Token name:** `{PROJECT_NAME} Diagnostics`
-   - **Expiration:** 1 year (or custom)
-   - **Repository access:** Only select repositories → select `{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics`
-   - **Permissions:** Issues → Read and Write (this is the ONLY permission needed)
+   - **Expiration:** Select **"Custom"** and pick a date ~1 year out, or choose **"No expiration"** (the dropdown options are: 7 days, 30 days, 60 days, 90 days, Custom, No expiration)
+   - **Repository access:** "Only select repositories" → select `{GITHUB_USER}/{PROJECT_FOLDER}-diagnostics`
+   - **Permissions:** Click **"+ Add permissions"** → search for **"Issues"** → add it → change the "Issues" access dropdown from "Read-only" to **"Read and write"** (a "Metadata: Read-only" permission will be added automatically — that's fine)
    - Click **"Generate token"** and **copy it**
 
-3. Use AskUserQuestion to collect the token:
+3. Use AskUserQuestion to collect the token. The user will need to select "Type something" (the auto-generated Other option) and paste their token there:
 
 ```
-question: "Paste your token here (it starts with github_pat_):"
+question: "Paste your github_pat_... token below (select 'Type something' and paste it)."
 header: "Token"
 options:
   - label: "Skip for now"
     description: "You can add it later by editing .env or running setup_diagnostic_repo.sh"
+  - label: "I need the instructions again"
+    description: "Show the PAT creation steps one more time"
 ```
 
-The user will select "Other" and paste their token.
+If the user selects "I need the instructions again", repeat the PAT creation instructions from step 2, then re-ask this question.
 
 4. Validate the token via Bash:
 
