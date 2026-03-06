@@ -8,7 +8,7 @@ version: 1.0.0
 
 ## Overview
 
-JUCE-Plugin-Starter is a template for creating macOS audio plugin projects (AU, VST3, CLAP, Standalone). It provides a CMake-based build system, automatic versioning, code signing, and optional Visage GPU UI integration.
+JUCE-Plugin-Starter is a template for creating macOS audio plugin projects (AU, AUv3, VST3, CLAP, Standalone). It provides a CMake-based build system, automatic versioning, code signing, and optional Visage GPU UI integration.
 
 ## Template Structure
 
@@ -96,7 +96,7 @@ These are loaded from the template's `.env` when creating new projects:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `BUILD_FORMATS` | `"AU VST3 CLAP Standalone"` | Plugin formats to build |
+| `BUILD_FORMATS` | `"AU AUv3 VST3 CLAP Standalone"` | Plugin formats to build |
 | `DEFAULT_CONFIG` | `Debug` | Build configuration |
 | `COPY_AFTER_BUILD` | `TRUE` | Auto-install plugins to system folders |
 | `JUCE_REPO` | GitHub JUCE URL | JUCE source repository |
@@ -207,7 +207,7 @@ Default setup:
 - Stereo I/O bus layout
 - MIDI input enabled, MIDI output enabled
 - Plugin type: MIDI processor (configurable via CMakeLists.txt)
-- Formats: AU, VST3, CLAP, Standalone
+- Formats: AU (v2), AUv3, VST3, CLAP, Standalone
 
 ## Post-Build Info.plist Versioning
 

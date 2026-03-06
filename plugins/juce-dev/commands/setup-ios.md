@@ -12,7 +12,9 @@ allowed-tools:
 
 # Add iOS App Target
 
-Add an iOS/iPadOS app target to an existing JUCE-Plugin-Starter project. Detects whether Visage GPU UI is enabled and creates the appropriate iOS app files.
+Add an iOS/iPadOS app target to an existing JUCE-Plugin-Starter project. Supports both standalone iOS app and AUv3 Audio Unit extension. Detects whether Visage GPU UI is enabled and creates the appropriate iOS app files.
+
+> **Note:** The macOS AUv3 format is already included in the default `FORMATS` line in CMakeLists.txt (`AU AUv3 VST3 Standalone`). This command adds an iOS-specific app target that can host an AUv3 extension for use in iOS DAWs like AUM, GarageBand, or Cubasis.
 
 ## Implementation
 
