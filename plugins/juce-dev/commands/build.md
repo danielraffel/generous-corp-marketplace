@@ -21,6 +21,7 @@ Arguments mirror `scripts/build.sh` exactly:
 - `all` — Build all formats (default if none specified)
 - `au` — Audio Unit only
 - `vst3` — VST3 only
+- `clap` — CLAP only
 - `standalone` — Standalone app only
 
 **Actions** (pick one):
@@ -42,6 +43,7 @@ Arguments mirror `scripts/build.sh` exactly:
 /juce-dev:build                          # Build all formats locally
 /juce-dev:build standalone               # Build standalone only
 /juce-dev:build au vst3                  # Build AU + VST3
+/juce-dev:build clap                     # Build CLAP only
 /juce-dev:build all test                 # Build all and run PluginVal
 /juce-dev:build standalone test          # Build standalone and test
 /juce-dev:build publish                  # Full release to GitHub
@@ -64,6 +66,7 @@ TARGETS (combine multiple):
   all             Build all formats (default)
   au              Audio Unit only
   vst3            VST3 only
+  clap            CLAP only
   standalone      Standalone app only
 
 ACTIONS (pick one):
@@ -102,7 +105,7 @@ Do NOT proceed to the build steps. Just display the help and return.
 
 Parse the user's arguments into targets, action, and options. The argument format matches `scripts/build.sh`:
 
-- **Targets**: `all`, `au`, `vst3`, `standalone` — multiple allowed, default `all`
+- **Targets**: `all`, `au`, `vst3`, `clap`, `standalone` — multiple allowed, default `all`
 - **Action**: `local`, `test`, `sign`, `notarize`, `pkg`, `publish`, `unsigned`, `uninstall` — one only, default `local`
 - **Options**: `--regenerate-page`
 
@@ -129,7 +132,7 @@ question: "This will remove all installed plugin components. Continue?"
 header: "Uninstall"
 options:
   - label: "Yes, uninstall"
-    description: "Removes AU, VST3, Standalone, and clears AU cache"
+    description: "Removes AU, VST3, CLAP, Standalone, and clears AU cache"
   - label: "Cancel"
     description: "No changes will be made"
 ```
