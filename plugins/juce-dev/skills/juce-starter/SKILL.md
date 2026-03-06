@@ -24,12 +24,17 @@ JUCE-Plugin-Starter/
 ├── scripts/
 │   ├── init_plugin_project.sh   # Interactive project creation
 │   ├── generate_and_open_xcode.sh  # CMake → Xcode build
-│   ├── build.sh                 # Command-line build (au/vst3/standalone)
+│   ├── build.sh                 # Command-line build (au/auv3/vst3/clap/standalone)
 │   ├── setup_visage.sh          # Clone Visage + apply patches
 │   ├── post_build.sh            # Info.plist version updates
 │   ├── sign_and_package_plugin.sh  # Code signing + notarization
 │   └── patches/visage/          # Visage patch files
+├── tests/
+│   ├── Catch2Main.cpp           # Custom main with JUCE MessageManager init
+│   ├── PluginBasics.cpp         # Example plugin tests
+│   └── helpers/test_helpers.h   # Helper for editor-context testing
 ├── CMakeLists.txt               # Build configuration
+├── .clang-format                # JUCE-style code formatting (Allman, 4-space, C++17)
 ├── .env                         # Developer + project settings
 └── .env.example                 # Settings reference with defaults
 ```
