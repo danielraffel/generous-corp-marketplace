@@ -27,7 +27,7 @@ Arguments mirror `scripts/build.sh` exactly:
 
 **Actions** (pick one):
 - `local` — Build locally without signing (default)
-- `test` — Build and run PluginVal tests
+- `test` — Build and run Catch2 unit tests + PluginVal validation
 - `sign` — Build and code sign
 - `notarize` — Build, sign, and notarize
 - `pkg` — Build, sign, notarize, and package (no GitHub release)
@@ -73,7 +73,7 @@ TARGETS (combine multiple):
 
 ACTIONS (pick one):
   local           Build locally without signing (default)
-  test            Build and run PluginVal tests
+  test            Build and run Catch2 + PluginVal tests
   sign            Build and code sign
   notarize        Build, sign, and notarize
   pkg             Build, sign, notarize, and create installer
@@ -187,7 +187,7 @@ After the build completes:
 **On success:**
 - Report which targets were built and the action performed
 - For `standalone` or `all` with `local`/`test`: note the app was launched
-- For `test`: report PluginVal results
+- For `test`: report Catch2 and PluginVal results
 - For `publish`: report the GitHub release URL
 - For `pkg`: note the PKG location (Desktop)
 

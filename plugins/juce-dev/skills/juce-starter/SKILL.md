@@ -142,6 +142,21 @@ FetchContent_MakeAvailable(JUCE clap-juce-extensions)
 ./scripts/sign_and_package_plugin.sh
 ```
 
+### Testing
+
+Unit tests use Catch2 v3, fetched via FetchContent. PluginVal validates AU/VST3 plugins.
+
+```bash
+# Run all tests (Catch2 + PluginVal)
+./scripts/build.sh all test
+
+# Tests are in tests/ directory
+tests/
+  Catch2Main.cpp          # Custom main with JUCE MessageManager init
+  PluginBasics.cpp        # Example plugin tests
+  helpers/test_helpers.h  # Helper for editor-context testing
+```
+
 ### CMake Configuration
 
 - Minimum macOS: 15.0 (configurable via `OSX_DEPLOYMENT_TARGET`)
@@ -149,6 +164,7 @@ FetchContent_MakeAvailable(JUCE clap-juce-extensions)
 - AU version integer: `(major << 16) | (minor << 8) | patch`
 - Post-build scripts update Info.plist for AU and VST3 targets
 - VST3 helper tool code signing is disabled to avoid build errors
+- Catch2 v3 for unit testing (Tests target)
 
 ### Visage Conditional Integration
 
