@@ -1,8 +1,8 @@
 # juce-dev
 
-**Create, build, and ship JUCE audio plugin projects**
+**Create, build, and ship cross-platform JUCE audio plugin projects**
 
-A Claude Code plugin for the full JUCE plugin development lifecycle — from project scaffolding to building, testing, signing, and publishing. Wraps the JUCE-Plugin-Starter template and `scripts/build.sh` with smart CMake regeneration detection.
+A Claude Code plugin for the full JUCE plugin development lifecycle — from project scaffolding to building, testing, signing, and publishing. Supports **macOS** and **Windows**. Wraps the JUCE-Plugin-Starter template with smart CMake regeneration detection and platform-aware build scripts.
 
 ## Installation
 
@@ -28,10 +28,19 @@ Type `/juce-dev:create` to confirm the command is available.
 
 ## Prerequisites
 
+**macOS:**
 - **Xcode** with command-line tools installed
 - **CMake** (`brew install cmake`)
+- **Ninja** (`brew install ninja`)
 - **gh CLI** (`brew install gh`) — for GitHub repo creation
-- **JUCE-Plugin-Starter** template cloned locally (or the command will clone it for you)
+
+**Windows:**
+- **Visual Studio 2022** (Community or Build Tools) with C++ workload
+- **CMake** (`winget install Kitware.CMake`)
+- **Ninja** (`winget install Ninja-build.Ninja`)
+- **Git** (`winget install Git.Git`)
+
+**Both:** JUCE-Plugin-Starter template cloned locally (or the command will clone it for you)
 
 ## Commands
 
@@ -53,7 +62,9 @@ Build, test, sign, or publish your JUCE plugin. Automatically detects whether CM
 
 | Targets | Actions | Options |
 |---------|---------|---------|
-| `all` `au` `vst3` `standalone` | `local` `test` `sign` `notarize` `pkg` `publish` `unsigned` `uninstall` | `--regenerate-page` `--help` |
+| `all` `au` `auv3` `vst3` `clap` `standalone` | `local` `test` `sign` `notarize` `pkg` `publish` `unsigned` `uninstall` | `--regenerate-page` `--help` |
+
+> **Windows:** Only `vst3`, `clap`, and `standalone` targets are available. The command auto-detects the platform and uses `build.ps1` instead of `build.sh`.
 
 **Smart regeneration:** Checks if `CMakeLists.txt`, `.env`, or source files changed. If not, skips CMake regeneration for faster builds. Falls back to full regeneration if the build fails.
 
