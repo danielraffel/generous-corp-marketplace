@@ -132,7 +132,30 @@ Or run the dependencies script:
 bash scripts/dependencies.sh
 ```
 
-If **all tools are present**, proceed silently to Stage 1.
+**GitHub CLI auth check (all platforms):**
+
+If `gh` CLI is installed AND the user wants GitHub integration (not `--no-github`), verify authentication:
+
+```bash
+gh auth status 2>&1
+```
+
+If not authenticated (exit code non-zero or output contains "not logged in"):
+```
+question: "GitHub CLI is installed but not authenticated. Sign in now?"
+header: "GitHub Auth"
+options:
+  - label: "Sign in (Recommended)"
+    description: "Opens browser to authenticate with GitHub — takes ~30 seconds"
+  - label: "Skip GitHub"
+    description: "Continue without GitHub — local git only, no repo creation"
+```
+
+If "Sign in": run `gh auth login --web` and wait for the user to complete the browser flow. After it completes, verify with `gh auth status`. If still not authenticated, offer to skip GitHub.
+
+If "Skip GitHub": treat as `--no-github` for the rest of the flow (skip Stage 2d, Stage 3.8, and Stage 3.9).
+
+If **all tools are present** (and auth is confirmed if needed), proceed silently to Stage 1.
 
 ---
 
@@ -576,6 +599,13 @@ git commit -m "Initial commit: {PLUGIN_NAME} plugin from JUCE-Plugin-Starter tem
 Use `git init -b main` to initialize with `main` as the default branch (not `master`).
 
 #### 3.8. Create GitHub repo (if requested)
+
+First, verify `gh` is authenticated (in case auth expired or was skipped earlier):
+```bash
+gh auth status >/dev/null 2>&1 || { echo "ERROR: gh not authenticated"; exit 1; }
+```
+
+If not authenticated, tell the user: "GitHub CLI is not authenticated. Run `gh auth login` and try again, or skip GitHub integration." Do NOT attempt `gh repo create` without valid auth.
 
 ```bash
 # Create repo and push (--source=. adds remote + pushes current branch)
