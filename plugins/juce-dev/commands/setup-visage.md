@@ -12,7 +12,7 @@ allowed-tools:
 
 # Add Visage GPU UI
 
-Add Visage Metal-accelerated UI to an existing JUCE-Plugin-Starter project that was created without it.
+Add Visage GPU-accelerated UI to an existing JUCE-Plugin-Starter project. Visage is fully cross-platform via bgfx: Metal (macOS), Direct3D11 (Windows), Vulkan (Linux), WebGL (Web).
 
 ## Implementation
 
@@ -45,7 +45,7 @@ question: "Add Visage GPU UI to this project?"
 header: "Visage"
 options:
   - label: "Yes, add Visage (Recommended)"
-    description: "Replaces PluginEditor with Visage Metal-rendered UI"
+    description: "Replaces PluginEditor with Visage GPU-rendered UI (Metal/D3D11/Vulkan)"
   - label: "Cancel"
     description: "No changes will be made"
 ```
