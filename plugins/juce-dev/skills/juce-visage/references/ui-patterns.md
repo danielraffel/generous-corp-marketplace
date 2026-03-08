@@ -261,6 +261,49 @@ The container uses `setIgnoresMouseEvents(true, true)` — ignores events itself
 
 **Click debounce**: Add a 100ms debounce on clicks to prevent the dropdown from immediately re-closing after being shown (since the open click can also register as a close-outside click).
 
+**Click-outside-to-dismiss (click-catcher overlay)**: Visage's `frameAtPoint()` dispatches `mouseDown` only to the deepest frame — parent frames never receive the event. This means you can't intercept clicks on a parent panel to close dropdowns. Instead, use a transparent overlay:
+
+```cpp
+// Transparent overlay that catches mouse clicks outside the dropdown menu
+class DropdownClickCatcher : public visage::Frame {
+public:
+    std::function<void()> onClicked;
+    void draw(visage::Canvas&) override {} // Fully transparent
+    void mouseDown(const visage::MouseEvent&) override {
+        if (onClicked) onClicked();
+    }
+};
+```
+
+When the dropdown opens, add the click catcher to `dropdownParent` BEFORE adding the dropdown menu. Both use `setOnTop(true)`. Because `frameAtPoint()` iterates children in reverse order (last added = highest priority), the dropdown menu (added last) gets clicks that land on it, while clicks elsewhere hit the catcher:
+
+```cpp
+void showDropdown() {
+    // ... existing open logic ...
+
+    // 1. Add click-catcher FIRST (covers entire parent area)
+    clickCatcher->setBounds(0, 0, dropdownParent->width(), dropdownParent->height());
+    dropdownParent->addChild(clickCatcher.get());
+    clickCatcher->setOnTop(true);
+
+    // 2. Add dropdown menu AFTER (last child = checked first in hit test)
+    dropdownParent->addChild(dropdownMenu.get());
+    dropdownMenu->setOnTop(true);
+}
+
+void hideDropdown() {
+    // Remove click catcher
+    clickCatcher->setVisible(false);
+    if (clickCatcher->parent()) clickCatcher->parent()->removeChild(clickCatcher.get());
+
+    // Remove dropdown menu
+    dropdownMenu->setVisible(false);
+    if (dropdownMenu->parent()) dropdownMenu->parent()->removeChild(dropdownMenu.get());
+}
+```
+
+This is the standard pattern for click-outside-to-dismiss in Visage — the overlay approach works because `frameAtPoint()` finds the catcher as the deepest frame at any point not covered by the dropdown menu.
+
 ### System 3: VisageModalDialog (Full-Screen Modals)
 
 For dialogs that need a dimmed background and centered content (URL input, help, sample info, settings):

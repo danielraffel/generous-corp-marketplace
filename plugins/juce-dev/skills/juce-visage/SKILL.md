@@ -1,25 +1,13 @@
 ---
 name: juce-visage
-description: Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins. Visage is FULLY CROSS-PLATFORM via bgfx (macOS=Metal, Windows=Direct3D11, Linux=Vulkan, Web=WebGL). Covers view embedding, event bridging, focus management, keyboard handling in DAW hosts, popups/modals/dropdowns, memory management, destruction ordering, native standalone appearance, required patches, iOS touch event handling, safe area insets, and comprehensive Visage API reference (Canvas, Frame, Widget, Theme, Dimension, PostEffect, Event system). Patterns derived from production plugin development. Use this skill whenever building or debugging JUCE+Visage plugin UI, even if the user doesn't explicitly mention "Visage" — trigger on mentions of GPU rendering in JUCE, GPU UI in audio plugins, embedded MTKView/HWND, or bridge layers between JUCE and a GPU framework.
+description: Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS and iOS/iPadOS. Covers Metal view embedding, event bridging, focus management, keyboard handling in DAW hosts, popups/modals/dropdowns, memory management, destruction ordering, native standalone appearance, required Visage patches, iOS touch event handling, safe area insets, and comprehensive Visage API reference (Canvas, Frame, Widget, Theme, Dimension, PostEffect, Event system). Patterns derived from production plugin development. Use this skill whenever building or debugging JUCE+Visage plugin UI, even if the user doesn't explicitly mention "Visage" — trigger on mentions of Metal rendering in JUCE, GPU UI in audio plugins, embedded MTKView, or bridge layers between JUCE and a GPU framework.
 ---
 
 # JUCE + Visage Integration Guide
 
 This skill covers how to build a JUCE audio plugin (AU/VST3/Standalone) or iOS/iPadOS app that uses Visage for its UI.
 
-**CRITICAL: Visage is fully cross-platform.** It uses bgfx as its rendering backend:
-- **macOS**: Metal
-- **Windows**: Direct3D11
-- **Linux**: Vulkan
-- **Web/Emscripten**: WebGL
-
-NEVER assume Visage is macOS-only. NEVER build with `USE_VISAGE_UI=OFF` on non-macOS platforms. Always build with Visage ON.
-
-**Scope**: This skill currently documents macOS and iOS/iPadOS integration in depth (Metal rendering, `NSView`/`UIView` embedding, event bridging). On macOS, the bridge forwards mouse events from JUCE to Visage. On iOS, Visage's `VisageMetalView` handles touch events natively — the bridge skips mouse forwarding entirely.
-
-**Windows JuceVisageBridge**: The bridge for Windows (Win32 HWND embedding, D3D11 backend) needs to be built/tested. Visage itself compiles and renders fine on Windows. This is tracked in the cross-platform plan as item 2.3.
-
-**Linux JuceVisageBridge**: The bridge for Linux (X11 window embedding, Vulkan backend) needs to be built/tested. Visage itself compiles and renders fine on Linux. This is tracked in the cross-platform plan as item 3.2.
+**Scope**: macOS and iOS/iPadOS (Metal rendering, `NSView`/`UIView` embedding, event bridging). On macOS, the bridge forwards mouse events from JUCE to Visage. On iOS, Visage's `VisageMetalView` handles touch events natively — the bridge skips mouse forwarding entirely.
 
 **Tested with**: Visage (VitalAudio fork, included directly in repo), JUCE 7/8, Logic Pro, Ableton Live, Reaper.
 
