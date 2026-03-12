@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>juce-dev | Plugin for Claude Code</title>
-    <meta name="description" content="A Claude Code plugin for the full JUCE audio plugin lifecycle — create, build, test, sign, and publish macOS and iOS audio plugins.">
+    <meta name="description" content="A Claude Code plugin for the full JUCE audio plugin lifecycle — create, build, test, sign, publish, and port macOS audio plugins to Windows and Linux.">
 
     <!-- Open Graph (iMessage, Slack, Discord, etc.) -->
     <meta property="og:title" content="juce-dev">
@@ -483,6 +483,7 @@
                 <div class="col-right">
                     <p>Starting a new audio plugin usually means wiring up build systems, configuring code signing, setting up project identifiers, and writing boilerplate. It's tedious before you write a single line of audio code.</p>
                     <p><strong>juce-dev handles all of that.</strong> Give it a name, confirm your developer settings, pick your options, and you get a project that compiles immediately. If it's your first time, it checks your tools and walks you through setup.</p>
+                    <p><strong>Go cross-platform:</strong> Start on macOS and port to Windows or Linux when you're ready. The port command audits your code for platform-specific dependencies, shows you exactly what needs to change, and applies the fixes — including building and testing on a remote VM over SSH.</p>
                     <p><strong>Context-aware assistance:</strong> If you add Visage GPU UI to your project, a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> automatically provides Claude with deep knowledge of Metal view embedding, event bridging, keyboard handling in DAW hosts, and more. No Visage? The skill stays out of the way — it only activates when relevant.</p>
                     <p>Want to go further? Use <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> to describe what your plugin should do and let Claude build it for you.</p>
                 </div>
@@ -505,6 +506,7 @@
                         <li>Optional iOS/iPadOS app target with auto-detected UI mode</li>
                         <li>Bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
+                        <li>Port to Windows and Linux — audit, fix, and test on remote VMs</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
                         <li>Developer settings saved — next project is even faster</li>
@@ -550,8 +552,8 @@
             <div class="grid">
                 <div class="col-full">
                     <h3>Commands</h3>
-                    <h2>Four commands.<br>Full lifecycle.</h2>
-                    <p style="max-width: 60ch;">Create, configure, build, ship. Each does one thing well — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
+                    <h2>Seven commands.<br>Full lifecycle.</h2>
+                    <p style="max-width: 60ch;">Create, configure, build, port, ship. Each does one thing well — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
                 </div>
 
                 <div class="col-left">
@@ -636,6 +638,38 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-left">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Port to Windows or Linux</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:port windows --vm win</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Audit, fix, build, and test on a remote VM.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Scans your project for macOS-only code (Objective-C++ files, Cocoa imports, platform-specific paths), generates a severity-ranked report, applies cross-platform fixes (CMake conditionals, <code>#if JUCE_MAC</code> guards, MSVC flags), then SSHs to your VM to build and test. Visage is fully cross-platform (D3D11 on Windows, Vulkan on Linux) and is never flagged.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Project status</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:status</div>
+                        </div>
+                        <div class="workflow-desc">
+                            See your project config, features, and VMs at a glance.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Shows your project name, bundle ID, JUCE version, enabled features (Visage, DiagnosticKit), configured VMs, build targets, and git status. Use <code>--verbose</code> for full .env details.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -706,6 +740,33 @@
 
 <span class="code-comment"># Full pipeline: build → sign → notarize → installer → GitHub Release</span>
 <span class="code-prompt">/</span>juce-dev:build publish
+
+
+<span class="code-comment"># ── Port ────────────────────────────────────────────</span>
+
+<span class="code-comment"># Audit macOS project for Windows compatibility</span>
+<span class="code-prompt">/</span>juce-dev:port windows --audit-only
+
+<span class="code-comment"># Port to Windows and test on a VM</span>
+<span class="code-prompt">/</span>juce-dev:port windows --vm win
+
+<span class="code-comment"># Port to Linux and run CI</span>
+<span class="code-prompt">/</span>juce-dev:port linux --test-ci
+
+<span class="code-comment"># Port to both platforms</span>
+<span class="code-prompt">/</span>juce-dev:port all
+
+
+<span class="code-comment"># ── Status &amp; VMs ────────────────────────────────────</span>
+
+<span class="code-comment"># Show project config, features, and VMs</span>
+<span class="code-prompt">/</span>juce-dev:status
+
+<span class="code-comment"># Add a Windows VM for cross-platform builds</span>
+<span class="code-prompt">/</span>juce-dev:vm add win win-ssh windows
+
+<span class="code-comment"># List configured VMs</span>
+<span class="code-prompt">/</span>juce-dev:vm list
 
 
 <span class="code-comment"># ── Help ────────────────────────────────────────────</span>
@@ -874,7 +935,48 @@ rm -rf tmp-juce-visage</div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">Does this work on Windows or Linux?</div>
                         <div class="faq-answer">
-                            <p><strong>macOS only</strong> for now. The build system uses Xcode and the code signing setup is Apple-specific. JUCE itself supports all platforms, but this plugin and its tooling are built for Mac development.</p>
+                            <p><strong>You develop on macOS, then port.</strong> The plugin runs in Claude Code on a Mac, where you create and build your plugin. When you're ready to go cross-platform, <code>/juce-dev:port windows</code> or <code>/juce-dev:port linux</code> audits your project for macOS-only code, applies the fixes, and can build and test on a remote VM over SSH.</p>
+                            <p>The <a href="https://github.com/danielraffel/JUCE-Plugin-Starter">JUCE-Plugin-Starter</a> template already includes cross-platform CMake configuration and a Windows build script (<code>build.ps1</code>). The port command handles your project-specific code — Objective-C++ files, Cocoa imports, platform-specific paths, and MSVC compiler flags.</p>
+                            <p>Visage is fully cross-platform: Metal on macOS, Direct3D11 on Windows, Vulkan on Linux. The port command knows this and won't flag it.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does the port command work?</div>
+                        <div class="faq-answer">
+                            <p><code>/juce-dev:port windows</code> runs through four stages:</p>
+                            <p><strong>1. Audit</strong> — scans every source file, CMakeLists.txt, and build script for macOS-only patterns. Categorizes each finding by severity (HIGH: <code>.mm</code> files, Cocoa imports; MEDIUM: macOS-specific paths; LOW: Unix-only headers). Use <code>--audit-only</code> to see the report without making changes.</p>
+                            <p><strong>2. Plan</strong> — shows you the full list of changes and asks whether to apply all at once, go through them one by one, or export a plan to a markdown file.</p>
+                            <p><strong>3. Execute</strong> — creates a <code>port/windows</code> branch and applies fixes: CMake platform conditionals, <code>#if JUCE_MAC</code> guards, MSVC compile flags, <code>if(APPLE)</code> guards for AU/AUv3 formats, and Windows build scripts.</p>
+                            <p><strong>4. Test</strong> — optionally SSHs to your VM, pushes the branch, runs the build there, and reports back. If the build fails, it analyzes the errors, fixes locally, pushes again, and retries. You can also trigger GitHub Actions CI instead.</p>
+                            <p>Your project needs to be cloned on the VM as well — the port command pushes your branch to GitHub and pulls it on the VM via SSH.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How do I set up a VM for cross-platform testing?</div>
+                        <div class="faq-answer">
+                            <p>You need SSH access to a Windows or Linux machine (a VM, a remote server, or another computer on your network). Add an SSH config entry in <code>~/.ssh/config</code>:</p>
+                            <div class="code-block-wrapper">
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                <div class="code-block" style="white-space: pre; line-height: 1.6;"><span class="code-comment"># ~/.ssh/config</span>
+Host windows10
+  HostName 192.168.20.30
+  User joesmith
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  ConnectTimeout 5</div>
+                            </div>
+                            <p style="margin-top: 1rem;">Then register it with juce-dev:</p>
+                            <div class="code-block-wrapper">
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                <div class="code-block"><span class="code-prompt">/</span>juce-dev:vm add windows10 windows10 windows</div>
+                            </div>
+                            <p style="margin-top: 1rem;">Now you can port and test in one step:</p>
+                            <div class="code-block-wrapper">
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                <div class="code-block"><span class="code-prompt">/</span>juce-dev:port windows --vm windows10</div>
+                            </div>
+                            <p style="margin-top: 0.5rem;">The port command will SSH to your VM, pull the branch, build with MSVC + Ninja, and report results. Your project repo needs to be cloned on the VM — the command pushes your branch to GitHub and pulls it remotely.</p>
+                            <p>Use <code>/juce-dev:vm list</code> to see configured VMs, or <code>/juce-dev:status</code> for a full project overview.</p>
                         </div>
                     </div>
                     <div class="faq-item">
