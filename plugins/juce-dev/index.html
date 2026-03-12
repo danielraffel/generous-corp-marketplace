@@ -483,7 +483,7 @@
                 <div class="col-right">
                     <p>Starting a new audio plugin usually means wiring up build systems, configuring code signing, setting up project identifiers, and writing boilerplate. It's tedious before you write a single line of audio code.</p>
                     <p><strong>juce-dev handles all of that.</strong> Give it a name, confirm your developer settings, pick your options, and you get a project that compiles immediately. If it's your first time, it checks your tools and walks you through setup.</p>
-                    <p><strong>Go cross-platform:</strong> Start on macOS and port to Windows or Linux when you're ready. The port command audits your code for platform-specific dependencies, shows you exactly what needs to change, and applies the fixes — including building and testing on a remote VM over SSH.</p>
+                    <p><strong>Go cross-platform:</strong> Start on macOS and port to Windows when you're ready (Linux coming soon). The port command scans your macOS code for platform-specific dependencies, shows you exactly what needs to change, and applies the fixes — including building and testing on a remote Windows VM over SSH.</p>
                     <p><strong>Context-aware assistance:</strong> If you add Visage GPU UI to your project, a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> automatically provides Claude with deep knowledge of Metal view embedding, event bridging, keyboard handling in DAW hosts, and more. No Visage? The skill stays out of the way — it only activates when relevant.</p>
                     <p>Want to go further? Use <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> to describe what your plugin should do and let Claude build it for you.</p>
                 </div>
@@ -506,7 +506,7 @@
                         <li>Optional iOS/iPadOS app target with auto-detected UI mode</li>
                         <li>Bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
-                        <li>Port to Windows and Linux — audit, fix, and test on remote VMs</li>
+                        <li>Port to Windows — audit macOS-specific code, fix, and test on a remote VM (Linux coming soon)</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
                         <li>Developer settings saved — next project is even faster</li>
@@ -640,17 +640,17 @@
                 </div>
                 <div class="col-left">
                     <div class="workflow-card">
-                        <div class="workflow-title">Port to Windows or Linux</div>
+                        <div class="workflow-title">Port to Windows <span style="font-size: 0.75rem; color: var(--gray); font-weight: normal;">(Linux coming soon)</span></div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                             <div class="code-block"><span class="code-prompt">/</span>juce-dev:port windows --vm win</div>
                         </div>
                         <div class="workflow-desc">
-                            Audit, fix, build, and test on a remote VM.
+                            Audit macOS-specific code, fix, build, and test on a remote VM.
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Scans your project for macOS-only code (Objective-C++ files, Cocoa imports, platform-specific paths), generates a severity-ranked report, applies cross-platform fixes (CMake conditionals, <code>#if JUCE_MAC</code> guards, MSVC flags), then SSHs to your VM to build and test. Visage is fully cross-platform (D3D11 on Windows, Vulkan on Linux) and is never flagged.
+                            Scans your macOS project for platform-specific code (Objective-C++ files, Cocoa imports, Apple framework dependencies, macOS-specific paths), generates a severity-ranked report, and applies cross-platform fixes (CMake conditionals, <code>#if JUCE_MAC</code> guards, MSVC flags). Can then SSH to your Windows VM to build and test. Currently ports from macOS → Windows. Visage is fully cross-platform (D3D11 on Windows) and is never flagged.
                         </div>
                     </div>
                 </div>
@@ -742,7 +742,7 @@
 <span class="code-prompt">/</span>juce-dev:build publish
 
 
-<span class="code-comment"># ── Port ────────────────────────────────────────────</span>
+<span class="code-comment"># ── Port (macOS → Windows) ──────────────────────────</span>
 
 <span class="code-comment"># Audit macOS project for Windows compatibility</span>
 <span class="code-prompt">/</span>juce-dev:port windows --audit-only
@@ -750,11 +750,8 @@
 <span class="code-comment"># Port to Windows and test on a VM</span>
 <span class="code-prompt">/</span>juce-dev:port windows --vm win
 
-<span class="code-comment"># Port to Linux and run CI</span>
-<span class="code-prompt">/</span>juce-dev:port linux --test-ci
-
-<span class="code-comment"># Port to both platforms</span>
-<span class="code-prompt">/</span>juce-dev:port all
+<span class="code-comment"># Port and trigger GitHub Actions CI</span>
+<span class="code-prompt">/</span>juce-dev:port windows --test-ci
 
 
 <span class="code-comment"># ── Status &amp; VMs ────────────────────────────────────</span>
@@ -935,16 +932,16 @@ rm -rf tmp-juce-visage</div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">Does this work on Windows or Linux?</div>
                         <div class="faq-answer">
-                            <p><strong>You develop on macOS, then port.</strong> The plugin runs in Claude Code on a Mac, where you create and build your plugin. When you're ready to go cross-platform, <code>/juce-dev:port windows</code> or <code>/juce-dev:port linux</code> audits your project for macOS-only code, applies the fixes, and can build and test on a remote VM over SSH.</p>
-                            <p>The <a href="https://github.com/danielraffel/JUCE-Plugin-Starter">JUCE-Plugin-Starter</a> template already includes cross-platform CMake configuration and a Windows build script (<code>build.ps1</code>). The port command handles your project-specific code — Objective-C++ files, Cocoa imports, platform-specific paths, and MSVC compiler flags.</p>
-                            <p>Visage is fully cross-platform: Metal on macOS, Direct3D11 on Windows, Vulkan on Linux. The port command knows this and won't flag it.</p>
+                            <p><strong>You develop on macOS, then port.</strong> The plugin runs in Claude Code on a Mac, where you create and build your plugin. When you're ready to go cross-platform, <code>/juce-dev:port windows</code> scans your macOS project for platform-specific code (Objective-C++, Cocoa imports, Apple frameworks, macOS paths), applies the fixes, and can build and test on a remote Windows VM over SSH. Linux support is coming soon.</p>
+                            <p>The <a href="https://github.com/danielraffel/JUCE-Plugin-Starter">JUCE-Plugin-Starter</a> template already includes cross-platform CMake configuration and a Windows build script (<code>build.ps1</code>). The port command handles your project-specific code — the things you add on top of the template.</p>
+                            <p>The build command (<code>/juce-dev:build</code>) also works on Windows and Linux if you're running Claude Code there — it detects the platform and uses the appropriate build script. Visage is fully cross-platform: Metal on macOS, Direct3D11 on Windows, Vulkan on Linux.</p>
                         </div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">How does the port command work?</div>
                         <div class="faq-answer">
-                            <p><code>/juce-dev:port windows</code> runs through four stages:</p>
-                            <p><strong>1. Audit</strong> — scans every source file, CMakeLists.txt, and build script for macOS-only patterns. Categorizes each finding by severity (HIGH: <code>.mm</code> files, Cocoa imports; MEDIUM: macOS-specific paths; LOW: Unix-only headers). Use <code>--audit-only</code> to see the report without making changes.</p>
+                            <p>The port command currently supports porting <strong>from macOS to Windows</strong>. It scans for macOS-specific code and applies Windows-compatible fixes. It runs through four stages:</p>
+                            <p><strong>1. Audit</strong> — scans every source file, CMakeLists.txt, and build script for macOS-only patterns (Objective-C++, Cocoa/AppKit imports, CoreAudio/CoreMIDI, macOS bundle paths, etc.). Categorizes each finding by severity (HIGH: <code>.mm</code> files, Cocoa imports; MEDIUM: macOS-specific paths; LOW: Unix-only headers). Use <code>--audit-only</code> to see the report without making changes.</p>
                             <p><strong>2. Plan</strong> — shows you the full list of changes and asks whether to apply all at once, go through them one by one, or export a plan to a markdown file.</p>
                             <p><strong>3. Execute</strong> — creates a <code>port/windows</code> branch and applies fixes: CMake platform conditionals, <code>#if JUCE_MAC</code> guards, MSVC compile flags, <code>if(APPLE)</code> guards for AU/AUv3 formats, and Windows build scripts.</p>
                             <p><strong>4. Test</strong> — optionally SSHs to your VM, pushes the branch, runs the build there, and reports back. If the build fails, it analyzes the errors, fixes locally, pushes again, and retries. You can also trigger GitHub Actions CI instead.</p>
