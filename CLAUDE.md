@@ -38,3 +38,9 @@ When adding a new plugin or skill to the marketplace, complete **all** of the fo
    - Answer: Links to both the bug and feature request templates
 
 5. **GitHub labels** — Create labels on the repository for the project name (e.g., `worktree-manager`, `chainer`) so issue templates can auto-apply them
+
+## Tracking Remaining Work
+
+**juce-dev work items** → file on **danielraffel/JUCE-Plugin-Starter** (not this repo), since the two projects are tightly coupled and most implementation lives there. See JUCE-Plugin-Starter's CLAUDE.md for issue conventions (naming, labels, series linking).
+
+**All other plugins** (worktree-manager, chainer, etc.) → file on **this repo** (generous-corp-marketplace), since those are self-contained projects.
