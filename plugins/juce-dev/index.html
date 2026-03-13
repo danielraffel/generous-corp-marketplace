@@ -507,6 +507,8 @@
                         <li>Bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
                         <li>In-app auto-updates via Sparkle/WinSparkle</li>
+                        <li>CI/CD with proper installers — macOS .pkg and Windows Setup.exe, not just raw binaries</li>
+                        <li>One-command certificate export from Keychain to GitHub Secrets</li>
                         <li>Port between macOS and Windows — audit platform-specific code, fix, and test on a remote VM</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
@@ -617,7 +619,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Full pipeline: builds all formats, code-signs with your Apple developer identity, notarizes with Apple, creates a .pkg installer, publishes to GitHub Releases, and updates your website download links (if you've set one up with <code>/juce-dev:website</code>).
+                            Full pipeline: builds all formats, code-signs with your Apple developer identity, notarizes with Apple, creates a .pkg installer, publishes a public GitHub Release, and updates your website download links — only activating buttons for platforms with actual assets. Use <code>/juce-dev:build draft</code> for a draft release instead. On Windows, creates a Setup.exe via Inno Setup.
                         </div>
                     </div>
                 </div>
@@ -715,7 +717,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Three modes: <strong>verify</strong> (build + test), <strong>sign</strong> (build + sign), <strong>publish</strong> (build + sign + GitHub Release + website update). Auto-detects which platforms your project supports. Per-platform signing controls — skip macOS or Windows signing with <code>--no-sign-macos</code> / <code>--no-sign-windows</code>. Gracefully skips signing if certs aren't configured. In publish mode, download links on your GitHub Pages site are updated automatically. Use <code>status</code> and <code>logs</code> to monitor runs. Use <code>secrets</code> to manage signing credentials.
+                            Four modes: <strong>verify</strong> (build + test), <strong>sign</strong> (build + sign), <strong>publish</strong> (build + sign + public GitHub Release + website update), <strong>draft</strong> (same as publish but creates a draft release). CI creates proper installers — macOS .pkg (pkgbuild + productbuild + productsign + notarytool + stapler) and Windows Setup.exe via Inno Setup. Auto-detects which platforms your project supports. Per-platform signing controls — skip macOS or Windows signing with <code>--no-sign-macos</code> / <code>--no-sign-windows</code>. Gracefully skips signing if certs aren't configured. After publish, download buttons on your GitHub Pages site are activated only for platforms with actual release assets, and the repo homepage URL is set automatically. If your <code>.env</code> is gitignored, CI falls back to <code>.env.ci</code> — a committed file with only non-secret values (PROJECT_NAME, versions, CI_PLATFORMS). Use <code>status</code> and <code>logs</code> to monitor runs. Use <code>secrets</code> to export signing certs from Keychain to GitHub Secrets.
                         </div>
                     </div>
                 </div>
@@ -731,7 +733,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Creates a <code>gh-pages</code> branch with a clean, responsive landing page — your plugin name, description, and download buttons. Supports light and dark mode. Download links auto-update when you publish. For private repos, the GitHub source link is omitted. Customize by editing <code>index.html</code> on the gh-pages branch.
+                            Creates a <code>gh-pages</code> branch with a clean, responsive landing page — your plugin name, description, and download buttons. Supports light and dark mode. The generated <code>index.html</code> includes <code>&lt;!-- DOWNLOAD-MACOS-START --&gt;</code> / <code>&lt;!-- DOWNLOAD-MACOS-END --&gt;</code> marker comments around each download button. When you publish, <code>update_download_links.sh</code> replaces the content between these markers with active download links — "Coming Soon" stubs become real buttons. For pages without markers (e.g., custom designs), the script falls back to regex-based URL replacement, updating versioned release URLs in-place. Only platforms with actual release assets get active buttons (macOS checks for .pkg, Windows for Setup.exe or .zip, Linux for .tar.gz). The repo homepage URL is set to the GitHub Pages URL automatically, with custom domain detection. For private repos, the GitHub source link is omitted. Customize by editing <code>index.html</code> on the gh-pages branch — both marker-based and markerless pages are supported.
                         </div>
                     </div>
                 </div>
@@ -844,8 +846,11 @@
 <span class="code-comment"># Sign-only (no release)</span>
 <span class="code-prompt">/</span>juce-dev:ci sign
 
-<span class="code-comment"># Full publish: build, sign, package, GitHub Release</span>
+<span class="code-comment"># Full publish: build, sign, package, public GitHub Release</span>
 <span class="code-prompt">/</span>juce-dev:ci publish
+
+<span class="code-comment"># Draft release (same as publish, but not public)</span>
+<span class="code-prompt">/</span>juce-dev:ci draft
 
 <span class="code-comment"># Publish but skip signing for a platform</span>
 <span class="code-prompt">/</span>juce-dev:ci publish --no-sign-windows
@@ -856,7 +861,7 @@
 <span class="code-comment"># View build logs</span>
 <span class="code-prompt">/</span>juce-dev:ci logs
 
-<span class="code-comment"># Manage signing secrets (local .env ↔ GitHub Secrets)</span>
+<span class="code-comment"># Export signing certs from Keychain to GitHub Secrets</span>
 <span class="code-prompt">/</span>juce-dev:ci secrets
 
 
@@ -1126,6 +1131,27 @@ Host macmini
                         <div class="faq-answer">
                             <p>Everything is opt-in. If <code>ENABLE_AUTO_UPDATE</code> isn't set to <code>true</code> in your <code>.env</code>, the publish pipeline works exactly as before — no EdDSA signing, no appcast generation, no Sparkle/WinSparkle linking, no "Check for Updates" menu item. Zero impact on your build.</p>
                             <p>You can add auto-updates later at any time with <code>/juce-dev:setup-updates</code>.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What if my .env is gitignored?</div>
+                        <div class="faq-answer">
+                            <p>Create a <code>.env.ci</code> file with only non-secret values and commit it. The CI workflow automatically falls back to <code>.env.ci</code> when <code>.env</code> doesn't exist.</p>
+                            <p><code>.env.ci</code> should contain: <code>PROJECT_NAME</code>, <code>PROJECT_BUNDLE_ID</code>, <code>DEVELOPER_NAME</code>, version numbers, <code>GITHUB_USER</code>, <code>GITHUB_REPO</code>, <code>CI_PLATFORMS</code>, and cert names (not secrets). Sensitive values like <code>APPLE_ID</code> and <code>APP_SPECIFIC_PASSWORD</code> stay as GitHub Secrets only.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Can I publish releases to a separate repo?</div>
+                        <div class="faq-answer">
+                            <p><strong>Not recommended.</strong> The default single-repo pattern (source + releases + website in one repo) is simpler and works well for most plugins. It's what <code>/juce-dev:build publish</code> and <code>/juce-dev:ci publish</code> are built for.</p>
+                            <p>If you have a specific reason to separate releases from source code (e.g., private source with a public download page), a split-repo pattern is possible but requires manual configuration: a separate release repo, a PAT for cross-repo access, and custom appcast setup. This is tracked as a future enhancement. Stick with the default unless you know you need it.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does the download page know which platforms to show?</div>
+                        <div class="faq-answer">
+                            <p>When you publish, the <code>update_download_links.sh</code> script checks the actual release assets on GitHub. If the release has a <code>.pkg</code>, the macOS button is activated. If it has a <code>_Setup.exe</code> (or <code>.zip</code> fallback), the Windows button is activated. If it has a <code>.tar.gz</code>, the Linux button is activated.</p>
+                            <p>This means you can publish macOS-only first and add Windows later — each platform's button only appears when there's a real file to download. The script also updates versioned URLs in your <code>README.md</code>.</p>
                         </div>
                     </div>
                     <div class="faq-item">
