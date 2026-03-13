@@ -506,7 +506,7 @@
                         <li>Optional iOS/iPadOS app target with auto-detected UI mode</li>
                         <li>Bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
-                        <li>In-app auto-updates via Sparkle/WinSparkle <span style="color: var(--gray); font-size: 0.85rem;">(planned)</span></li>
+                        <li>In-app auto-updates via Sparkle/WinSparkle</li>
                         <li>Port between macOS and Windows — audit platform-specific code, fix, and test on a remote VM</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
@@ -689,7 +689,7 @@
                 </div>
                 <div class="col-left">
                     <div class="workflow-card">
-                        <div class="workflow-title">Auto-updates <span style="font-size: 0.75rem; color: var(--gray); font-weight: normal;">(planned)</span></div>
+                        <div class="workflow-title">Auto-updates</div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                             <div class="code-block"><span class="code-prompt">/</span>juce-dev:setup-updates</div>
@@ -791,7 +791,7 @@
 <span class="code-prompt">/</span>juce-dev:port windows --test-ci
 
 
-<span class="code-comment"># ── Auto-Updates (planned) ──────────────────────────</span>
+<span class="code-comment"># ── Auto-Updates ────────────────────────────────────</span>
 
 <span class="code-comment"># Add auto-update support to your project</span>
 <span class="code-prompt">/</span>juce-dev:setup-updates
@@ -1041,10 +1041,25 @@ Host macmini
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">How do auto-updates work?</div>
                         <div class="faq-answer">
-                            <p><strong>Planned feature.</strong> Auto-updates use <a href="https://sparkle-project.org/">Sparkle</a> on macOS and <a href="https://winsparkle.org/">WinSparkle</a> on Windows — the same frameworks used by most desktop apps with built-in updaters.</p>
+                            <p>Auto-updates use <a href="https://sparkle-project.org/">Sparkle</a> on macOS and <a href="https://winsparkle.org/">WinSparkle</a> on Windows — the same frameworks used by most desktop apps with built-in updaters.</p>
                             <p>The updater UI lives in the <strong>standalone app only</strong> — you can't trigger an update from within a DAW plugin. On macOS, "Check for Updates..." appears in the app name menu. On Windows, it's in the Settings panel.</p>
                             <p>When an update is available, the frameworks handle the download, progress UI, and installation. The update payload is a <strong>full product installer</strong> (PKG on macOS, Inno Setup on Windows) that replaces all plugin formats (AU, VST3, CLAP, Standalone) at once — no version skew between formats.</p>
                             <p>Installers are EdDSA-signed for integrity verification. Use <code>/juce-dev:setup-updates</code> to add auto-update support to your project, and <code>--doctor</code> to validate your update chain end-to-end.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does publishing an update work?</div>
+                        <div class="faq-answer">
+                            <p>If auto-updates are enabled, <code>/juce-dev:build publish</code> handles everything in a single command: build, code-sign, notarize, create the installer, EdDSA-sign it, upload to GitHub Releases, and generate the appcast XML that tells users a new version is available.</p>
+                            <p>The appcast (<code>appcast-macos.xml</code> / <code>appcast-windows.xml</code>) is committed to your repo and served via <code>raw.githubusercontent.com</code>. It's always published <strong>last</strong>, after the installer is already uploaded — so users never see an update they can't download.</p>
+                            <p>Manual "Check for Updates" picks up the new version immediately. Automatic background checks find it within 24 hours (configurable).</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What if I don't want auto-updates?</div>
+                        <div class="faq-answer">
+                            <p>Everything is opt-in. If <code>ENABLE_AUTO_UPDATE</code> isn't set to <code>true</code> in your <code>.env</code>, the publish pipeline works exactly as before — no EdDSA signing, no appcast generation, no Sparkle/WinSparkle linking, no "Check for Updates" menu item. Zero impact on your build.</p>
+                            <p>You can add auto-updates later at any time with <code>/juce-dev:setup-updates</code>.</p>
                         </div>
                     </div>
                     <div class="faq-item">

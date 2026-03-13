@@ -347,7 +347,23 @@ options:
 
 **CRITICAL**: When Visage is enabled (via flag or user selection), Stage 3.4 MUST run. The Visage editor templates replace the standard JUCE PluginEditor files, and `setup_visage.sh` clones the Visage library into `external/visage/`. Without this step, `USE_VISAGE_UI=TRUE` is set in `.env` but the project won't compile — the Visage headers and source will be missing.
 
-#### 2d. GitHub repository
+#### 2d. Auto-updates
+
+Ask as an individual yes/no question (not part of the multi-select above):
+
+```
+question: "Do you want in-app auto-updates for the Standalone app?"
+header: "Auto-Updates"
+options:
+  - label: "Yes"
+    description: "Adds Sparkle (macOS) / WinSparkle (Windows) — users get update notifications in-app"
+  - label: "No"
+    description: "You can always add this later with /juce-dev:setup-updates"
+```
+
+If "Yes": set `enable_auto_updates = true` — this will be used in Stage 3 to run the auto-update setup.
+
+#### 2e. GitHub repository
 
 Skip if `--no-github` is in `$ARGUMENTS` or if GITHUB_USER is empty/skipped.
 
@@ -364,7 +380,7 @@ options:
     description: "Local git only, no remote repository"
 ```
 
-#### 2e. Confirm before proceeding
+#### 2f. Confirm before proceeding
 
 Show a summary and ask for confirmation:
 ```
@@ -695,6 +711,45 @@ If the response is not `200`, tell the user the token is invalid and suggest the
 
 Offer to try again or skip.
 
+#### 3.10. Auto-update setup (if enabled)
+
+Skip this step if auto-updates were not selected in Step 2d.
+
+1. Run the Sparkle/WinSparkle download script:
+   ```bash
+   # macOS
+   ./scripts/setup_sparkle.sh
+
+   # Windows
+   ./scripts/setup_winsparkle.sh
+   ```
+
+2. Generate EdDSA key pair:
+   ```bash
+   # macOS — stores private key in Keychain, prints public key
+   ./external/bin/generate_keys
+   ```
+   Capture the public key from the output.
+
+3. Detect the default branch:
+   ```bash
+   git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
+   ```
+   Fall back to `main` if detection fails.
+
+4. Update `.env` with auto-update variables:
+   ```
+   ENABLE_AUTO_UPDATE=true
+   AUTO_UPDATE_MODE=public
+   AUTO_UPDATE_EDDSA_PUBLIC_KEY={captured_public_key}
+   AUTO_UPDATE_FEED_URL_MACOS=https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/{default_branch}/appcast-macos.xml
+   AUTO_UPDATE_FEED_URL_WINDOWS=https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/{default_branch}/appcast-windows.xml
+   ```
+
+5. Verify the source files exist (`Source/AutoUpdater.h`, `Source/AutoUpdater_Mac.mm`, `Source/StandaloneApp.cpp`).
+
+If `scripts/setup_sparkle.sh` doesn't exist, tell the user their JUCE-Plugin-Starter template needs updating.
+
 ---
 
 ### Stage 4: Summary and Next Steps
@@ -712,7 +767,7 @@ Display a summary to the user:
 | **Bundle ID** | {BUNDLE_ID} |
 | **Plugin code** | {PLUGIN_CODE} |
 | **Manufacturer code** | {PLUGIN_MANUFACTURER_CODE} |
-| **Features** | Visage, DiagnosticKit (or "None") |
+| **Features** | Visage, DiagnosticKit, Auto-Updates (or "None") |
 | **GitHub** | github.com/{user}/{repo} (or "Local only") |
 
 ### Build your plugin

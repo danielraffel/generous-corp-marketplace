@@ -408,8 +408,9 @@ Apply fixes in order of severity (HIGH first).
 
 5. **External dependencies** — handle platform-specific deps
    - Guard Windows-only deps (WinSparkle) with `if(WIN32)` in CMakeLists.txt
-   - Add Sparkle for macOS auto-update if WinSparkle was used, inside `if(APPLE)`
-   - Note which deps need macOS builds (report, don't fix)
+   - Guard macOS-only deps (Sparkle) with `if(APPLE)` in CMakeLists.txt
+   - **Auto-updates**: If the source project has Sparkle (macOS→Windows port) or WinSparkle (Windows→macOS port), offer to add the counterpart framework for the target platform. Use `/juce-dev:setup-updates` to configure the counterpart.
+   - Note which deps need target platform builds (report, don't fix)
    - Check `.lib` static libraries — may need `.a` equivalents
 
 6. **Plugin format setup** — AU/AUv3 specific
