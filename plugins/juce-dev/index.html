@@ -703,6 +703,38 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-right">
+                    <div class="workflow-card">
+                        <div class="workflow-title">CI/CD</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:ci publish</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Trigger cloud builds, sign, and publish from GitHub Actions.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Three modes: <strong>verify</strong> (build + test), <strong>sign</strong> (build + sign), <strong>publish</strong> (full release pipeline with GitHub Release). Auto-detects which platforms your project supports. Per-platform signing controls — skip macOS or Windows signing with <code>--no-sign-macos</code> / <code>--no-sign-windows</code>. Gracefully skips signing if certs aren't configured. Use <code>status</code> and <code>logs</code> to monitor runs. Use <code>secrets</code> to manage signing credentials.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Website</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:website</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Create a GitHub Pages download page for your plugin.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Creates a <code>gh-pages</code> branch with a clean, responsive landing page — your plugin name, description, and download buttons. Supports light and dark mode. Download links auto-update when you publish. For private repos, the GitHub source link is omitted. Customize by editing <code>index.html</code> on the gh-pages branch.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -798,6 +830,40 @@
 
 <span class="code-comment"># Validate the full update chain</span>
 <span class="code-prompt">/</span>juce-dev:setup-updates --doctor
+
+
+<span class="code-comment"># ── CI/CD ───────────────────────────────────────────</span>
+
+<span class="code-comment"># Show CI config and trigger a verify build</span>
+<span class="code-prompt">/</span>juce-dev:ci
+
+<span class="code-comment"># Build specific platforms</span>
+<span class="code-prompt">/</span>juce-dev:ci macos
+<span class="code-prompt">/</span>juce-dev:ci macos,windows
+
+<span class="code-comment"># Sign-only (no release)</span>
+<span class="code-prompt">/</span>juce-dev:ci sign
+
+<span class="code-comment"># Full publish: build, sign, package, GitHub Release</span>
+<span class="code-prompt">/</span>juce-dev:ci publish
+
+<span class="code-comment"># Publish but skip signing for a platform</span>
+<span class="code-prompt">/</span>juce-dev:ci publish --no-sign-windows
+
+<span class="code-comment"># Check recent CI run results</span>
+<span class="code-prompt">/</span>juce-dev:ci status
+
+<span class="code-comment"># View build logs</span>
+<span class="code-prompt">/</span>juce-dev:ci logs
+
+<span class="code-comment"># Manage signing secrets (local .env ↔ GitHub Secrets)</span>
+<span class="code-prompt">/</span>juce-dev:ci secrets
+
+
+<span class="code-comment"># ── Website ─────────────────────────────────────────</span>
+
+<span class="code-comment"># Create a GitHub Pages download page</span>
+<span class="code-prompt">/</span>juce-dev:website
 
 
 <span class="code-comment"># ── Status &amp; VMs ────────────────────────────────────</span>
