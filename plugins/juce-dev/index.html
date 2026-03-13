@@ -617,7 +617,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Full pipeline: builds all formats, code-signs with your Apple developer identity, notarizes with Apple, creates a .pkg installer, and publishes to GitHub Releases with a download page.
+                            Full pipeline: builds all formats, code-signs with your Apple developer identity, notarizes with Apple, creates a .pkg installer, publishes to GitHub Releases, and updates your website download links (if you've set one up with <code>/juce-dev:website</code>).
                         </div>
                     </div>
                 </div>
@@ -715,7 +715,7 @@
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
-                            Three modes: <strong>verify</strong> (build + test), <strong>sign</strong> (build + sign), <strong>publish</strong> (full release pipeline with GitHub Release). Auto-detects which platforms your project supports. Per-platform signing controls — skip macOS or Windows signing with <code>--no-sign-macos</code> / <code>--no-sign-windows</code>. Gracefully skips signing if certs aren't configured. Use <code>status</code> and <code>logs</code> to monitor runs. Use <code>secrets</code> to manage signing credentials.
+                            Three modes: <strong>verify</strong> (build + test), <strong>sign</strong> (build + sign), <strong>publish</strong> (build + sign + GitHub Release + website update). Auto-detects which platforms your project supports. Per-platform signing controls — skip macOS or Windows signing with <code>--no-sign-macos</code> / <code>--no-sign-windows</code>. Gracefully skips signing if certs aren't configured. In publish mode, download links on your GitHub Pages site are updated automatically. Use <code>status</code> and <code>logs</code> to monitor runs. Use <code>secrets</code> to manage signing credentials.
                         </div>
                     </div>
                 </div>
