@@ -109,6 +109,46 @@ cd my-plugin-project
 /juce-dev:setup-ios
 ```
 
+### `/juce-dev:port <platform>`
+
+Port an existing JUCE plugin project between macOS and Windows.
+
+```
+/juce-dev:port windows          # Port macOS project to Windows
+/juce-dev:port macos            # Port Windows project to macOS
+```
+
+**What it does:**
+1. Auto-detects source platform (macOS-origin vs Windows-origin)
+2. Scans for platform-specific code (Win32 APIs, COM, DirectX, Objective-C, etc.)
+3. Reports findings by severity (HIGH, MEDIUM, LOW)
+4. Generates platform-specific build scripts and CMake config
+5. Creates VM build/test instructions for the target platform
+
+### `/juce-dev:setup-updates` *(planned)*
+
+Add Sparkle (macOS) and WinSparkle (Windows) auto-update support to an existing project. The updater UI lives in the Standalone app; the update payload is a full product installer (PKG on macOS, Inno Setup on Windows) that replaces all plugin formats.
+
+```
+cd my-plugin-project
+/juce-dev:setup-updates         # Public mode (default)
+```
+
+**Planned features:**
+- EdDSA-signed installers with appcast XML feed
+- "Check for Updates" menu item (macOS) / Settings panel button (Windows)
+- Automatic background update checks
+- `--doctor` flag to validate the full update chain
+- Private mode for commercial plugins (future phase, requires validation)
+
+### `/juce-dev:status`
+
+Show current project configuration, build targets, VMs, and plugin status.
+
+### `/juce-dev:vm`
+
+Manage test VMs for cross-platform builds.
+
 ## Integration with Other Plugins
 
 - **juce-visage** skill: Available automatically for Visage UI development guidance

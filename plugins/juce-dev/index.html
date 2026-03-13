@@ -483,7 +483,7 @@
                 <div class="col-right">
                     <p>Starting a new audio plugin usually means wiring up build systems, configuring code signing, setting up project identifiers, and writing boilerplate. It's tedious before you write a single line of audio code.</p>
                     <p><strong>juce-dev handles all of that.</strong> Give it a name, confirm your developer settings, pick your options, and you get a project that compiles immediately. If it's your first time, it checks your tools and walks you through setup.</p>
-                    <p><strong>Go cross-platform:</strong> Port between macOS and Windows in either direction (Linux coming soon). The port command scans your project for platform-specific code, shows you exactly what needs to change, and applies the fixes — including building and testing on a remote VM over SSH. Started on Windows and want to ship on macOS? It handles that too, adding AU/AUv3 support, code signing, universal binaries, and everything else macOS needs.</p>
+                    <p><strong>Go cross-platform:</strong> Port between macOS and Windows in either direction. The port command scans your project for platform-specific code, shows you exactly what needs to change, and applies the fixes — including building and testing on a remote VM over SSH. Started on Windows and want to ship on macOS? It handles that too, adding AU/AUv3 support, code signing, universal binaries, and everything else macOS needs.</p>
                     <p><strong>Context-aware assistance:</strong> If you add Visage GPU UI to your project, a bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> automatically provides Claude with deep knowledge of Metal view embedding, event bridging, keyboard handling in DAW hosts, and more. No Visage? The skill stays out of the way — it only activates when relevant.</p>
                     <p>Want to go further? Use <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> to describe what your plugin should do and let Claude build it for you.</p>
                 </div>
@@ -506,7 +506,8 @@
                         <li>Optional iOS/iPadOS app target with auto-detected UI mode</li>
                         <li>Bundled <a href="../../skills/claude/juce-visage/">juce-visage skill</a> — activates only when working on Visage UI</li>
                         <li>Optional crash reporting for your users</li>
-                        <li>Port between macOS and Windows — audit platform-specific code, fix, and test on a remote VM (Linux coming soon)</li>
+                        <li>In-app auto-updates via Sparkle/WinSparkle <span style="color: var(--gray); font-size: 0.85rem;">(planned)</span></li>
+                        <li>Port between macOS and Windows — audit platform-specific code, fix, and test on a remote VM</li>
                         <li>Git repo initialized, GitHub repo created if you want</li>
                         <li>Checks your dev environment and installs missing tools</li>
                         <li>Developer settings saved — next project is even faster</li>
@@ -552,8 +553,8 @@
             <div class="grid">
                 <div class="col-full">
                     <h3>Commands</h3>
-                    <h2>Seven commands.<br>Full lifecycle.</h2>
-                    <p style="max-width: 60ch;">Create, configure, build, port, ship. Each does one thing well — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
+                    <h2>Nine commands.<br>Full lifecycle.</h2>
+                    <p style="max-width: 60ch;">Create, configure, build, port, ship. Start a project on one platform, easily port it to another. Each command does one thing well — combine with <a href="https://www.generouscorp.com/generous-corp-marketplace/plugins/chainer/">Chainer</a> for automated workflows.</p>
                 </div>
 
                 <div class="col-left">
@@ -620,7 +621,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-full">
+                <div class="col-left">
                     <div class="workflow-card">
                         <div class="workflow-title">macOS + iOS with GPU UI</div>
                         <div class="code-block-wrapper">
@@ -630,31 +631,11 @@
 <span class="code-prompt">/</span>juce-dev:setup-ios</div>
                         </div>
                         <div class="workflow-desc">
-                            Create a plugin with Metal UI, then add an iOS target. iOS is always a separate step after create.
+                            Create a plugin with Metal UI, then add an iOS target.
                             <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
                         </div>
                         <div class="details">
                             First command creates a macOS plugin with Visage GPU-rendered UI (Metal, 60fps). Then <code>setup-ios</code> adds an iOS/iPadOS app target — it auto-detects Visage and creates a matching Metal UI with native touch handling. Both platforms share the same codebase. There's no <code>--ios</code> flag on create because the iOS target needs the project to exist first.
-                        </div>
-                    </div>
-                </div>
-                <div class="col-left">
-                    <div class="workflow-card">
-                        <div class="workflow-title">Port cross-platform <span style="font-size: 0.75rem; color: var(--gray); font-weight: normal;">(Linux coming soon)</span></div>
-                        <div class="code-block-wrapper">
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:port windows --vm win</div>
-                        </div>
-                        <div style="margin-top: 0.5rem;" class="code-block-wrapper">
-                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:port macos --vm mac</div>
-                        </div>
-                        <div class="workflow-desc">
-                            Audit platform-specific code, fix, build, and test on a remote VM. Works in both directions.
-                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
-                        </div>
-                        <div class="details">
-                            Scans your project for platform-specific code and generates a severity-ranked report. <strong>macOS → Windows:</strong> finds Objective-C++ files, Cocoa imports, Apple frameworks, macOS paths; applies CMake conditionals, <code>#if JUCE_MAC</code> guards, MSVC flags. <strong>Windows → macOS:</strong> finds Win32 API calls, COM/DirectX code, MSVC pragmas, Windows paths; adds AU/AUv3 formats, universal binary config, code signing, macOS build scripts. Can SSH to your target VM to build and test. Visage is fully cross-platform and is never flagged.
                         </div>
                     </div>
                 </div>
@@ -671,6 +652,54 @@
                         </div>
                         <div class="details">
                             Shows your project name, bundle ID, JUCE version, enabled features (Visage, DiagnosticKit), configured VMs, build targets, and git status. Use <code>--verbose</code> for full .env details.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Port macOS to Windows</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:port windows --vm win</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Audit macOS-specific code, fix, build, and test on a Windows VM.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Scans your project for macOS-specific code: Objective-C++ files, Cocoa imports, Apple frameworks, macOS paths. Generates a severity-ranked report, then applies CMake conditionals, <code>#if JUCE_MAC</code> guards, and MSVC flags. Can SSH to your Windows VM to build and test. Visage is fully cross-platform and is never flagged.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Port Windows to macOS</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:port macos --vm mac</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Audit Windows-specific code, fix, build, and test on a macOS VM.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Scans your project for Windows-specific code: Win32 API calls, COM/DirectX code, MSVC pragmas, Windows paths. Generates a severity-ranked report, then adds AU/AUv3 formats, universal binary config, code signing, and macOS build scripts. Can SSH to your macOS VM to build and test. Visage is fully cross-platform and is never flagged.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Auto-updates <span style="font-size: 0.75rem; color: var(--gray); font-weight: normal;">(planned)</span></div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:setup-updates</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Add in-app auto-updates to your standalone app.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Adds Sparkle (macOS) or WinSparkle (Windows) for automatic update checking. The updater UI lives in the standalone app — "Check for Updates" in the macOS app menu, or the Settings panel on Windows. Updates are full product installers (PKG on macOS, Inno Setup on Windows) that replace all plugin formats at once. EdDSA-signed for integrity. Use <code>--doctor</code> to validate your update chain.
                         </div>
                     </div>
                 </div>
@@ -760,6 +789,15 @@
 
 <span class="code-comment"># Port and trigger GitHub Actions CI</span>
 <span class="code-prompt">/</span>juce-dev:port windows --test-ci
+
+
+<span class="code-comment"># ── Auto-Updates (planned) ──────────────────────────</span>
+
+<span class="code-comment"># Add auto-update support to your project</span>
+<span class="code-prompt">/</span>juce-dev:setup-updates
+
+<span class="code-comment"># Validate the full update chain</span>
+<span class="code-prompt">/</span>juce-dev:setup-updates --doctor
 
 
 <span class="code-comment"># ── Status &amp; VMs ────────────────────────────────────</span>
@@ -998,6 +1036,15 @@ Host macmini
                             </div>
                             <p style="margin-top: 0.5rem;">The port command will SSH to your VM, pull the branch, build with the platform's toolchain, and report results. For macOS targets, it also validates AU plugins with <code>auval</code>. Your project repo needs to be cloned on the VM — the command pushes your branch to GitHub and pulls it remotely.</p>
                             <p>Use <code>/juce-dev:vm list</code> to see configured VMs, or <code>/juce-dev:status</code> for a full project overview.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How do auto-updates work?</div>
+                        <div class="faq-answer">
+                            <p><strong>Planned feature.</strong> Auto-updates use <a href="https://sparkle-project.org/">Sparkle</a> on macOS and <a href="https://winsparkle.org/">WinSparkle</a> on Windows — the same frameworks used by most desktop apps with built-in updaters.</p>
+                            <p>The updater UI lives in the <strong>standalone app only</strong> — you can't trigger an update from within a DAW plugin. On macOS, "Check for Updates..." appears in the app name menu. On Windows, it's in the Settings panel.</p>
+                            <p>When an update is available, the frameworks handle the download, progress UI, and installation. The update payload is a <strong>full product installer</strong> (PKG on macOS, Inno Setup on Windows) that replaces all plugin formats (AU, VST3, CLAP, Standalone) at once — no version skew between formats.</p>
+                            <p>Installers are EdDSA-signed for integrity verification. Use <code>/juce-dev:setup-updates</code> to add auto-update support to your project, and <code>--doctor</code> to validate your update chain end-to-end.</p>
                         </div>
                     </div>
                     <div class="faq-item">

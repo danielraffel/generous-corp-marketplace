@@ -1,6 +1,6 @@
 ---
 name: JUCE Plugin Starter
-description: This skill should be used when the user asks about "JUCE-Plugin-Starter", "starter template", "init plugin project", "plugin template", "juce project setup", ".env configuration", "plugin codes", "bundle ID", "generate_and_open_xcode", mentions placeholder replacement, or discusses creating new JUCE plugin projects from a template. Provides knowledge about the JUCE-Plugin-Starter template conventions, build system, and configuration.
+description: This skill should be used when the user asks about "JUCE-Plugin-Starter", "starter template", "init plugin project", "plugin template", "juce project setup", ".env configuration", "plugin codes", "bundle ID", "generate_and_open_xcode", mentions placeholder replacement, discusses creating new JUCE plugin projects from a template, or asks about VST3 MIDI generator configuration, cross-DAW MIDI effect setup, IS_SYNTH/IS_MIDI_EFFECT settings, or Ableton Live VST3 MIDI routing. Provides knowledge about the JUCE-Plugin-Starter template conventions, build system, configuration, and VST3 MIDI generator patterns.
 version: 1.0.0
 ---
 
