@@ -51,10 +51,30 @@ Extract and display:
 |---------|---------|
 | Visage GPU UI | {USE_VISAGE_UI from .env} |
 | DiagnosticKit | {ENABLE_DIAGNOSTICS from .env} |
+| Auto-Updates | {see auto-update section below} |
 | GitHub | {GITHUB_USER}/{GITHUB_REPO} or "Not configured" |
 | Code Signing | {APP_CERT is set and not placeholder} |
 | Notarization | {APPLE_ID + APP_SPECIFIC_PASSWORD set} |
 ```
+
+**Auto-Update details** (if `ENABLE_AUTO_UPDATE=true` in `.env`):
+
+```
+## Auto-Updates
+
+| Setting | Value |
+|---------|-------|
+| **Enabled** | {ENABLE_AUTO_UPDATE from .env} |
+| **Mode** | {AUTO_UPDATE_MODE from .env — "public" or "private"} |
+| **EdDSA Key** | {AUTO_UPDATE_EDDSA_PUBLIC_KEY is set? "Configured" : "Missing"} |
+| **Feed URL (macOS)** | {AUTO_UPDATE_FEED_URL_MACOS or "Not set"} |
+| **Feed URL (Windows)** | {AUTO_UPDATE_FEED_URL_WINDOWS or "Not set"} |
+| **Framework (macOS)** | {check external/Sparkle.framework exists} |
+| **Framework (Windows)** | {check external/WinSparkle/ exists} |
+| **Appcast** | {check appcast-macos.xml exists in repo root} |
+```
+
+If `ENABLE_AUTO_UPDATE` is not set or not `true`, show: `| Auto-Updates | Not configured — use /juce-dev:setup-updates |`
 
 ### 2. Check VMs
 

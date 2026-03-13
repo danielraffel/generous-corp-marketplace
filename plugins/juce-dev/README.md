@@ -125,20 +125,21 @@ Port an existing JUCE plugin project between macOS and Windows.
 4. Generates platform-specific build scripts and CMake config
 5. Creates VM build/test instructions for the target platform
 
-### `/juce-dev:setup-updates` *(planned)*
+### `/juce-dev:setup-updates`
 
 Add Sparkle (macOS) and WinSparkle (Windows) auto-update support to an existing project. The updater UI lives in the Standalone app; the update payload is a full product installer (PKG on macOS, Inno Setup on Windows) that replaces all plugin formats.
 
 ```
 cd my-plugin-project
-/juce-dev:setup-updates         # Public mode (default)
+/juce-dev:setup-updates         # Run setup wizard
+/juce-dev:setup-updates --doctor  # Validate existing setup
 ```
 
-**Planned features:**
+**Features:**
 - EdDSA-signed installers with appcast XML feed
-- "Check for Updates" menu item (macOS) / Settings panel button (Windows)
+- "Check for Updates" menu item in Standalone app
 - Automatic background update checks
-- `--doctor` flag to validate the full update chain
+- `--doctor` flag to validate the full update chain (config, feed, artifacts)
 - Private mode for commercial plugins (future phase, requires validation)
 
 ### `/juce-dev:status`

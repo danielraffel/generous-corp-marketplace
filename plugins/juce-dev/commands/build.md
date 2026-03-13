@@ -31,7 +31,7 @@ Arguments mirror `scripts/build.sh` exactly:
 - `sign` — Build and code sign
 - `notarize` — Build, sign, and notarize
 - `pkg` — Build, sign, notarize, and package (no GitHub release)
-- `publish` — Full release: build, sign, notarize, publish to GitHub
+- `publish` — Full release: build, sign, notarize, EdDSA-sign, publish to GitHub, generate appcast
 - `unsigned` — Build unsigned installer package (fast testing)
 - `uninstall` — Uninstall all plugin components
 
@@ -213,8 +213,9 @@ After the build completes:
 - Report which targets were built and the action performed
 - For `standalone` or `all` with `local`/`test`: note the app was launched
 - For `test`: report Catch2 and PluginVal results
-- For `publish`: report the GitHub release URL
+- For `publish`: report the GitHub release URL; if auto-updates are enabled, also report EdDSA signing status and appcast commit
 - For `pkg`: note the PKG location (Desktop)
+- For EdDSA signing failures: suggest checking that the EdDSA private key is in Keychain or `EDDSA_PRIVATE_KEY` env var is set
 
 **On failure:**
 - Show the relevant error output
