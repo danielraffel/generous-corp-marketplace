@@ -1048,6 +1048,21 @@ Host macmini
                         </div>
                     </div>
                     <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">How does publishing an update work?</div>
+                        <div class="faq-answer">
+                            <p>If auto-updates are enabled, <code>/juce-dev:build publish</code> handles everything in a single command: build, code-sign, notarize, create the installer, EdDSA-sign it, upload to GitHub Releases, and generate the appcast XML that tells users a new version is available.</p>
+                            <p>The appcast (<code>appcast-macos.xml</code> / <code>appcast-windows.xml</code>) is committed to your repo and served via <code>raw.githubusercontent.com</code>. It's always published <strong>last</strong>, after the installer is already uploaded — so users never see an update they can't download.</p>
+                            <p>Manual "Check for Updates" picks up the new version immediately. Automatic background checks find it within 24 hours (configurable).</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">What if I don't want auto-updates?</div>
+                        <div class="faq-answer">
+                            <p>Everything is opt-in. If <code>ENABLE_AUTO_UPDATE</code> isn't set to <code>true</code> in your <code>.env</code>, the publish pipeline works exactly as before — no EdDSA signing, no appcast generation, no Sparkle/WinSparkle linking, no "Check for Updates" menu item. Zero impact on your build.</p>
+                            <p>You can add auto-updates later at any time with <code>/juce-dev:setup-updates</code>.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
                         <div class="faq-question" onclick="toggleFaq(this)">How do I report a bug or request a feature?</div>
                         <div class="faq-answer">
                             <p>We use GitHub issue templates so you can report the right thing in the right place:</p>
