@@ -769,6 +769,22 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-right">
+                    <div class="workflow-card">
+                        <div class="workflow-title">Manage VMs</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:vm add win win-ssh windows</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Register cross-platform test VMs for build and test.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Saves a VM configuration (name, SSH alias, platform) to your <code>.env</code> file so that <code>/juce-dev:port</code> and <code>/juce-dev:build</code> can SSH in to build and test on that platform. Use <code>/juce-dev:vm list</code> to see configured VMs. Supports Windows, Linux, and macOS VMs — Proxmox, UTM, Parallels, or any SSH-accessible machine.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
