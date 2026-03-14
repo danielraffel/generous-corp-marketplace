@@ -24,7 +24,12 @@ Verify by typing `/juce-dev:create` — if the command is recognized, you're set
 
 ## Prerequisites
 
-**Required:** [Claude Code](https://claude.ai/code) and macOS. The plugin checks for other dependencies (Xcode command-line tools, CMake, Ninja, gh CLI) and helps install anything missing. JUCE is fetched automatically during build — no separate install needed.
+**Required:** [Claude Code](https://claude.ai/code) on macOS, Windows, or Linux. The plugin checks for other dependencies and helps install anything missing. JUCE is fetched automatically during build — no separate install needed.
+
+**Per-platform dependencies** (auto-installed by `scripts/dependencies.sh`):
+- **macOS**: Xcode CLI tools, Homebrew, CMake, Ninja
+- **Windows**: Visual Studio 2022 Build Tools, CMake, Ninja (via winget)
+- **Linux**: Clang, CMake, Ninja, JUCE apt dependencies (via apt)
 
 **Optional:**
 - **Apple Developer account** — needed for code signing and distribution; not required for local development
