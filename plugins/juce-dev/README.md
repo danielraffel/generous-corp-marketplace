@@ -83,8 +83,11 @@ The build system auto-detects whether CMake regeneration is needed — skips it 
 
 ```
 /juce-dev:port windows         # Audit and port macOS project to Windows
-/juce-dev:port macos           # Audit and port Windows project to macOS
+/juce-dev:port linux           # Audit and port macOS/Windows project to Linux
+/juce-dev:port macos           # Audit and port Windows/Linux project to macOS
+/juce-dev:port all             # Port to all other platforms
 /juce-dev:port windows --vm win   # Port and test on a Windows VM
+/juce-dev:port linux --vm ubuntu  # Port and test on a Linux VM
 /juce-dev:port windows --audit-only  # Scan only, don't modify
 ```
 
@@ -119,10 +122,10 @@ CI reads config from `.env` or `.env.ci` (fallback for repos that gitignore `.en
 | `/juce-dev:create` | Create a new plugin project from the template |
 | `/juce-dev:build` | Build, test, sign, or publish plugins |
 | `/juce-dev:ci` | Trigger CI/CD builds, check status, view logs |
-| `/juce-dev:port` | Port a project between macOS and Windows |
+| `/juce-dev:port` | Port a project between macOS, Windows, and Linux |
 | `/juce-dev:setup-visage` | Add Visage GPU UI to a project |
 | `/juce-dev:setup-ios` | Add iOS/iPadOS app target |
-| `/juce-dev:setup-updates` | Add Sparkle/WinSparkle auto-updates |
+| `/juce-dev:setup-updates` | Add Sparkle/WinSparkle/Linux auto-updates |
 | `/juce-dev:website` | Create a GitHub Pages download page |
 | `/juce-dev:status` | Show project configuration and status |
 | `/juce-dev:vm` | Manage cross-platform test VMs |

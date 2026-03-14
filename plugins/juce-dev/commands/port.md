@@ -56,17 +56,24 @@ has_ps1=$(test -f scripts/build.ps1 && echo "yes")
 has_msvc_cmake=$(grep -l "if(MSVC)" CMakeLists.txt 2>/dev/null)
 has_azure_signing=$(grep -l "AZURE_TENANT_ID" .env 2>/dev/null || grep -l "AZURE_TENANT_ID" .env.example 2>/dev/null)
 has_inno_setup=$(grep -rl "Inno Setup\|\.iss" scripts/ 2>/dev/null | head -1)
+
+# Check for Linux-origin indicators
+has_linux_cmake=$(grep -l "UNIX AND NOT APPLE" CMakeLists.txt 2>/dev/null)
+has_linux_deps=$(grep -l "libasound2-dev\|libwebkit2gtk" scripts/dependencies.sh 2>/dev/null)
+has_linux_updater=$(test -f Source/AutoUpdater_Linux.cpp && echo "yes")
 ```
 
 Determine source platform:
 - If `.mm` files, Xcode script, or macOS post-build scripts exist → **macOS-origin**
 - If `build.ps1` exists without `build.sh`, or Azure signing vars are set, or Inno Setup references → **Windows-origin**
-- If both → **hybrid** (already partially cross-platform)
+- If Linux CMake guards, Linux deps, or Linux updater exist without macOS/Windows indicators → **Linux-origin**
+- If multiple indicators → **hybrid** (already partially cross-platform)
 - If neither → ask the user
 
 Validate the port direction makes sense:
 - Porting macOS → macOS = error ("Already a macOS project")
 - Porting Windows → Windows = error ("Already a Windows project")
+- Porting Linux → Linux = error ("Already a Linux project")
 
 Read `.env` to understand the project:
 - `PROJECT_NAME` — plugin name
@@ -158,7 +165,57 @@ Check for:
 
 ---
 
-#### If porting TO macOS (from Windows)
+#### If porting TO Linux (from macOS or Windows)
+
+**Source files:**
+
+Scan for these platform-specific patterns that won't compile on Linux:
+
+| Pattern | Severity | Description | Linux Fix |
+|---------|----------|-------------|-----------|
+| `.mm` files | HIGH | Objective-C++ — macOS only | Guard with `if(APPLE)` in CMakeLists.txt |
+| `#import <Cocoa/` | HIGH | macOS framework | Guard with `#if JUCE_MAC` |
+| `#import <AppKit/` | HIGH | macOS framework | Guard with `#if JUCE_MAC` |
+| `#include <windows.h>` | HIGH | Windows API | Guard with `#if JUCE_WINDOWS` |
+| `#include <d3d11.h>` | HIGH | DirectX headers | Guard with `#if JUCE_WINDOWS` |
+| `NSView`, `NSWindow` | HIGH | macOS AppKit types | Guard with `#if JUCE_MAC` |
+| `HWND`, `HINSTANCE` | HIGH | Win32 handle types | Guard with `#if JUCE_WINDOWS` |
+| `~/Library/` hardcoded | MEDIUM | macOS-specific path | Use JUCE `File::getSpecialLocation()` |
+| `%APPDATA%` hardcoded | MEDIUM | Windows-specific path | Use JUCE `File::getSpecialLocation()` |
+
+**CMakeLists.txt:**
+- Ensure `if(UNIX AND NOT APPLE)` block exists for Linux-specific settings
+- Plugin FORMATS: must exclude AU/AUv3 (macOS-only)
+- Compiler: Clang preferred (for consistency), but GCC also works
+- Generator: Ninja (not Xcode or MSVC)
+- Auto-update: Linux uses `AutoUpdater_Linux.cpp` (custom appcast poller, no external deps)
+
+**Build scripts:**
+- `build.sh` must detect Linux via `uname -s` = `Linux` and use Ninja
+- No `generate_and_open_xcode.sh` needed (Xcode is macOS-only)
+- No `build.ps1` needed (PowerShell is Windows-only)
+
+**Dependencies:**
+- All JUCE apt dependencies must be documented: `libasound2-dev libx11-dev libxinerama-dev libxext-dev libxrandr-dev libxcursor-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev libcurl4-openssl-dev pkg-config`
+- `scripts/dependencies.sh` should handle Linux package installation
+- Sparkle is macOS-only — on Linux, use custom appcast poller (`AutoUpdater_Linux.cpp`)
+- WinSparkle is Windows-only — same as above
+- Visage: cross-platform via bgfx (Vulkan on Linux) — no changes needed
+
+**Linux-specific additions needed:**
+
+| Addition | Priority | Description |
+|----------|----------|-------------|
+| `if(UNIX AND NOT APPLE)` CMake block | HIGH | Platform conditionals for Linux |
+| `dependencies.sh` Linux section | HIGH | apt package installation |
+| `build.sh` Linux detection | HIGH | Use Ninja, skip AU/AUv3 |
+| `AutoUpdater_Linux.cpp` | MEDIUM | Custom appcast poller (if auto-updates enabled) |
+| `CI_PLATFORMS` update | MEDIUM | Add `linux` to CI platforms |
+| Packaging as tar.gz | LOW | No native installer format (unlike PKG/Inno Setup) |
+
+---
+
+#### If porting TO macOS (from Windows or Linux)
 
 **Source files (*.cpp, *.h):**
 
@@ -342,7 +399,7 @@ Apply fixes in order of severity (HIGH first).
 
 ---
 
-#### If porting TO Windows or Linux (from macOS)
+#### If porting TO Windows (from macOS or Linux)
 
 1. **CMakeLists.txt platform conditionals** — this is the most impactful change
    - Add FETCHCONTENT_BASE_DIR Windows path handling
@@ -359,17 +416,49 @@ Apply fixes in order of severity (HIGH first).
    - Replace deprecated APIs (e.g., `PopupMenu::show()` → `showMenu()`)
    - Fix MSVC-specific issues (non-virtual override, template quirks)
 
-3. **Build scripts** — ensure Windows/Linux can build
+3. **Build scripts** — ensure Windows can build
    - Copy `build.ps1` from JUCE-Plugin-Starter template if missing
-   - Verify `build.sh` has Linux BUILD_PLATFORM detection
+   - If porting from Linux, also add macOS build scripts if missing
 
 4. **External dependencies** — handle platform-specific deps
    - Guard macOS-only deps in CMakeLists.txt
+   - Guard Linux-only deps (custom appcast poller) with `if(UNIX AND NOT APPLE)`
    - Note which deps need cross-platform builds (report, don't fix)
 
 ---
 
-#### If porting TO macOS (from Windows)
+#### If porting TO Linux (from macOS or Windows)
+
+1. **CMakeLists.txt platform conditionals**
+   - Add `if(UNIX AND NOT APPLE)` block for Linux-specific settings
+   - Guard AU/AUv3 formats with `if(APPLE)` if not already
+   - Guard MSVC flags with `if(MSVC)` if not already
+   - Ensure Clang is preferred via `find_program(CLANG_CXX_COMPILER clang++)`
+   - Ensure Visage `add_subdirectory` is NOT guarded (cross-platform — Vulkan on Linux)
+
+2. **Source code platform guards** — fix compile errors
+   - Add `#if JUCE_MAC` around macOS-specific API usage (NSView, NSWindow, Cocoa)
+   - Add `#if JUCE_WINDOWS` around Windows-only API usage (HWND, D3D11, COM)
+   - Replace hardcoded paths with JUCE `File::getSpecialLocation()`
+
+3. **Build scripts** — ensure Linux can build
+   - Verify `build.sh` detects Linux (`uname -s` = `Linux`) and uses Ninja
+   - Verify `dependencies.sh` has Linux apt package installation
+   - Linux doesn't need `generate_and_open_xcode.sh` or `build.ps1`
+
+4. **Auto-update** — add Linux updater if enabled
+   - Copy `AutoUpdater_Linux.cpp` from JUCE-Plugin-Starter template
+   - Add `elseif(UNIX AND NOT APPLE)` block in CMakeLists.txt auto-update section
+   - Set `AUTO_UPDATE_FEED_URL_LINUX` in `.env` (or reuse `AUTO_UPDATE_FEED_URL`)
+
+5. **External dependencies** — handle platform-specific deps
+   - Guard macOS-only deps (Sparkle) with `if(APPLE)`
+   - Guard Windows-only deps (WinSparkle) with `if(WIN32)`
+   - Note JUCE apt dependencies needed for Linux build
+
+---
+
+#### If porting TO macOS (from Windows or Linux)
 
 1. **CMakeLists.txt platform conditionals** — most impactful change
    - Add `CMAKE_OSX_DEPLOYMENT_TARGET` (e.g., `10.15` or as set in `.env`)
@@ -561,6 +650,8 @@ Key facts:
 - **Essentia** may have macOS-only prebuilt libs — check for cross-platform builds.
 - **Sparkle** auto-update is macOS-only — guard with `if(APPLE)`.
 - **WinSparkle** auto-update is Windows-only — guard with `if(WIN32)`.
+- **Linux auto-update** uses custom appcast poller (`AutoUpdater_Linux.cpp`) — pure JUCE, no external deps. Guard with `if(UNIX AND NOT APPLE)`.
+- **Linux tested on Ubuntu 24.04 LTS** (aarch64) — VST3, CLAP, Standalone all build and link. Catch2 tests pass. Auto-update compiles and integrates with Help menu.
 - **Bundled binaries** (yt-dlp, ffmpeg, etc.) are cross-platform but need platform-specific builds.
 - **Xcode/Clang strictness** — code that compiles on MSVC may fail on Clang due to stricter narrowing conversion and implicit cast rules.
 - **Universal binaries** — macOS plugins should ship arm64 + x86_64. Set `CMAKE_OSX_ARCHITECTURES`.
