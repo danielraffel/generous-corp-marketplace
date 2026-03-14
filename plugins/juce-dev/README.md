@@ -152,3 +152,7 @@ The plugin includes skills that activate automatically when relevant:
 - juce-visage (Codex skill)
   - [Report a bug](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-visage-codex-bug.yml)
   - [Request a feature](https://github.com/danielraffel/generous-corp-marketplace/issues/new?template=juce-visage-codex-feature.yml)
+
+## Acknowledgements
+
+Many of the build system patterns in [JUCE Plugin Starter](https://github.com/danielraffel/JUCE-Plugin-Starter) were inspired by [Pamplejuce](https://github.com/sudara/pamplejuce) by [Sudara](https://melatonin.dev). If you're an experienced C++ developer comfortable with CMake, Pamplejuce is an excellent choice — it's maintained by a serious audio developer with a large community and great [documentation](https://melatonin.dev/manuals/pamplejuce/). juce-dev is designed for folks who prefer a more hands-off, natural language workflow.
