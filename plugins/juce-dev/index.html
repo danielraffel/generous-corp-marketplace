@@ -707,6 +707,22 @@
                 </div>
                 <div class="col-right">
                     <div class="workflow-card">
+                        <div class="workflow-title">Port to All Platforms</div>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <div class="code-block"><span class="code-prompt">/</span>juce-dev:port all</div>
+                        </div>
+                        <div class="workflow-desc">
+                            Port your project to every supported platform in one pass.
+                            <span class="learn-more" onclick="toggleDetails(this)">What happens</span>
+                        </div>
+                        <div class="details">
+                            Detects which platforms your project already supports (macOS, Windows, Linux) and runs the port audit + fix for each missing platform in sequence. Adds CMake conditionals, platform-specific build scripts, auto-updater support, and dependency setup for every target. Optionally builds and tests on VMs if configured. One command to go from single-platform to fully cross-platform.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-left">
+                    <div class="workflow-card">
                         <div class="workflow-title">Auto-updates</div>
                         <div class="code-block-wrapper">
                             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
