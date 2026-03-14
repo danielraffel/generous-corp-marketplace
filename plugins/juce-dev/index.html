@@ -1233,6 +1233,15 @@ Host ubuntu
                         </div>
                     </div>
                 </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">Should I use this or Pamplejuce?</div>
+                        <div class="faq-answer">
+                            <p>If you're an experienced C++ developer comfortable with CMake, <a href="https://github.com/sudara/pamplejuce">Pamplejuce</a> is probably the better choice. It's maintained by <a href="https://melatonin.dev">Sudara</a>, a serious audio developer, and has a large community. It stays closer to standard CMake conventions and has excellent <a href="https://melatonin.dev/manuals/pamplejuce/">documentation</a>.</p>
+                            <p>juce-dev is designed for people who are newer to audio plugin development or want a more hands-off workflow. It handles prerequisites, scaffolding, building, signing, and publishing through natural language commands &mdash; you don't need to learn the underlying toolchain. It also adds features like in-app auto-updates, AI release notes, download pages, and diagnostic tooling that go beyond what a template typically provides.</p>
+                            <p>Many of the build system patterns in <a href="https://github.com/danielraffel/JUCE-Plugin-Starter">JUCE Plugin Starter</a> (the template juce-dev builds on) were inspired by Pamplejuce's approach to CI/CD, testing, and packaging. We're grateful for the example it set for the JUCE community.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1246,6 +1255,9 @@ Host ubuntu
             <div class="col-right" style="text-align: right;">
                 <a href="https://github.com/danielraffel/generous-corp-marketplace/tree/master/plugins/juce-dev" style="text-decoration: none;">GitHub Repository ↗</a>
             </div>
+        </div>
+        <div style="text-align: center; margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);">
+            Build system inspired by <a href="https://github.com/sudara/pamplejuce" style="text-decoration: none;">Pamplejuce</a>
         </div>
     </footer>
 
