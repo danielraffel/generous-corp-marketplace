@@ -471,6 +471,37 @@ Unlike the primary plugin editor where Visage's native render loop drives update
 
 **Window on top in plugin mode**: Call `setWindowOnTop(true)` before `show()` so the secondary window floats above the DAW's plugin window. This sets `NSFloatingWindowLevel` on the window. In standalone mode, this is unnecessary.
 
+### Hide/Show Lifecycle (Critical on macOS)
+
+**Never destroy the Visage `ApplicationWindow` on hide on macOS.** Destroying and recreating causes:
+1. Black window on reopen (bgfx framebuffer not properly reinitialized)
+2. Potential silent process termination (bgfx context teardown issues)
+
+Instead, stop/restart the render timer:
+
+```cpp
+void closeButtonPressed() override {
+#if JUCE_WINDOWS
+    // Windows: destroy to avoid bgfx contention between multiple windows
+    destroyVisageWindow();
+#else
+    // macOS: keep Visage alive, just stop rendering
+    stopTimer();
+#endif
+    setVisible(false);
+}
+
+void visibilityChanged() override {
+    if (isVisible() && !isTimerRunning()) {
+        startTimerHz(60);  // Restart rendering
+    }
+}
+```
+
+On **Windows**, destroy/recreate is required because bgfx can't handle multiple active framebuffers simultaneously. Use `prepareToShow()` to restart the timer before `setVisible(true)` so `createVisageWindow()` runs on the next tick.
+
+Destroy the Visage `ApplicationWindow` only in the destructor (both platforms).
+
 ### Modal Keyboard Handling in Secondary JUCE Windows
 
 When a Visage modal dialog opens inside a secondary JUCE `DocumentWindow` (e.g., a waveform editor), ESC may not work until the user clicks inside the window. This happens because:
