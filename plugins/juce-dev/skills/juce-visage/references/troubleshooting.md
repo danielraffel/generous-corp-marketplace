@@ -206,6 +206,42 @@ Update the per-project file with:
 | Change `GIT_TAG` in CMakeLists.txt without clearing FetchContent cache | JUCE stays at old version — stale source reused from shared `FETCHCONTENT_BASE_DIR` | Delete `~/.juce_cache/juce-src`, `juce-build`, `juce-subbuild`, then regenerate |
 | CMakeLists.txt reads `$ENV{JUCE_TAG}` but `.env` not sourced before `cmake` | `JUCE_TAG` is empty, falls back to hardcoded default (often outdated) | Always keep `CMakeLists.txt` fallback default up to date; or source `.env` before `cmake` |
 | Use JUCE < 8.0.12 with iOS 26+ | App crashes on launch — `AudioQueueNewOutput` fails with error -50, JUCE assertion in `juce_Audio_ios.cpp` | Update to JUCE 8.0.12+ which skips AudioQueue probe on iOS 26 |
+| Edit shared state in a local copy (e.g., `make_unique<WaveformState>()`) | Changes never visible to other windows/views reading the shared state | Write changed fields back to the shared state object during editing, not just on close |
+| Poll only SampleState enum for UI refresh | UI misses changes to fields within the same state (e.g., editStart/editEnd while state stays Ready) | Add a separate timer poll that compares specific field values against snapshots and triggers redraw on change |
+
+## Cross-Window State Sync
+
+When a Visage component in a **secondary window** (e.g., waveform editor) modifies state that a component in the **main window** (e.g., sample card) needs to display:
+
+### The Problem
+The secondary window's component often works on a **local copy** of the state (for undo, isolation, etc.). The main window's component reads from the **shared/processor state**. If the local copy isn't synced back, the main view never sees changes.
+
+Additionally, the main window's timer-driven polling may only check high-level state enums (e.g., Loading/Ready/Failed). If the relevant fields change within the same enum state (e.g., trim positions while state stays Ready), the polling loop never detects the change and never triggers a redraw.
+
+### The Fix Pattern
+1. **Sync specific fields in real-time** during editing (not just on close):
+   ```cpp
+   // In the editor's drag handler:
+   currentState->editStart = newValue;
+   // Sync to shared state immediately:
+   audioProcessor.waveforms[slotIndex].editStart = currentState->editStart;
+   ```
+
+2. **Add field-level dirty tracking** in the main window's timer callback:
+   ```cpp
+   // In timerCallback(), separate from SampleState polling:
+   for (int i = 0; i < 16; ++i) {
+       const auto& wf = audioProcessor.waveforms[i];
+       auto& snap = lastEditStates[i];
+       if (wf.editStart != snap.editStart || wf.editEnd != snap.editEnd) {
+           snap.editStart = wf.editStart;
+           snap.editEnd = wf.editEnd;
+           sampleCells[i]->safeRedraw();
+       }
+   }
+   ```
+
+3. **Don't fight the render pipeline** — `Frame::redraw()` called from a JUCE timer works fine with Visage's 60fps MTKView. If the cell doesn't visually update, the issue is always the **data** not being in the shared location, not the rendering mechanism.
 
 ---
 
