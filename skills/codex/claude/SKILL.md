@@ -104,6 +104,16 @@ When metadata is included, keep it minimal by default:
 - `session_id` and `is_error`
 - Add `stop_reason` and `total_cost_usd` only on request or error analysis.
 
+### Background / Sidecar Mode
+
+Use bridge mode as a tracked sidecar when the answer matters and the work may take time.
+
+Practical rules:
+- Prefer one tracked Claude session over repeated short probes.
+- Keep the session alive for debugging, code review, and second opinions.
+- Treat a slow but healthy run as active work, not failure.
+- When the run completes, react immediately and continue from that result instead of restarting.
+
 ### Structured Response Schema
 
 When bridge mode needs machine-readable output, use this JSON schema:
@@ -189,6 +199,22 @@ Use this order:
 3. If context is large, chunk and summarize first, then ask Claude on the summaries.
 4. Record assumptions about omitted context in output.
 
+### Context Symmetry
+
+When the current Codex request is already grounded in RepoPrompt, context-builder, or selected-file context, preserve that same repo-grounded material when asking Claude.
+
+Do not ask Claude for a vague second opinion on the problem in isolation. Ask it to reason against the same source material you are using locally, so the comparison stays anchored to the same files, excerpts, and assumptions.
+
+If Claude-side RepoPrompt or equivalent tooling is available, ask Claude to use it too. If it is not available, say so explicitly and fall back to file-grounded context only. Do not imply symmetry that you cannot actually provide.
+If RepoPrompt was not part of the current request, do not force it into the Claude ask.
+
+When RepoPrompt symmetry is required:
+- say it explicitly in the Claude prompt, not implicitly
+- name the exact files or roots Claude should inspect
+- ask Claude to state whether it actually used RepoPrompt or equivalent MCP repo tools
+- if Claude answers the task correctly but reports `used_repoprompt=false`, retry once with a stricter tool-grounding prompt before accepting the result
+- only accept `used_repoprompt=false` without retry when Claude reports the repo tools are unavailable or denied
+
 ## Error Handling
 
 Common bridge-mode failures and handling:
@@ -202,10 +228,13 @@ Common bridge-mode failures and handling:
 1. Parse intent, deliverables, constraints, success criteria.
 2. Select mode (`package`, `bridge`, or `meta`) deterministically.
 3. Gather minimal relevant context and inputs.
-4. Detect critical ambiguity and embed up to 2 questions only if needed.
-5. For package mode: emit deterministic package.
-6. For bridge mode: run Claude CLI, parse output contract, and continue follow-up loop if needed.
-7. Validate formatting, scope, assumptions, and constraint fidelity before returning.
+4. If the local task is repo-grounded, carry the same RepoPrompt/context-builder/selected-file material into Claude.
+5. If RepoPrompt symmetry matters, make the prompt explicitly require RepoPrompt tool use and ask Claude to confirm whether it actually used those tools.
+6. Detect critical ambiguity and embed up to 2 questions only if needed.
+7. For package mode: emit deterministic package.
+8. For bridge mode: run Claude CLI, parse output contract, and continue follow-up loop if needed.
+9. If RepoPrompt symmetry was required and Claude reports it did not use repo tools, retry once with a stricter tool-grounding prompt unless the tools were unavailable.
+10. Validate formatting, scope, assumptions, and constraint fidelity before returning.
 
 ## Quality Rules
 
@@ -218,6 +247,7 @@ Common bridge-mode failures and handling:
 - Keep `CHECKLIST:` within 6 to 12 bullets.
 - Keep bridge responses parseable and session-aware.
 - Do not add extra headings in package output.
+- When RepoPrompt symmetry is requested, do not treat a repo-grounded answer as sufficient unless Claude also confirms it used the repo tools, or explicitly reports why it could not.
 
 ## Practical Examples
 
@@ -238,6 +268,7 @@ Common bridge-mode failures and handling:
 - `EDGE CASES:` appears only when warranted.
 - Bridge output is concise by default; metadata is included only when needed or requested.
 - Follow-up loop behavior is defined for open questions.
+- Repo-grounded sidecar asks preserve context symmetry instead of generating abstract second opinions.
 
 ## Feedback & Issues
 
