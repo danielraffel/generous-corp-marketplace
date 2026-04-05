@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Partner Gallery</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.5rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .stats {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 30px;
+    }
+
+    .image-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .image-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+    }
+
+    .image-container {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      background: #f5f5f5;
+      overflow: hidden;
+    }
+
+    .image-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .image-info {
+      padding: 20px;
+    }
+
+    .image-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .image-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .provider-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .provider-openai {
+      background: #10a37f;
+      color: white;
+    }
+
+    .provider-gemini {
+      background: #4285f4;
+      color: white;
+    }
+
+    .prompt-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .prompt-label {
+      font-size: 0.8rem;
+      color: #999;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .prompt-text {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.5;
+      max-height: 100px;
+      overflow: auto;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 6px;
+    }
+
+    .copy-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #5568d3;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      color: white;
+      font-size: 40px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Design Partner Gallery</h1>
+
+    <div class="stats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Total Images</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">$0.04</div>
+          <div class="stat-label">Total Spend</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">$4.96</div>
+          <div class="stat-label">Budget Remaining</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery">
+      <div class="image-card">
+        <div class="image-container">
+          <img src="img-001-sign-in-screen.png" alt="Sign-In Screen" onclick="openModal(this.src)">
+        </div>
+        <div class="image-info">
+          <div class="image-title">Sign-In Screen</div>
+          <div class="image-meta">
+            <span class="provider-badge provider-openai">DALL-E 3</span>
+            <span>$0.04</span>
+          </div>
+          <div class="image-meta">
+            <span>1024x1024</span>
+            <span>15.1s</span>
+          </div>
+          <div class="prompt-section">
+            <div class="prompt-label">Original Prompt</div>
+            <div class="prompt-text" id="prompt-001">A clean, modern sign-in screen interface for a web or mobile application. The screen features a centered white card or panel on a subtle gradient background. The card contains: App logo or brand icon at the top, Sign In or Welcome Back heading in clear, professional typography, Email/username input field with icon, Password input field with icon and show/hide toggle, Forgot Password link in small text, Large, prominent Sign In button in a primary brand color, Optional divider line with or text, Social sign-in buttons (Google, Apple) below, Don't have an account Sign up link at bottom. The design follows modern UI/UX principles with proper spacing, subtle shadows, rounded corners, and a professional color scheme (blues, whites, grays). The interface is clean, minimal, and user-friendly.</div>
+            <button class="copy-btn" onclick="copyPrompt('prompt-001')">Copy Prompt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <img id="modal-img" src="" alt="Full size image">
+  </div>
+
+  <script>
+    function openModal(src) {
+      document.getElementById('modal').classList.add('active');
+      document.getElementById('modal-img').src = src;
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function copyPrompt(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Prompt copied to clipboard!');
+      });
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

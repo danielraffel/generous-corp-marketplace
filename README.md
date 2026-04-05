@@ -28,7 +28,7 @@ Official marketplace for **Claude Code plugins** and **Agent Skills** (`SKILL.md
 
 ### Codex Skills
 
-- **[claude](skills/codex/claude)** - Route a task to Anthropic Claude from Codex and return the response.
+- **[claude](skills/codex/claude)** - Route a task to Anthropic Claude from Codex, including tracked long-running sidecar asks and repo-grounded second opinions.
 - **[juce-visage](skills/codex/juce-visage)** - Guide for integrating the Visage GPU-accelerated UI framework with JUCE audio plugins on macOS and iOS/iPadOS.
 
 ### Claude Code Skills
