@@ -25,13 +25,18 @@ chmod +x "$fixture/bin/claude"
 cat >"$fixture/bin/sr" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1-} ${2-}" == 'claude help' ]]; then
-  if [[ -n "${SR_PROXY_SUPPORTED-}" ]]; then
+  if [[ "${SR_PROXY_SUPPORTED-}" == 1 || "${SR_PROXY_SUPPORTED-}" == proxy_only || "${SR_PROXY_SUPPORTED-}" == scope_only ]]; then
     printf '  sr claude proxy [args...]\n'
   fi
-  if [[ "${SR_PROXY_SUPPORTED-}" == 1 || "${SR_PROXY_SUPPORTED-}" == scope_only ]]; then
+  if [[ "${SR_PROXY_SUPPORTED-}" == options || "${SR_PROXY_SUPPORTED-}" == options_proxy_only || "${SR_PROXY_SUPPORTED-}" == options_scope_only ]]; then
+    printf '  sr claude proxy [options] [args...]\n'
+  fi
+  if [[ "${SR_PROXY_SUPPORTED-}" == 1 || "${SR_PROXY_SUPPORTED-}" == scope_only || "${SR_PROXY_SUPPORTED-}" == options || "${SR_PROXY_SUPPORTED-}" == options_scope_only ]]; then
     printf '  sr claude proxy-scope\n'
   fi
-  [[ "${SR_PROXY_SUPPORTED-}" == 1 ]] && printf '    --sr-expect-scope SCOPE --\n'
+  if [[ "${SR_PROXY_SUPPORTED-}" == 1 || "${SR_PROXY_SUPPORTED-}" == options ]]; then
+    printf '    --sr-expect-scope SCOPE --\n'
+  fi
   exit 0
 fi
 if [[ "${1-} ${2-}" == 'claude proxy-scope' ]]; then
@@ -82,6 +87,11 @@ grep -q '^route=subrouter$' <<<"$proxied" || fail 'auto did not prefer supported
 grep -q '<-p><--model><fable>' <<<"$proxied" || fail 'proxy arguments were not preserved'
 grep -q '^stdin=through proxy$' <<<"$proxied" || fail 'proxy stdin was not preserved'
 
+options_proxied=$(printf 'through options proxy' | SR_PROXY_SUPPORTED=options "$bridge" --route auto -- -p --model fable)
+grep -q '^route=subrouter$' <<<"$options_proxied" || fail 'auto did not accept the options-aware Subrouter synopsis'
+grep -q '<-p><--model><fable>' <<<"$options_proxied" || fail 'options-aware proxy arguments were not preserved'
+grep -q '^stdin=through options proxy$' <<<"$options_proxied" || fail 'options-aware proxy stdin was not preserved'
+
 scope_info=$("$bridge" --route auto --route-info --)
 grep -q '^route=subrouter$' <<<"$scope_info" || fail 'route info missed proxy route'
 grep -q '^scope=0123456789abcdef01234567$' <<<"$scope_info" || fail 'route info missed opaque proxy scope'
@@ -130,6 +140,12 @@ grep -q '^route=direct$' <<<"$proxy_only" || fail 'auto used a proxy build witho
 
 scope_only=$(printf 'intermediate fallback' | SR_PROXY_SUPPORTED=scope_only "$bridge" --route auto -- -p)
 grep -q '^route=direct$' <<<"$scope_only" || fail 'auto used a proxy build without atomic scope binding'
+
+options_proxy_only=$(printf 'options fallback' | SR_PROXY_SUPPORTED=options_proxy_only "$bridge" --route auto -- -p)
+grep -q '^route=direct$' <<<"$options_proxy_only" || fail 'auto used an options-aware proxy build without exact scope support'
+
+options_scope_only=$(printf 'options atomic fallback' | SR_PROXY_SUPPORTED=options_scope_only "$bridge" --route auto -- -p)
+grep -q '^route=direct$' <<<"$options_scope_only" || fail 'auto used an options-aware proxy build without atomic scope binding'
 
 scope_probe_marker=$fixture/scope-probed
 if SR_SCOPE_PROBE_MARKER=$scope_probe_marker "$bridge" --route subrouter -- -p >"$fixture/out" 2>"$fixture/err"; then

@@ -178,7 +178,8 @@ supports_subrouter_proxy() {
   local help_output
   command -v sr >/dev/null 2>&1 || return 1
   help_output=$(sr claude help 2>&1) || return 1
-  grep -Fq 'sr claude proxy [args...]' <<<"$help_output" &&
+  { grep -Fq 'sr claude proxy [args...]' <<<"$help_output" ||
+      grep -Fq 'sr claude proxy [options] [args...]' <<<"$help_output"; } &&
     grep -Fq 'sr claude proxy-scope' <<<"$help_output" &&
     grep -Fq -- '--sr-expect-scope SCOPE --' <<<"$help_output"
 }
