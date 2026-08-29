@@ -1,0 +1,380 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: claude-bridge [--route auto|subrouter|direct] [--prompt-file PATH]
+                     [--attach PATH ...] [--expect-scope NAME] [--route-info]
+                     -- [claude arguments...]
+
+Prompt text may also be supplied on stdin. Use --prompt-file for large prompts;
+Claude Code caps piped stdin at 10 MB. Attachments are passed as absolute paths
+for Claude's Read tool instead of being copied into argv or stdin.
+EOF
+}
+
+route=auto
+prompt_file=
+attachments=()
+expected_scope=
+route_info=false
+
+while (($#)); do
+  case "$1" in
+    --route)
+      (($# >= 2)) || { usage; exit 2; }
+      route=$2
+      shift 2
+      ;;
+    --prompt-file)
+      (($# >= 2)) || { usage; exit 2; }
+      prompt_file=$2
+      shift 2
+      ;;
+    --attach)
+      (($# >= 2)) || { usage; exit 2; }
+      attachments+=("$2")
+      shift 2
+      ;;
+    --expect-scope)
+      (($# >= 2)) || { usage; exit 2; }
+      expected_scope=$2
+      shift 2
+      ;;
+    --route-info)
+      route_info=true
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'claude-bridge: unknown wrapper option: %s\n' "$1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+case "$route" in
+  auto|subrouter|direct) ;;
+  *)
+    printf 'claude-bridge: invalid route %q (want auto, subrouter, or direct)\n' "$route" >&2
+    exit 2
+    ;;
+esac
+
+absolute_existing_path() {
+  local input=$1 candidate resolved
+  if [[ "$input" == *$'\n'* || "$input" == *$'\r'* ]]; then
+    printf 'claude-bridge: paths containing newlines are not supported\n' >&2
+    return 2
+  fi
+  if [[ "$input" = /* ]]; then
+    candidate=$input
+  else
+    candidate=$PWD/${input#./}
+  fi
+  [[ -e "$candidate" ]] || {
+    printf 'claude-bridge: file does not exist: %s\n' "$input" >&2
+    return 2
+  }
+  if command -v realpath >/dev/null 2>&1; then
+    resolved=$(realpath "$candidate")
+  elif command -v python3 >/dev/null 2>&1; then
+    resolved=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$candidate")
+  else
+    printf 'claude-bridge: realpath or python3 is required for safe file handoff\n' >&2
+    return 69
+  fi
+  [[ -e "$resolved" ]] || {
+    printf 'claude-bridge: resolved file does not exist: %s\n' "$input" >&2
+    return 2
+  }
+  printf '%s\n' "$resolved"
+}
+
+claude_before_delimiter=()
+claude_after_delimiter=()
+claude_had_delimiter=false
+for arg in "$@"; do
+  if [[ "$claude_had_delimiter" == false && "$arg" == -- ]]; then
+    claude_had_delimiter=true
+    continue
+  fi
+  if [[ "$claude_had_delimiter" == true ]]; then
+    claude_after_delimiter+=("$arg")
+  else
+    claude_before_delimiter+=("$arg")
+  fi
+done
+manifest_paths=()
+read_dirs=()
+
+add_read_path() {
+  local path=$1 directory existing
+  manifest_paths+=("$path")
+  directory=$(dirname -- "$path")
+  for existing in "${read_dirs[@]}"; do
+    [[ "$existing" == "$directory" ]] && return 0
+  done
+  read_dirs+=("$directory")
+}
+
+if [[ -n "$prompt_file" ]]; then
+  prompt_file=$(absolute_existing_path "$prompt_file")
+  [[ -f "$prompt_file" ]] || {
+    printf 'claude-bridge: prompt path is not a regular file: %s\n' "$prompt_file" >&2
+    exit 2
+  }
+  add_read_path "$prompt_file"
+fi
+
+for attachment in "${attachments[@]}"; do
+  attachment=$(absolute_existing_path "$attachment")
+  [[ -f "$attachment" ]] || {
+    printf 'claude-bridge: attachment is not a regular file: %s\n' "$attachment" >&2
+    exit 2
+  }
+  add_read_path "$attachment"
+done
+
+for directory in "${read_dirs[@]}"; do
+  # --add-dir is variadic in Claude Code. The equals form keeps the later
+  # positional prompt from being consumed as another directory. Inject it
+  # before Claude's own -- delimiter so a literal argument cannot swallow it.
+  claude_before_delimiter+=("--add-dir=$directory")
+done
+
+if ((${#manifest_paths[@]})); then
+  manifest='Read the following local files with the Read tool before answering.'
+  if [[ -n "$prompt_file" ]]; then
+    manifest+=$'\nThe first path is the complete task prompt. Follow it as the user request.'
+  else
+    manifest+=$'\nTreat piped stdin, when present, as the user request.'
+  fi
+  manifest+=$'\nFor large text, read it in bounded chunks. Images and PDFs must be inspected as visual/document content, not base64-dumped into the prompt.'
+  manifest+=$'\n\nFiles:'
+  for path in "${manifest_paths[@]}"; do
+    manifest+=$'\n- '
+    manifest+="$path"
+  done
+fi
+
+resume_requested=false
+for arg in "${claude_before_delimiter[@]}"; do
+  case "$arg" in
+    --resume|-r|--resume=*|-c|--continue) resume_requested=true ;;
+  esac
+done
+
+supports_subrouter_proxy() {
+  local help_output
+  command -v sr >/dev/null 2>&1 || return 1
+  help_output=$(sr claude help 2>&1) || return 1
+  { grep -Fq 'sr claude proxy [args...]' <<<"$help_output" ||
+      grep -Fq 'sr claude proxy [options] [args...]' <<<"$help_output"; } &&
+    grep -Fq 'sr claude proxy-scope' <<<"$help_output" &&
+    grep -Fq -- '--sr-expect-scope SCOPE --' <<<"$help_output"
+}
+
+if [[ "$route" == auto ]]; then
+  if [[ "$resume_requested" == true ]]; then
+    printf '%s\n' \
+      'claude-bridge: --route auto is not allowed with --resume/--continue.' \
+      'Reuse the explicit route and recorded scope from the original bridge result.' >&2
+    exit 64
+  fi
+  if supports_subrouter_proxy; then
+    route=subrouter
+  else
+    route=direct
+  fi
+fi
+
+if [[ "$resume_requested" == true && -z "$expected_scope" ]]; then
+  printf '%s\n' \
+    'claude-bridge: resume/continue requires --expect-scope with the recorded route scope.' \
+    'No request was sent.' >&2
+  exit 64
+fi
+
+if [[ "$route" == subrouter ]] && ! supports_subrouter_proxy; then
+  printf '%s\n' \
+    'claude-bridge: Subrouter routing requested, but this sr build lacks the exact proxy and proxy-scope commands.' \
+    'Install a current Subrouter build or explicitly use --route direct; no fallback was attempted.' >&2
+  exit 69
+fi
+
+route_scope=claude.ai
+if [[ "$route" == subrouter ]]; then
+  scope_output=$(sr claude proxy-scope 2>/dev/null) || {
+    printf 'claude-bridge: cannot determine the selected Subrouter server scope\n' >&2
+    exit 69
+  }
+  if [[ ! "$scope_output" =~ ^scope=([0-9a-f]{24})$ ]]; then
+    printf 'claude-bridge: invalid Subrouter proxy scope response; no request was sent\n' >&2
+    exit 69
+  fi
+  route_scope=${BASH_REMATCH[1]}
+fi
+
+if [[ -n "$expected_scope" && "$expected_scope" != "$route_scope" ]]; then
+  printf 'claude-bridge: route scope changed (expected %s, current %s); no request was sent\n' \
+    "$expected_scope" "$route_scope" >&2
+  exit 69
+fi
+
+if [[ "$route_info" == true ]]; then
+  printf 'route=%s\nscope=%s\n' "$route" "$route_scope"
+  exit 0
+fi
+
+printf 'claude-bridge: route=%s scope=%s\n' "$route" "$route_scope" >&2
+
+stdin_payload=
+have_stdin=false
+if [[ ! -t 0 ]]; then
+  # The sentinel preserves trailing newlines that command substitution would
+  # otherwise strip. Read at most 10 MB + 1 byte so an accidental unbounded
+  # producer cannot exhaust bridge memory before the size check. Prompts are
+  # text; NUL bytes are intentionally unsupported.
+  LC_ALL=C
+  stdin_payload=$(head -c 10485761; printf x)
+  stdin_payload=${stdin_payload%x}
+  if ((${#stdin_payload} > 10 * 1024 * 1024)); then
+    printf '%s\n' \
+      "claude-bridge: piped prompt exceeds Claude Code's 10 MB stdin limit." \
+      'Save it as a file and retry with --prompt-file; no request was sent.' >&2
+    exit 65
+  fi
+  [[ -n "$stdin_payload" ]] && have_stdin=true
+fi
+
+if [[ -n "${manifest-}" ]]; then
+  if [[ -n "$prompt_file" && "$have_stdin" == true ]]; then
+    printf '%s\n' \
+      'claude-bridge: --prompt-file cannot be combined with a piped prompt.' \
+      'Put the complete request in the prompt file or pipe it, but not both; no request was sent.' >&2
+    exit 64
+  fi
+  if [[ "$have_stdin" == true ]]; then
+    stdin_payload=$manifest$'\n\nUser request from stdin:\n'${stdin_payload}
+  else
+    stdin_payload=$manifest
+  fi
+  have_stdin=true
+fi
+LC_ALL=C
+if ((${#stdin_payload} > 10 * 1024 * 1024)); then
+  printf '%s\n' \
+    "claude-bridge: complete piped prompt exceeds Claude Code's 10 MB stdin limit." \
+    'Save the task as a file and retry with --prompt-file; no request was sent.' >&2
+  exit 65
+fi
+
+claude_args=("${claude_before_delimiter[@]}")
+if [[ "$claude_had_delimiter" == true ]]; then
+  claude_args+=(-- "${claude_after_delimiter[@]}")
+fi
+
+exec_with_stdin() {
+  if [[ "$have_stdin" == true ]]; then
+    exec "$@" < <(printf '%s' "$stdin_payload")
+  fi
+  exec "$@"
+}
+
+if [[ "$route" == subrouter ]]; then
+  exec_with_stdin sr claude proxy --sr-expect-scope "$route_scope" -- "${claude_args[@]}"
+fi
+
+command -v claude >/dev/null 2>&1 || {
+  printf 'claude-bridge: Claude CLI not found on PATH\n' >&2
+  exit 127
+}
+
+# Direct mode must be genuinely direct. Claude Code gives cloud-provider flags,
+# bearer/API credentials, and custom base URLs precedence over subscription
+# OAuth. Remove every known routing/auth override rather than unsetting only the
+# variable named by the first warning.
+routing_env=(
+  ANTHROPIC_BASE_URL
+  ANTHROPIC_AUTH_TOKEN
+  ANTHROPIC_API_KEY
+  ANTHROPIC_CUSTOM_HEADERS
+  CLAUDE_CONFIG_DIR
+  CLAUDE_CODE_CONFIG_DIR
+  CLAUDE_CODE_OAUTH_TOKEN
+  CLAUDE_CODE_API_KEY
+  CLAUDE_CODE_AUTH_TOKEN
+  CLAUDE_CODE_BASE_URL
+  CLAUDE_CODE_USE_BEDROCK
+  ANTHROPIC_BEDROCK_BASE_URL
+  CLAUDE_CODE_SKIP_BEDROCK_AUTH
+  CLAUDE_CODE_USE_VERTEX
+  ANTHROPIC_VERTEX_BASE_URL
+  CLAUDE_CODE_SKIP_VERTEX_AUTH
+  CLAUDE_CODE_USE_FOUNDRY
+  ANTHROPIC_FOUNDRY_BASE_URL
+  CLAUDE_CODE_SKIP_FOUNDRY_AUTH
+  CLAUDE_CODE_USE_MANTLE
+  ANTHROPIC_BEDROCK_MANTLE_BASE_URL
+  CLAUDE_CODE_SKIP_MANTLE_AUTH
+  CLAUDE_CODE_USE_ANTHROPIC_AWS
+  ANTHROPIC_AWS_BASE_URL
+  CLAUDE_CODE_SKIP_ANTHROPIC_AWS_AUTH
+  CLAUDE_CODE_USE_ANTHROPIC_GOOGLE_CLOUD
+  ANTHROPIC_GOOGLE_CLOUD_BASE_URL
+  CLAUDE_CODE_SKIP_ANTHROPIC_GOOGLE_CLOUD_AUTH
+  CLAUDE_CODE_USE_GATEWAY
+)
+
+clean_env=(env)
+for name in "${routing_env[@]}"; do
+  clean_env+=(-u "$name")
+done
+
+# An authoritative final settings overlay also neutralizes routing values from
+# user/project/local settings. Its argv contains only neutral routing values,
+# never a credential. Config selectors are intentionally absent: Claude's
+# default ~/.claude identity is not equivalent to explicitly setting that path
+# on macOS, while an empty selector makes the current directory the config root.
+# Empty setting sources prevent persisted user/project/local env selectors from
+# reintroducing a different config identity. Managed policy remains
+# intentionally authoritative. Drop caller-supplied settings flags so they
+# cannot replace this launch contract.
+authoritative_settings='{"env":{"ANTHROPIC_BASE_URL":"","ANTHROPIC_AUTH_TOKEN":"","ANTHROPIC_API_KEY":"","ANTHROPIC_CUSTOM_HEADERS":"","CLAUDE_CODE_OAUTH_TOKEN":"","CLAUDE_CODE_API_KEY":"","CLAUDE_CODE_AUTH_TOKEN":"","CLAUDE_CODE_BASE_URL":"","CLAUDE_CODE_USE_BEDROCK":"","ANTHROPIC_BEDROCK_BASE_URL":"","CLAUDE_CODE_SKIP_BEDROCK_AUTH":"","CLAUDE_CODE_USE_VERTEX":"","ANTHROPIC_VERTEX_BASE_URL":"","CLAUDE_CODE_SKIP_VERTEX_AUTH":"","CLAUDE_CODE_USE_FOUNDRY":"","ANTHROPIC_FOUNDRY_BASE_URL":"","CLAUDE_CODE_SKIP_FOUNDRY_AUTH":"","CLAUDE_CODE_USE_MANTLE":"","ANTHROPIC_BEDROCK_MANTLE_BASE_URL":"","CLAUDE_CODE_SKIP_MANTLE_AUTH":"","CLAUDE_CODE_USE_ANTHROPIC_AWS":"","ANTHROPIC_AWS_BASE_URL":"","CLAUDE_CODE_SKIP_ANTHROPIC_AWS_AUTH":"","CLAUDE_CODE_USE_ANTHROPIC_GOOGLE_CLOUD":"","ANTHROPIC_GOOGLE_CLOUD_BASE_URL":"","CLAUDE_CODE_SKIP_ANTHROPIC_GOOGLE_CLOUD_AUTH":"","CLAUDE_CODE_USE_GATEWAY":""}}'
+safe_args=()
+for ((i = 0; i < ${#claude_before_delimiter[@]}; i++)); do
+  arg=${claude_before_delimiter[$i]}
+  case "$arg" in
+    --settings|--managed-settings)
+      ((i + 1 < ${#claude_before_delimiter[@]})) || {
+        printf 'claude-bridge: %s requires a value\n' "$arg" >&2
+        exit 2
+      }
+      ((i += 1))
+      ;;
+    --settings=*|--managed-settings=*) ;;
+    --setting-sources)
+      ((i + 1 < ${#claude_before_delimiter[@]})) || {
+        printf 'claude-bridge: %s requires a value\n' "$arg" >&2
+        exit 2
+      }
+      ((i += 1))
+      ;;
+    --setting-sources=*) ;;
+    *) safe_args+=("$arg") ;;
+  esac
+done
+if [[ "$claude_had_delimiter" == true ]]; then
+  safe_args+=(-- "${claude_after_delimiter[@]}")
+fi
+exec_with_stdin "${clean_env[@]}" claude --setting-sources "" --settings "$authoritative_settings" "${safe_args[@]}"
