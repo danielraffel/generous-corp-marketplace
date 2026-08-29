@@ -1,6 +1,6 @@
 ---
 name: claude
-description: Ask Claude directly via bridge mode by default (`claude -p`), with optional deterministic prompt-package generation when explicitly requested.
+description: Ask Claude through a durable noninteractive bridge with explicit Subrouter or direct authentication, file and image handoff, structured output, and resumable sessions; package prompts only when explicitly requested.
 ---
 
 # Claude Prompt + Bridge
@@ -40,10 +40,10 @@ $claude package <request>
 $claude prompt <request>
 $claude convert <request>
 
-# Claude CLI commands used by bridge mode
-claude -p --output-format json "<prompt>"
-claude -p --output-format json --json-schema '<schema>' "<prompt>"
-claude -p --output-format json --resume <session_id> "<follow_up>"
+# Durable bridge commands (resolve <skill-dir> from this loaded skill)
+printf '%s' "<prompt>" | <skill-dir>/scripts/claude-bridge --route auto -- -p --output-format json
+<skill-dir>/scripts/claude-bridge --route auto --prompt-file /absolute/task.md --attach /absolute/image.png -- -p --output-format json
+printf '%s' "<follow_up>" | <skill-dir>/scripts/claude-bridge --route <recorded-route> --expect-scope <recorded-scope> -- -p --output-format json --resume <session_id>
 ```
 
 ## Mode Selection
@@ -65,6 +65,34 @@ Meta mode escape hatch:
 - `$claude review-skill` -> evaluate/improve this skill (no forced prompt package output).
 - `$claude literal <text>` -> treat `<text>` as literal content, not a command.
 
+## Bridge Routing
+
+Always invoke [scripts/claude-bridge](scripts/claude-bridge); never run raw `claude -p` and never invoke bare `sr claude`.
+
+Choose one route before launch:
+- `--route auto` by default. It uses `sr claude proxy` only when that exact pooled launcher is installed; otherwise it uses a sanitized direct Claude login.
+- `--route subrouter` when the user requests Subrouter, pooled subscriptions, account failover, or Fable. This fails closed if `sr claude proxy` is unavailable. Bare `sr claude` is an account picker and is not a bridge launcher.
+- `--route direct` when the user explicitly wants to bypass Subrouter. The bridge removes every known Anthropic/cloud routing override, isolates user/project/local settings sources, and applies an authoritative final settings overlay before invoking the normal Claude login. Managed organization policy remains authoritative. For a human interactive launch, the equivalent Subrouter command is `sr claude-direct` once a build with the same authoritative overlay is installed.
+
+Do not retry a request through a different route after launch. A route change can duplicate work, consume quota twice, or change billing/authentication semantics. Report the selected route and failure instead. A pre-request configuration failure may be retried on the same route after correcting that configuration.
+
+For a new session, capture the bridge's `route=... scope=...` diagnostic alongside `session_id`. A Subrouter scope is an opaque fingerprint of the exact selected tenant, Tailscale node, or named server identity; it does not expose the underlying credential. For `continue`/`resume`, use that explicit route plus `--expect-scope <scope>`; every resume spelling requires the recorded scope, and `auto` intentionally refuses `--resume`, `-r`, `--continue`, and `-c`. Subrouter validates the scope inside the same process and against the same server snapshot used to launch. If it changed, restore the recorded selection or start an explicitly acknowledged new session. Never silently resume through a different account pool.
+
+## Prompt and File Transport
+
+Keep substantive prompt contents out of process arguments whenever practical.
+
+- Pipe ordinary multiline prompts over stdin. Claude Code caps piped stdin at 10 MB.
+- For a large prompt, an already-existing prompt artifact, or sensitive shell-hostile text, use `--prompt-file /absolute/path`. The bridge passes only the path and tells Claude to read the file in bounded chunks.
+- Use repeatable `--attach /absolute/path` for source files, logs, images, and PDFs. The bridge grants each containing directory once with `--add-dir` and passes an absolute-path manifest. It does not base64-dump binary content into the prompt.
+- Claude's `Read` tool handles PNG/JPEG/GIF/WebP as visual content and PDFs as documents. Tell Claude what to inspect or compare; for fine detail in large images, ask it to crop/read the relevant region.
+- Prefer exact file paths over pasted excerpts when Claude needs full evidence. Include only genuinely relevant artifacts and state each artifact's purpose.
+- Paths are local to the machine running the Claude CLI. A remote Subrouter server does not change that: `sr claude proxy` still runs Claude locally, so local paths work. If deliberately launching Claude over SSH, stage or identify the files on that remote machine first; never hand it paths that exist only on the caller.
+- Preserve the working directory when repository instructions and relative context matter. Use absolute attachment paths so spaces and punctuation are unambiguous.
+- Direct mode disables user/project/local setting sources to prevent persisted auth routing from leaking into the launch. When repository instructions or an MCP configuration are required, attach the exact instruction files and pass any required MCP configuration explicitly rather than assuming Claude loaded them.
+
+For a file-backed request, put the complete task and constraints in the prompt file and list supporting artifacts with `--attach`. Do not both pipe the same content and attach it.
+
 ## Core Concepts
 
 ### Package Mode Contract
@@ -80,7 +108,7 @@ Never add text before `SYSTEM:` or after final section.
 
 ### Bridge Mode Contract
 
-Bridge mode runs Claude CLI and returns Claude output plus minimal execution metadata.
+Bridge mode runs the bundled transport. The calling agent validates Claude's JSON result and returns Claude output plus minimal execution metadata.
 
 Required parse order for CLI JSON output:
 1. `structured_output` (when `--json-schema` is used)
@@ -162,7 +190,7 @@ Default behavior:
 
 In bridge mode:
 1. If Claude returns `needs_input: true` or non-empty `questions`, ask the user those questions.
-2. Resume same Claude session with `--resume <session_id>` after user reply.
+2. Resume the same Claude session with its recorded explicit route and scope after user reply.
 3. Continue until `needs_input: false` and no blocking questions remain.
 
 ## Package Format Rules
@@ -219,6 +247,10 @@ When RepoPrompt symmetry is required:
 
 Common bridge-mode failures and handling:
 - **CLI unavailable/auth issue**: report failure. Do not silently switch to package mode unless user asked for conversion/package output.
+- **Route unavailable**: distinguish `subrouter`, `direct`, and `auto`. Do not replace an unavailable explicit route with another route.
+- **Credential-precedence warning**: do not merely unset `ANTHROPIC_API_KEY`. Re-run through the bridge on the same intended route so all conflicting auth, base URL, config-dir, and cloud-provider selectors are isolated.
+- **DNS/ENOTFOUND**: report the chosen route and host when available. Do not infer that Subrouter failed when the chosen route was direct, and do not blindly cross-route retry.
+- **Surrounding MCP warnings**: Codex MCP startup failures (for example a missing local Figma server, RepoPrompt timeout, expired Linear OAuth, or a missing unrelated token) are not Claude API transport failures. Evaluate the Claude process JSON and exit status separately.
 - **Schema validation failure**: retry once with clearer output instruction; if still failing, return raw `result` and flag schema miss.
 - **Permission/tool denial**: narrow ask, disable tools, or request user-approved alternative.
 - **Conflicting constraints**: preserve user constraints, surface conflict explicitly, propose minimal resolution options.
@@ -232,7 +264,7 @@ Common bridge-mode failures and handling:
 5. If RepoPrompt symmetry matters, make the prompt explicitly require RepoPrompt tool use and ask Claude to confirm whether it actually used those tools.
 6. Detect critical ambiguity and embed up to 2 questions only if needed.
 7. For package mode: emit deterministic package.
-8. For bridge mode: run Claude CLI, parse output contract, and continue follow-up loop if needed.
+8. For bridge mode: choose the route, record route scope, choose stdin versus prompt-file transport, attach exact artifacts, run the bundled bridge, parse the output contract, and continue the same route/session if needed.
 9. If RepoPrompt symmetry was required and Claude reports it did not use repo tools, retry once with a stricter tool-grounding prompt unless the tools were unavailable.
 10. Validate formatting, scope, assumptions, and constraint fidelity before returning.
 
@@ -246,6 +278,8 @@ Common bridge-mode failures and handling:
 - Keep `SYSTEM:` compact (typically 4 to 8 bullets).
 - Keep `CHECKLIST:` within 6 to 12 bullets.
 - Keep bridge responses parseable and session-aware.
+- Keep prompt bodies and secrets out of argv; use stdin or prompt files and pass binary artifacts by path.
+- Never invoke bare `sr claude`; pooled bridge calls use the exact `sr claude proxy` subcommand.
 - Do not add extra headings in package output.
 - When RepoPrompt symmetry is requested, do not treat a repo-grounded answer as sufficient unless Claude also confirms it used the repo tools, or explicitly reports why it could not.
 
@@ -255,6 +289,8 @@ Common bridge-mode failures and handling:
 - `$claude run Give me a second opinion on this migration approach`
 - `$claude json Analyze these test failures and return structured risks + next actions`
 - `$claude run --meta any thoughts on this script?`
+- `$claude subrouter ask Fable to adversarially review this design and inspect /absolute/design.png`
+- `$claude direct ask Claude through my normal login, bypassing Subrouter`
 - `$claude continue 31feb98d-6f2a-451e-977b-0df8945a62b5 user chose React + TypeScript`
 - `$claude package convert this bug ticket into a Claude prompt package for root-cause + fix plan`
 - `$claude review-skill evaluate gaps in this skill file and propose improvements`
@@ -268,6 +304,7 @@ Common bridge-mode failures and handling:
 - `EDGE CASES:` appears only when warranted.
 - Bridge output is concise by default; metadata is included only when needed or requested.
 - Follow-up loop behavior is defined for open questions.
+- Route choice and file transport are explicit, fail-closed, and do not duplicate a launched request.
 - Repo-grounded sidecar asks preserve context symmetry instead of generating abstract second opinions.
 
 ## Feedback & Issues

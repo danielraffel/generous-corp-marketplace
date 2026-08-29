@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir=$(cd -P -- "$(dirname -- "$0")" && pwd)
+bridge=$script_dir/claude-bridge
+fixture=$(mktemp -d)
+fixture=$(cd -P -- "$fixture" && pwd)
+trap 'chmod -R u+w "$fixture" 2>/dev/null || true; rm -rf "$fixture"' EXIT
+mkdir -p "$fixture/bin" "$fixture/files with spaces"
+
+cat >"$fixture/bin/claude" <<'EOF'
+#!/usr/bin/env bash
+printf 'route=direct\n'
+printf 'args='; printf '<%s>' "$@"; printf '\n'
+printf 'routing_env='; env | sed 's/=.*//' | grep -E '^(ANTHROPIC_|CLAUDE_CODE_(USE|API|AUTH|BASE|OAUTH|CONFIG)|CLAUDE_CONFIG_DIR)' | sort | tr '\n' ',' || true; printf '\n'
+if [[ "${CLAUDE_COUNT_STDIN-}" == 1 ]]; then
+  printf 'stdin_bytes='; wc -c | tr -d ' '; printf '\n'
+else
+  printf 'stdin='; cat; printf '\n'
+fi
+EOF
+chmod +x "$fixture/bin/claude"
+
+cat >"$fixture/bin/sr" <<'EOF'
+#!/usr/bin/env bash
+if [[ "${1-} ${2-}" == 'claude help' ]]; then
+  if [[ -n "${SR_PROXY_SUPPORTED-}" ]]; then
+    printf '  sr claude proxy [args...]\n'
+  fi
+  if [[ "${SR_PROXY_SUPPORTED-}" == 1 || "${SR_PROXY_SUPPORTED-}" == scope_only ]]; then
+    printf '  sr claude proxy-scope\n'
+  fi
+  [[ "${SR_PROXY_SUPPORTED-}" == 1 ]] && printf '    --sr-expect-scope SCOPE --\n'
+  exit 0
+fi
+if [[ "${1-} ${2-}" == 'claude proxy-scope' ]]; then
+  [[ -n "${SR_SCOPE_PROBE_MARKER-}" ]] && : >"$SR_SCOPE_PROBE_MARKER"
+  printf 'scope=%s\n' "${SR_SCOPE-0123456789abcdef01234567}"
+  exit 0
+fi
+if [[ "${1-} ${2-}" == 'claude proxy' ]]; then
+  shift 2
+  if [[ "${1-}" == --sr-expect-scope ]]; then
+    [[ "${3-}" == -- ]] || exit 65
+    [[ "${2-}" == "${SR_LAUNCH_SCOPE-${SR_SCOPE-0123456789abcdef01234567}}" ]] || exit 69
+    shift 3
+  fi
+  printf 'route=subrouter\n'
+  printf 'args='; printf '<%s>' "$@"; printf '\n'
+  printf 'stdin='; cat; printf '\n'
+  exit 0
+fi
+exit 64
+EOF
+chmod +x "$fixture/bin/sr"
+
+export PATH="$fixture/bin:$PATH"
+
+fail() {
+  printf 'FAIL: %s\n' "$*" >&2
+  exit 1
+}
+
+poisoned=$(printf 'multiline\nprompt\n' | \
+  ANTHROPIC_API_KEY=bad \
+  ANTHROPIC_AUTH_TOKEN=bad \
+  ANTHROPIC_BASE_URL=http://stale.invalid \
+  ANTHROPIC_CUSTOM_HEADERS=bad \
+  CLAUDE_CONFIG_DIR=/stale \
+  CLAUDE_CODE_USE_BEDROCK=1 \
+  "$bridge" --route direct -- -p --output-format json)
+grep -q '^route=direct$' <<<"$poisoned" || fail 'direct route was not used'
+grep -q '^routing_env=$' <<<"$poisoned" || fail 'direct route leaked routing environment'
+grep -q $'^stdin=multiline$' <<<"$poisoned" || fail 'multiline stdin was not preserved'
+grep -q '<-p><--output-format><json>' <<<"$poisoned" || fail 'Claude arguments were not preserved'
+grep -Fq '<--setting-sources><><--settings><{"env":{"ANTHROPIC_BASE_URL":""' <<<"$poisoned" || fail 'direct route lacked isolated setting sources and authoritative settings overlay'
+
+export SR_PROXY_SUPPORTED=1
+proxied=$(printf 'through proxy' | "$bridge" --route auto -- -p --model fable)
+grep -q '^route=subrouter$' <<<"$proxied" || fail 'auto did not prefer supported Subrouter proxy'
+grep -q '<-p><--model><fable>' <<<"$proxied" || fail 'proxy arguments were not preserved'
+grep -q '^stdin=through proxy$' <<<"$proxied" || fail 'proxy stdin was not preserved'
+
+scope_info=$("$bridge" --route auto --route-info --)
+grep -q '^route=subrouter$' <<<"$scope_info" || fail 'route info missed proxy route'
+grep -q '^scope=0123456789abcdef01234567$' <<<"$scope_info" || fail 'route info missed opaque proxy scope'
+
+if printf 'resume' | "$bridge" --route auto -- -p --resume session-1 >"$fixture/out" 2>"$fixture/err"; then
+  fail 'auto resume unexpectedly succeeded'
+fi
+grep -q 'route auto is not allowed' "$fixture/err" || fail 'auto resume diagnostic missing'
+
+for continue_flag in -c --continue; do
+  if printf 'continue' | "$bridge" --route auto -- -p "$continue_flag" >"$fixture/out" 2>"$fixture/err"; then
+    fail "auto continue unexpectedly succeeded for $continue_flag"
+  fi
+  grep -q 'route auto is not allowed' "$fixture/err" || fail "auto continue diagnostic missing for $continue_flag"
+done
+
+if printf 'resume' | SR_SCOPE=aaaaaaaaaaaaaaaaaaaaaaaa "$bridge" --route subrouter --expect-scope 0123456789abcdef01234567 -- -p --resume session-1 >"$fixture/out" 2>"$fixture/err"; then
+  fail 'changed Subrouter scope unexpectedly resumed'
+fi
+grep -q 'route scope changed' "$fixture/err" || fail 'scope mismatch diagnostic missing'
+
+for resume_flag in --resume -r --continue -c; do
+  if printf 'resume' | "$bridge" --route subrouter -- -p "$resume_flag" session-1 >"$fixture/out" 2>"$fixture/err"; then
+    fail "explicit Subrouter resume without scope unexpectedly succeeded for $resume_flag"
+  fi
+  grep -q 'requires --expect-scope' "$fixture/err" || fail "missing-scope diagnostic absent for $resume_flag"
+done
+
+if printf 'race' | SR_LAUNCH_SCOPE=aaaaaaaaaaaaaaaaaaaaaaaa "$bridge" --route subrouter --expect-scope 0123456789abcdef01234567 -- -p >"$fixture/out" 2>"$fixture/err"; then
+  fail 'scope changed between probe and atomic launch unexpectedly sent a request'
+fi
+if grep -q '^route=subrouter$' "$fixture/out"; then
+  fail 'scope-race fixture launched Claude before rejecting the changed scope'
+fi
+
+literal_after_delimiter=$(printf 'literal' | "$bridge" --route auto -- -p -- --resume settings)
+grep -q '^route=subrouter$' <<<"$literal_after_delimiter" || fail 'literal --resume after delimiter was treated as a resume option'
+grep -Fq '<-p><--><--resume><settings>' <<<"$literal_after_delimiter" || fail 'arguments after Claude delimiter were not preserved'
+
+unset SR_PROXY_SUPPORTED
+fallback=$(printf 'direct fallback' | "$bridge" --route auto -- -p)
+grep -q '^route=direct$' <<<"$fallback" || fail 'auto did not fall back to sanitized direct mode'
+
+proxy_only=$(printf 'legacy fallback' | SR_PROXY_SUPPORTED=proxy_only "$bridge" --route auto -- -p)
+grep -q '^route=direct$' <<<"$proxy_only" || fail 'auto used a proxy build without exact scope support'
+
+scope_only=$(printf 'intermediate fallback' | SR_PROXY_SUPPORTED=scope_only "$bridge" --route auto -- -p)
+grep -q '^route=direct$' <<<"$scope_only" || fail 'auto used a proxy build without atomic scope binding'
+
+scope_probe_marker=$fixture/scope-probed
+if SR_SCOPE_PROBE_MARKER=$scope_probe_marker "$bridge" --route subrouter -- -p >"$fixture/out" 2>"$fixture/err"; then
+  fail 'explicit unavailable Subrouter route unexpectedly succeeded'
+fi
+grep -q 'no fallback was attempted' "$fixture/err" || fail 'missing fail-closed Subrouter diagnostic'
+[[ ! -e "$scope_probe_marker" ]] || fail 'unsupported Subrouter build was probed for proxy scope'
+
+export SR_PROXY_SUPPORTED=1
+if SR_SCOPE=not-an-opaque-scope "$bridge" --route subrouter --route-info -- >"$fixture/out" 2>"$fixture/err"; then
+  fail 'invalid Subrouter scope response unexpectedly succeeded'
+fi
+grep -q 'invalid Subrouter proxy scope response' "$fixture/err" || fail 'invalid proxy scope diagnostic missing'
+
+printf 'Read every artifact and compare it.\n' >"$fixture/files with spaces/task prompt.md"
+printf 'not-real-image-data\n' >"$fixture/files with spaces/design image.png"
+files=$(
+  "$bridge" --route direct \
+    --prompt-file "$fixture/files with spaces/task prompt.md" \
+    --attach "$fixture/files with spaces/design image.png" \
+    -- -p --output-format json
+)
+grep -Fq '<--add-dir='"$fixture"'/files with spaces>' <<<"$files" || fail 'attachment directory was not granted once'
+grep -Fq -- '- '"$fixture"'/files with spaces/task prompt.md' <<<"$files" || fail 'prompt path missing from manifest'
+grep -Fq -- '- '"$fixture"'/files with spaces/design image.png' <<<"$files" || fail 'attachment path missing from manifest'
+[[ $(grep -o '<--add-dir=' <<<"$files" | wc -l | tr -d ' ') == 1 ]] || fail 'duplicate --add-dir was emitted'
+if grep -Fq 'Read every artifact and compare it.' <<<"$files"; then
+  fail 'prompt-file contents leaked into argv/stdin instead of being read by Claude'
+fi
+
+delimited=$(
+  printf 'inspect attachment' | "$bridge" --route direct \
+    --attach "$fixture/files with spaces/design image.png" \
+    -- -p -- --settings literal
+)
+grep -Fq '<--add-dir='"$fixture"'/files with spaces><--><--settings><literal>' <<<"$delimited" || fail 'attachment option was not injected before Claude delimiter or literal settings were stripped'
+grep -Fq 'User request from stdin:' <<<"$delimited" || fail 'attachment manifest was not combined with stdin'
+
+settings_literal=$(printf 'settings' | "$bridge" --route direct -- -p --setting-sources user --settings hostile -- --setting-sources literal)
+grep -Fq '<--setting-sources><><--settings><{"env":' <<<"$settings_literal" || fail 'direct route did not impose isolated settings sources'
+grep -Fq '<-p><--><--setting-sources><literal>' <<<"$settings_literal" || fail 'literal setting-sources after delimiter was changed'
+
+ln -s "$fixture/files with spaces/task prompt.md" "$fixture/prompt-link"
+linked=$("$bridge" --route direct --prompt-file "$fixture/prompt-link" -- -p)
+grep -Fq -- '- '"$fixture"'/files with spaces/task prompt.md' <<<"$linked" || fail 'symlink leaf was not resolved'
+grep -Fq '<--add-dir='"$fixture"'/files with spaces>' <<<"$linked" || fail 'symlink target directory was not granted'
+
+at_limit=$(head -c 10485760 /dev/zero | tr '\0' x | CLAUDE_COUNT_STDIN=1 "$bridge" --route direct -- -p)
+grep -q '^stdin_bytes=10485760$' <<<"$at_limit" || fail '10 MB stdin boundary was not preserved'
+set +e
+over_limit=$(head -c 10485761 /dev/zero | tr '\0' x | CLAUDE_COUNT_STDIN=1 "$bridge" --route direct -- -p 2>&1)
+over_status=$?
+set -e
+[[ $over_status -eq 65 ]] || fail 'oversized stdin did not fail with exit 65'
+grep -q '10 MB stdin limit' <<<"$over_limit" || fail 'oversized stdin diagnostic missing'
+
+printf 'PASS\n'
